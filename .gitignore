@@ -1,0 +1,30 @@
+# Visual Studio .NET .gitignore
+# ==============================
+
+# Build and debug output
+bin/
+obj/
+*.user
+*.lock.json
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code settings
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.assets.json
+
+# Rider IDE
+.idea/
+
+# Entity Framework Migrations
+Migrations/
+
+# Logs
+*.log
+logs/
