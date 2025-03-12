@@ -28,3 +28,9 @@ Migrations/
 # Logs
 *.log
 logs/
+
+echo "/bin/" >> .gitignore
+echo "/obj/" >> .gitignore
+echo "/.vs/" >> .gitignore
+git add .gitignore
+git commit -m "Added .gitignore to exclude build and temporary files"
