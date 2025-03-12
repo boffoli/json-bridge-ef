@@ -1,0 +1,134 @@
+{
+    "utenti": [
+        {
+            "id_utente": 1,
+            "nome_completo": "Alicio Verdi",
+            "residenza": {
+                "indirizzo": "Via Roma 123",
+                "città": "Milano",
+                "cap": "20100"
+            },
+            "contatti": {
+                "id_contatto": 1001,
+                "num_telefono": "987654321",
+                "email": "alicio.verdi@email.com"
+            },
+            "dispositivi": [
+                {
+                    "id_dispositivo": 3001,
+                    "tipo": "smartphone",
+                    "marca": "Apple",
+                    "modello": "iPhone 13",
+                    "applicazioni": [
+                        {
+                            "id_app": 4001,
+                            "nome": "WhatsApp",
+                            "versione": "2.24.5"
+                        },
+                        {
+                            "id_app": 4002,
+                            "nome": "Gmail",
+                            "versione": "2024.02.10"
+                        }
+                    ]
+                },
+                {
+                    "id_dispositivo": 3002,
+                    "tipo": "tablet",
+                    "marca": "Samsung",
+                    "modello": "Galaxy Tab S7",
+                    "applicazioni": [
+                        {
+                            "id_app": 4003,
+                            "nome": "Netflix",
+                            "versione": "10.2.1"
+                        }
+                    ]
+                }
+            ],
+            "preferenze": {
+                "tema": "scuro",
+                "notifiche": {
+                    "email": true,
+                    "sms": false,
+                    "push": {
+                        "abilitato": true,
+                        "frequenza": "giornaliera"
+                    }
+                }
+            },
+            "transazioni": [
+                {
+                    "id_transazione": 5001,
+                    "importo": 250.75,
+                    "data": "2024-02-15",
+                    "dettagli": {
+                        "metodo_pagamento": "Carta di credito",
+                        "banca": "Intesa Sanpaolo"
+                    }
+                },
+                {
+                    "id_transazione": 5002,
+                    "importo": 89.99,
+                    "data": "2024-02-20",
+                    "dettagli": {
+                        "metodo_pagamento": "PayPal",
+                        "banca": "N26"
+                    }
+                }
+            ]
+        },
+        {
+            "id_utente": 2,
+            "nome_completo": "Bobu Bianchi",
+            "residenza": {
+                "indirizzo": "Corso Italia 45",
+                "città": "Roma",
+                "cap": "00184"
+            },
+            "contatti": {
+                "id_contatto": 1002,
+                "num_telefono": "123456789",
+                "email": "bobu.bianchi@email.com"
+            },
+            "dispositivi": [
+                {
+                    "id_dispositivo": 3003,
+                    "tipo": "laptop",
+                    "marca": "Dell",
+                    "modello": "XPS 13",
+                    "applicazioni": [
+                        {
+                            "id_app": 4004,
+                            "nome": "Zoom",
+                            "versione": "5.15.3"
+                        }
+                    ]
+                }
+            ],
+            "preferenze": {
+                "tema": "chiaro",
+                "notifiche": {
+                    "email": false,
+                    "sms": true,
+                    "push": {
+                        "abilitato": false,
+                        "frequenza": "settimanale"
+                    }
+                }
+            }
+        }
+    ],
+    "metadati": {
+        "id_metadato": 999,
+        "descrizione": "Dati di test",
+        "configurazioni": {
+            "lingua": "IT",
+            "timezone": "CET",
+            "backup": {
+                "abilitato": true,
+                "frequenza": "settimanale"
+            }
+        }
+    }
+}

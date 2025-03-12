@@ -1,0 +1,47 @@
+{
+  "independent_blocks": {
+    "contatti": [
+      {
+        "id_contatto": 1001,
+        "num_telefono": "987654321",
+        "preferenze": {
+          "tema": "scuro",
+          "notifiche_email": true
+        }
+      },
+      {
+        "id_contatto": 1002,
+        "num_telefono": "123456789",
+        "preferenze": {
+          "tema": "chiaro",
+          "notifiche_email": false
+        }
+      }
+    ],
+    "metadati": [
+      {
+        "id_metadato": 999,
+        "descrizione": "Dati di test"
+      }
+    ],
+    "utenti": [
+      {
+        "id_utente": 1,
+        "nome_completo": "Alicio Verdi",
+        "residenza": "Via Roma 123",
+        "_IB_contatti_id_contatto": 1001
+      },
+      {
+        "id_utente": 2,
+        "nome_completo": "Bobu Bianchi",
+        "residenza": "Corso Italia 45",
+        "_IB_contatti_id_contatto": 1002
+      },
+      {
+        "id_utente": 3,
+        "nome_completo": "Charlie Rossi",
+        "residenza": "Piazza Dante 7"
+      }
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+    "_commenti_schema": {
+        "1": "🔹 ID con nomi specifici",
+        "1.1": "Gli identificatori non usano 'id' generico ma 'id_utente', 'id_contatto', 'id_metadato'.",
+        "1.2": "Il mapping deve essere in grado di gestire chiavi con nomi non standard.",
+
+        "2": "🔹 Possibilità di suddivisione di un campo in due proprietà",
+        "2.1": "'nome_completo' potrebbe essere diviso in 'nome' e 'cognome' nel modello target.",
+        "2.2": "Questo scenario richiede due regole di mapping separate.",
+
+        "3": "🔹 Combinazione di più campi in una singola proprietà target",
+        "3.1": "'residenza' e 'num_telefono' verranno combinati in 'FullContactInfo'.",
+        "3.2": "Esempio di output atteso: 'FullContactInfo': 'Via Roma 123 - 987654321'.",
+
+        "4": "🔹 Strutture annidate e identificatori separati",
+        "4.1": "'contatti' è un oggetto con un proprio 'id_contatto', distinto da 'id_utente'.",
+        "4.2": "Questo richiede un mapping in cui i dati di 'contatti' possono essere trattati separatamente o incorporati.",
+
+        "5": "🔹 Assenza di identificatori in alcune strutture",
+        "5.1": "Il blocco 'contatti' contiene 'id_contatto', ma non tutti gli oggetti annidati hanno un ID.",
+        "5.2": "Se un'entità non ha un ID proprio, deve essere trattata come un 'value object' nel modello EF.",
+
+        "6": "🔹 Mapping tra JSON e modello EF con relazioni complesse",
+        "6.1": "'utenti' sarà una tabella principale.",
+        "6.2": "'contatti' potrebbe essere una tabella separata oppure un oggetto annidato senza ID.",
+        "6.3": "'metadati' potrebbe essere una tabella di configurazione generale.",
+
+        "7": "🔹 Scenari di test per il mapping",
+        "7.1": "✅ Verifica che i campi con ID specifici siano correttamente riconosciuti.",
+        "7.2": "✅ Verifica la corretta divisione di 'nome_completo' in 'nome' e 'cognome'.",
+        "7.3": "✅ Controllo che 'residenza' e 'num_telefono' vengano combinati in 'FullContactInfo'.",
+        "7.4": "✅ Test della gestione di entità senza ID (come 'contatti').",
+        "7.5": "✅ Assicurarsi che 'metadati' sia gestito come una configurazione a parte."
+    },
+
+    "utenti": [
+        {
+            "id_utente": 1,
+            "nome_completo": "Alicio Verdi",
+            "residenza": "Via Roma 123",
+            "contatti": {
+                "id_contatto": 1001,
+                "num_telefono": "987654321"
+            },
+            "preferenze": {
+                "tema": "scuro",
+                "notifiche_email": true
+            }
+        },
+        {
+            "id_utente": 2,
+            "nome_completo": "Bobu Bianchi",
+            "residenza": "Corso Italia 45",
+            "contatti": {
+                "id_contatto": 1002,
+                "num_telefono": "123456789"
+            },
+            "preferenze": {
+                "tema": "chiaro",
+                "notifiche_email": false
+            }
+        },
+        {
+            "id_utente": 3,
+            "nome_completo": "Charlie Rossi",
+            "residenza": "Piazza Dante 7",
+            "preferenze": {
+                "tema": "scuro",
+                "notifiche_email": true
+            }
+        }
+    ],
+    "metadati": {
+        "id_metadato": 999,
+        "descrizione": "Dati di test"
+    }
+}
