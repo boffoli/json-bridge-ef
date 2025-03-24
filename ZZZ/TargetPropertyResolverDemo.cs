@@ -13,7 +13,7 @@ namespace JsonBridgeEF.ZZZ
             string schemaIdentifier = "UserDataV1";
             string sourceFieldPath = "utenti.nome_completo";
 
-            var targetProp = resolver.ResolveTargetPropertyDefinition(
+            var targetProp = resolver.ResolveTargetPropertyinition(
                 projectName, schemaIdentifier, sourceFieldPath
             );
 

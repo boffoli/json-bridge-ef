@@ -5,7 +5,7 @@ namespace JsonBridgeEF.Helpers
 {
     /// <summary>
     /// Provides static methods for introspection of the target model
-    /// and for evaluating the validity of a <see cref="TargetPropertyDef"/>.
+    /// and for evaluating the validity of a <see cref="TargetProperty"/>.
     /// </summary>
     public static class TargetModelInspector
     {

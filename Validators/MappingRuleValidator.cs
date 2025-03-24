@@ -18,8 +18,8 @@ namespace JsonBridgeEF.Validators
         {
             ValidateId(model.Id);
             ValidateMappingProjectId(model.MappingProjectId);
-            ValidateJsonFieldDefId(model.JsonFieldDefId);
-            ValidateTargetPropertyDefId(model.TargetPropertyDefId);
+            ValidateJsonFieldId(model.JsonFieldId);
+            ValidateTargetPropertyId(model.TargetPropertyId);
             ValidateJsFormula(model.JsFormula);
         }
 
@@ -43,24 +43,24 @@ namespace JsonBridgeEF.Validators
                 throw new ValidationException("The MappingProjectId must be a positive number.");
         }
 
-        // ======================== METODI PRIVATI PER JsonFieldDefId ========================
-        private static void ValidateJsonFieldDefId(int jsonFieldDefId)
+        // ======================== METODI PRIVATI PER JsonFieldId ========================
+        private static void ValidateJsonFieldId(int jsonFieldId)
         {
-            if (jsonFieldDefId <= 0)
-                throw new ValidationException("The JsonFieldDefId must be a positive number.");
+            if (jsonFieldId <= 0)
+                throw new ValidationException("The JsonFieldId must be a positive number.");
 
-            if (!TargetModelInspector.TypeExists(typeof(JsonFieldDef).FullName!))
-                throw new ValidationException($"The referenced JsonFieldDef (ID: {jsonFieldDefId}) does not exist.");
+            if (!TargetModelInspector.TypeExists(typeof(JsonField).FullName!))
+                throw new ValidationException($"The referenced JsonField (ID: {jsonFieldId}) does not exist.");
         }
 
-        // ======================== METODI PRIVATI PER TargetPropertyDefId ========================
-        private static void ValidateTargetPropertyDefId(int targetPropertyDefId)
+        // ======================== METODI PRIVATI PER TargetPropertyId ========================
+        private static void ValidateTargetPropertyId(int targetPropertyId)
         {
-            if (targetPropertyDefId <= 0)
-                throw new ValidationException("The TargetPropertyDefId must be a positive number.");
+            if (targetPropertyId <= 0)
+                throw new ValidationException("The TargetPropertyId must be a positive number.");
 
-            if (!TargetModelInspector.TypeExists(typeof(TargetPropertyDef).FullName!))
-                throw new ValidationException($"The referenced TargetPropertyDef (ID: {targetPropertyDefId}) does not exist.");
+            if (!TargetModelInspector.TypeExists(typeof(TargetProperty).FullName!))
+                throw new ValidationException($"The referenced TargetProperty (ID: {targetPropertyId}) does not exist.");
         }
 
         // ======================== METODI PRIVATI PER JsFormula ========================

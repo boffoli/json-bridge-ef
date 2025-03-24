@@ -41,13 +41,13 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_ValidInputs_ShouldSaveMappingRules()
         {
             // Arrange
-            var jsonFields = new List<JsonFieldDef>
+            var jsonFields = new List<JsonField>
             {
                 new() { Id = 1, SourceFieldPath = "utente.nome" },
                 new() { Id = 2, SourceFieldPath = "utente.email" }
             };
 
-            var targetProperties = new List<TargetPropertyDef>
+            var targetProperties = new List<TargetProperty>
             {
                 new() { Id = 101, Namespace = "JsonBridgeEF.Models", RootClass = "User", Name = "FirstName" },
                 new() { Id = 102, Namespace = "JsonBridgeEF.Models", RootClass = "User", Name = "Email" }
@@ -57,18 +57,18 @@ namespace JsonBridgeEF.Tests
             {
                 Id = 1,
                 Name = "Test Mapping Project",
-                JsonSchemaDefId = 10,
-                TargetDbContextDefId = 20
+                JsonSchemaId = 10,
+                TargetDbContextInfoId = 20
             };
 
             var expectedRules = new List<MappingRule>
             {
-                new() { MappingProjectId = mappingProject.Id, JsonFieldDefId = 1, TargetPropertyDefId = 101, JsFormula = "" },
-                new() { MappingProjectId = mappingProject.Id, JsonFieldDefId = 2, TargetPropertyDefId = 102, JsFormula = "" }
+                new() { MappingProjectId = mappingProject.Id, JsonFieldId = 1, TargetPropertyId = 101, JsFormula = "" },
+                new() { MappingProjectId = mappingProject.Id, JsonFieldId = 2, TargetPropertyId = 102, JsFormula = "" }
             };
 
             // Simula il comportamento della console di mapping
-            _mockRuleConsole.SetupSequence(rc => rc.PromptMappingRuleForProperty(It.IsAny<List<JsonFieldDef>>(), It.IsAny<TargetPropertyDef>(), It.IsAny<MappingProject>()))
+            _mockRuleConsole.SetupSequence(rc => rc.PromptMappingRuleForProperty(It.IsAny<List<JsonField>>(), It.IsAny<TargetProperty>(), It.IsAny<MappingProject>()))
                             .Returns(expectedRules[0])
                             .Returns(expectedRules[1]);
 
@@ -89,12 +89,12 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_NoMappings_ShouldReturnEmptyList()
         {
             // Arrange
-            var jsonFields = new List<JsonFieldDef>
+            var jsonFields = new List<JsonField>
             {
                 new() { Id = 1, SourceFieldPath = "utente.nome" }
             };
 
-            var targetProperties = new List<TargetPropertyDef>
+            var targetProperties = new List<TargetProperty>
             {
                 new() { Id = 101, Namespace = "JsonBridgeEF.Models", RootClass = "User", Name = "FirstName" }
             };
@@ -103,12 +103,12 @@ namespace JsonBridgeEF.Tests
             {
                 Id = 1,
                 Name = "Test Mapping Project",
-                JsonSchemaDefId = 10,
-                TargetDbContextDefId = 20
+                JsonSchemaId = 10,
+                TargetDbContextInfoId = 20
             };
 
             // Simula il comportamento della console quando nessun mapping viene selezionato
-            _mockRuleConsole.Setup(rc => rc.PromptMappingRuleForProperty(It.IsAny<List<JsonFieldDef>>(), It.IsAny<TargetPropertyDef>(), It.IsAny<MappingProject>()))
+            _mockRuleConsole.Setup(rc => rc.PromptMappingRuleForProperty(It.IsAny<List<JsonField>>(), It.IsAny<TargetProperty>(), It.IsAny<MappingProject>()))
                             .Returns((MappingRule?)null);
 
             // Act
@@ -125,10 +125,10 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync lanci un'eccezione se la lista di campi JSON è nulla.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_NullJsonFieldDefs_ShouldThrowArgumentNullException()
+        public async Task SeedAsync_NullJsonFields_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var targetProperties = new List<TargetPropertyDef>();
+            var targetProperties = new List<TargetProperty>();
             var mappingProject = new MappingProject();
 
             // Act & Assert
@@ -139,10 +139,10 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync lanci un'eccezione se la lista di proprietà target è nulla.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_NullTargetPropertyDefs_ShouldThrowArgumentNullException()
+        public async Task SeedAsync_NullTargetPropertys_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var jsonFields = new List<JsonFieldDef>();
+            var jsonFields = new List<JsonField>();
             var mappingProject = new MappingProject();
 
             // Act & Assert
@@ -156,8 +156,8 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_NullMappingProject_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var jsonFields = new List<JsonFieldDef>();
-            var targetProperties = new List<TargetPropertyDef>();
+            var jsonFields = new List<JsonField>();
+            var targetProperties = new List<TargetProperty>();
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(jsonFields, targetProperties, null!));
@@ -172,13 +172,13 @@ namespace JsonBridgeEF.Tests
         /// <summary>
         /// Simula l'interazione con l'utente per selezionare una regola di mapping.
         /// </summary>
-        /// <param name="jsonFieldDefs">Lista dei campi JSON disponibili.</param>
+        /// <param name="jsonFields">Lista dei campi JSON disponibili.</param>
         /// <param name="targetProp">Proprietà target su cui effettuare il mapping.</param>
         /// <param name="mappingProject">Progetto di mapping corrente.</param>
         /// <returns>La regola di mapping selezionata oppure <c>null</c> se nessun mapping è stato scelto.</returns>
         MappingRule? PromptMappingRuleForProperty(
-            List<JsonFieldDef> jsonFieldDefs,
-            TargetPropertyDef targetProp,
+            List<JsonField> jsonFields,
+            TargetProperty targetProp,
             MappingProject mappingProject);
     }
 }

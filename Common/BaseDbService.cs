@@ -47,6 +47,18 @@ namespace JsonBridgeEF.Common
         #region 🔹 Salvataggio delle modifiche
 
         /// <summary>
+        /// Garantisce che l'entità sia tracciata nel DbContext (idempotente).
+        /// </summary>
+        protected void EnsureTracked(object entity)
+        {
+            var entry = _unitOfWork.DbContext.Entry(entity);
+            if (entry.State == EntityState.Detached)
+            {
+                _unitOfWork.DbContext.Attach(entity);
+            }
+        }
+
+        /// <summary>
         /// Salva le modifiche al database e gestisce eventuali errori.
         /// </summary>
         /// <returns>Un'operazione asincrona completata quando il salvataggio è avvenuto.</returns>
@@ -105,7 +117,7 @@ namespace JsonBridgeEF.Common
             // Esegue la cancellazione dei record in modo sicuro
             var commandText = $"DELETE FROM \"{tableName}\";";
             await dbContext.Database.ExecuteSqlRawAsync(commandText);
-            
+
             // Riattiva le verifiche sulle chiavi esterne
             await dbContext.Database.ExecuteSqlRawAsync("PRAGMA foreign_keys = ON;"); await SaveChangesAsync();
             Console.WriteLine($"✅ Tutti i dati per {typeof(TEntity).Name} sono stati eliminati con successo.");

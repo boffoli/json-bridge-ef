@@ -24,10 +24,10 @@ namespace JsonBridgeEF.Data
         public ApplicationDbContext() : this(AppSettings.Get("Database:ApplicationDbPath")) { }
 
         // DbSet per le tabelle di definizione e mapping
-        public DbSet<JsonSchemaDef> JsonSchemaDefs { get; set; } = null!;
-        public DbSet<JsonFieldDef> JsonFieldDefs { get; set; } = null!;
-        public DbSet<TargetDbContextDef> TargetDbContextDefs { get; set; } = null!;
-        public DbSet<TargetPropertyDef> TargetPropertyDefs { get; set; } = null!;
+        public DbSet<JsonSchema> JsonSchemas { get; set; } = null!;
+        public DbSet<JsonField> JsonFields { get; set; } = null!;
+        public DbSet<TargetDbContextInfo> TargetDbContextInfos { get; set; } = null!;
+        public DbSet<TargetProperty> TargetPropertys { get; set; } = null!;
         public DbSet<MappingProject> MappingProjects { get; set; } = null!;
         public DbSet<MappingRule> MappingRules { get; set; } = null!;
         public DbSet<EntityKeyMapping> EntityKeyMappings { get; set; } = null!;
@@ -45,11 +45,11 @@ namespace JsonBridgeEF.Data
             base.OnModelCreating(modelBuilder);
 
             // Caricamento delle configurazioni da file separati
-            modelBuilder.ApplyConfiguration(new JsonSchemaDefConfig());
-            modelBuilder.ApplyConfiguration(new JsonIndepBlockInfoConfig());
-            modelBuilder.ApplyConfiguration(new JsonFieldDefConfig());
-            modelBuilder.ApplyConfiguration(new TargetDbContextDefConfig());
-            modelBuilder.ApplyConfiguration(new TargetPropertyDefConfig());
+            modelBuilder.ApplyConfiguration(new JsonSchemaConfig());
+            modelBuilder.ApplyConfiguration(new JsonBlockConfig());
+            modelBuilder.ApplyConfiguration(new JsonFieldConfig());
+            modelBuilder.ApplyConfiguration(new TargetDbContextInfoConfig());
+            modelBuilder.ApplyConfiguration(new TargetPropertyConfig());
             modelBuilder.ApplyConfiguration(new MappingProjectConfig());
             modelBuilder.ApplyConfiguration(new MappingRuleConfig());
             modelBuilder.ApplyConfiguration(new EntityKeyMappingConfig());

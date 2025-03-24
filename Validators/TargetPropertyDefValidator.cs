@@ -6,18 +6,18 @@ using JsonBridgeEF.Seeding.TargetModel.Models;
 namespace JsonBridgeEF.Validators
 {
     /// <summary>
-    /// Validator for the <see cref="TargetPropertyDef"/> class.
+    /// Validator for the <see cref="TargetProperty"/> class.
     /// Ensures the validity of a target property definition and attempts to correct it when possible.
     /// </summary>
-    internal partial class TargetPropertyDefValidator : IValidateAndFix<TargetPropertyDef>
+    internal partial class TargetPropertyValidator : IValidateAndFix<TargetProperty>
     {
         private static readonly Regex NamespacePattern = MyRegex();
 
         /// <inheritdoc />
-        public void EnsureValid(TargetPropertyDef model)
+        public void EnsureValid(TargetProperty model)
         {
             ValidateId(model.Id);
-            ValidateTargetDbContextDefId(model.TargetDbContextDefId);
+            ValidateTargetDbContextInfoId(model.TargetDbContextInfoId);
             ValidateNamespace(model.Namespace);
             ValidateRootClass(model.Namespace, model.RootClass);
             ValidatePath(model.Namespace, model.RootClass, model.Path);
@@ -25,7 +25,7 @@ namespace JsonBridgeEF.Validators
         }
 
         /// <inheritdoc />
-        public void Fix(TargetPropertyDef model)
+        public void Fix(TargetProperty model)
         {
             model.Path = FixPath(model.Path);
         }
@@ -37,11 +37,11 @@ namespace JsonBridgeEF.Validators
                 throw new ValidationException("The Id cannot be negative.");
         }
 
-        // ======================== METODI PRIVATI PER TargetDbContextDefId ========================
-        private static void ValidateTargetDbContextDefId(int targetDbContextDefId)
+        // ======================== METODI PRIVATI PER TargetDbContextInfoId ========================
+        private static void ValidateTargetDbContextInfoId(int targetDbContextInfoId)
         {
-            if (targetDbContextDefId <= 0)
-                throw new ValidationException("The TargetDbContextDefId must be a positive number.");
+            if (targetDbContextInfoId <= 0)
+                throw new ValidationException("The TargetDbContextInfoId must be a positive number.");
         }
 
         // ======================== METODI PRIVATI PER Namespace ========================

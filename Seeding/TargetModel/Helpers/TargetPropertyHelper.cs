@@ -13,16 +13,16 @@ namespace JsonBridgeEF.Seeding.TargetModel.Helpers
     internal static class TargetPropertyHelper
     {
         /// <summary>
-        /// Genera una lista di <see cref="TargetPropertyDef"/> per tutte le entità presenti
+        /// Genera una lista di <see cref="TargetProperty"/> per tutte le entità presenti
         /// nel namespace specificato.
         /// </summary>
-        /// <param name="targetDbContextDefId">L'ID del contesto di destinazione.</param>
+        /// <param name="targetDbContextInfoId">L'ID del contesto di destinazione.</param>
         /// <param name="targetNamespace">Il namespace contenente le entità target.</param>
         /// <param name="referenceEntityType">Un tipo di riferimento per determinare l'assembly da cui caricare le entità.</param>
-        /// <returns>Una lista di <see cref="TargetPropertyDef"/> per il seeding nel database.</returns>
-        public static List<TargetPropertyDef> GenerateTargetProperties(int targetDbContextDefId, string targetNamespace, Type referenceEntityType)
+        /// <returns>Una lista di <see cref="TargetProperty"/> per il seeding nel database.</returns>
+        public static List<TargetProperty> GenerateTargetProperties(int targetDbContextInfoId, string targetNamespace, Type referenceEntityType)
         {
-            var definitions = new List<TargetPropertyDef>();
+            var definitions = new List<TargetProperty>();
 
             var assembly = Assembly.GetAssembly(referenceEntityType);
             var entityTypes = assembly?
@@ -39,19 +39,19 @@ namespace JsonBridgeEF.Seeding.TargetModel.Helpers
 
             foreach (var entityType in entityTypes)
             {
-                ProcessEntityType(definitions, entityType, targetDbContextDefId, entityType.Name, "");
+                ProcessEntityType(definitions, entityType, targetDbContextInfoId, entityType.Name, "");
             }
 
             return definitions;
         }
 
         /// <summary>
-        /// Elabora un'entità e le sue proprietà per generare definizioni di <see cref="TargetPropertyDef"/>.
+        /// Elabora un'entità e le sue proprietà per generare definizioni di <see cref="TargetProperty"/>.
         /// </summary>
         private static void ProcessEntityType(
-            List<TargetPropertyDef> definitions,
+            List<TargetProperty> definitions,
             Type entityType,
-            int targetDbContextDefId,
+            int targetDbContextInfoId,
             string rootClass,
             string parentPath)
         {
@@ -78,11 +78,11 @@ namespace JsonBridgeEF.Seeding.TargetModel.Helpers
                 // **Se è un tipo complesso, naviga ricorsivamente**
                 if (IsComplexType(property, entityType))
                 {
-                    ProcessEntityType(definitions, property.PropertyType, targetDbContextDefId, rootClass, currentPath);
+                    ProcessEntityType(definitions, property.PropertyType, targetDbContextInfoId, rootClass, currentPath);
                     continue;
                 }
 
-                TryCreateTargetPropertyDef(definitions, property, targetDbContextDefId, rootClass, parentPath);
+                TryCreateTargetProperty(definitions, property, targetDbContextInfoId, rootClass, parentPath);
             }
         }
 
@@ -125,18 +125,18 @@ namespace JsonBridgeEF.Seeding.TargetModel.Helpers
         }
 
         /// <summary>
-        /// Crea un <see cref="TargetPropertyDef"/> per le proprietà primitive (inclusi gli ID Foreign Key).
+        /// Crea un <see cref="TargetProperty"/> per le proprietà primitive (inclusi gli ID Foreign Key).
         /// </summary>
-        private static void TryCreateTargetPropertyDef(
-            List<TargetPropertyDef> definitions,
+        private static void TryCreateTargetProperty(
+            List<TargetProperty> definitions,
             PropertyInfo property,
-            int targetDbContextDefId,
+            int targetDbContextInfoId,
             string rootClass,
             string parentPath)
         {
-            var newDef = new TargetPropertyDef(new TargetPropertyDefValidator())
+            var newDef = new TargetProperty(new TargetPropertyValidator())
             {
-                TargetDbContextDefId = targetDbContextDefId,
+                TargetDbContextInfoId = targetDbContextInfoId,
                 Namespace = property.DeclaringType?.Namespace ?? "",
                 RootClass = rootClass,
                 Path = parentPath ?? "",
@@ -151,7 +151,7 @@ namespace JsonBridgeEF.Seeding.TargetModel.Helpers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠️ TargetPropertyDef non valido: {newDef.FullyQualifiedPropertyName}");
+                Console.WriteLine($"⚠️ TargetProperty non valido: {newDef.FullyQualifiedPropertyName}");
                 Console.WriteLine($"   🛑 Errore: {ex.Message}");
             }
         }

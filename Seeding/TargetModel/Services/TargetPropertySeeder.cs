@@ -13,22 +13,22 @@ namespace JsonBridgeEF.Seeding.TargetModel.Services
         /// <summary>
         /// Esegue il seeding delle definizioni delle proprietà target.
         /// </summary>
-        /// <param name="targetDbContextDef">Il contesto target di riferimento.</param>
+        /// <param name="targetDbContextInfo">Il contesto target di riferimento.</param>
         /// <param name="targetNamespace">Il namespace contenente le entità target.</param>
         /// <param name="referenceEntityType">Un tipo di riferimento per determinare l'assembly corretto.</param>
-        internal async Task<List<TargetPropertyDef>> SeedAsync(
-            TargetDbContextDef targetDbContextDef,
+        internal async Task<List<TargetProperty>> SeedAsync(
+            TargetDbContextInfo targetDbContextInfo,
             string targetNamespace,
             Type referenceEntityType)
         {
-            ArgumentNullException.ThrowIfNull(targetDbContextDef);
+            ArgumentNullException.ThrowIfNull(targetDbContextInfo);
             if (string.IsNullOrWhiteSpace(targetNamespace)) throw new ArgumentNullException(nameof(targetNamespace));
             ArgumentNullException.ThrowIfNull(referenceEntityType);
 
-            Console.WriteLine($"📂 Creazione delle proprietà target per il contesto: {targetDbContextDef.Name} nel namespace '{targetNamespace}'");
+            Console.WriteLine($"📂 Creazione delle proprietà target per il contesto: {targetDbContextInfo.Name} nel namespace '{targetNamespace}'");
 
             // Genera le proprietà in base al namespace e all'entità di riferimento
-            var definitions = TargetPropertyHelper.GenerateTargetProperties(targetDbContextDef.Id, targetNamespace, referenceEntityType);
+            var definitions = TargetPropertyHelper.GenerateTargetProperties(targetDbContextInfo.Id, targetNamespace, referenceEntityType);
 
             foreach (var prop in definitions)
             {
@@ -38,7 +38,7 @@ namespace JsonBridgeEF.Seeding.TargetModel.Services
                 }
                 prop.TryValidateAndFix();
 
-                GetRepository<TargetPropertyDef>().Add(prop);
+                GetRepository<TargetProperty>().Add(prop);
                 await SaveChangesAsync();
             }
             return definitions;

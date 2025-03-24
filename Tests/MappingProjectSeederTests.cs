@@ -39,8 +39,8 @@ namespace JsonBridgeEF.Tests
             var mappingProject = new MappingProject(new MappingProjectValidator())
             {
                 Name = "Test Mapping Project",
-                JsonSchemaDefId = 10,
-                TargetDbContextDefId = 1
+                JsonSchemaId = 10,
+                TargetDbContextInfoId = 1
             };
 
             // Simula l'aggiunta al repository
@@ -52,8 +52,8 @@ namespace JsonBridgeEF.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("Test Mapping Project", result.Name);
-            Assert.Equal(10, result.JsonSchemaDefId);
-            Assert.Equal(1, result.TargetDbContextDefId);
+            Assert.Equal(10, result.JsonSchemaId);
+            Assert.Equal(1, result.TargetDbContextInfoId);
 
             _mockRepository.Verify(r => r.Add(It.IsAny<MappingProject>()), Times.Once);
             _mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -79,8 +79,8 @@ namespace JsonBridgeEF.Tests
             var mappingProject = new MappingProject(new MappingProjectValidator())
             {
                 Name = "",
-                JsonSchemaDefId = 10,
-                TargetDbContextDefId = 1
+                JsonSchemaId = 10,
+                TargetDbContextInfoId = 1
             };
 
             // Act & Assert
@@ -93,14 +93,14 @@ namespace JsonBridgeEF.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-5)]
-        public async Task SeedAsync_InvalidJsonSchemaDefId_ShouldThrowInvalidOperationException(int invalidSchemaId)
+        public async Task SeedAsync_InvalidJsonSchemaId_ShouldThrowInvalidOperationException(int invalidSchemaId)
         {
             // Arrange
             var mappingProject = new MappingProject(new MappingProjectValidator())
             {
                 Name = "Test Mapping Project",
-                JsonSchemaDefId = invalidSchemaId,
-                TargetDbContextDefId = 1
+                JsonSchemaId = invalidSchemaId,
+                TargetDbContextInfoId = 1
             };
 
             // Act & Assert

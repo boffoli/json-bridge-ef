@@ -25,10 +25,10 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync salvi correttamente le proprietà target per un contesto valido.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_ValidTargetDbContextDef_ShouldSaveProperties()
+        public async Task SeedAsync_ValidTargetDbContextInfo_ShouldSaveProperties()
         {
             // Arrange
-            var targetDbContextDef = new TargetDbContextDef
+            var targetDbContextInfo = new TargetDbContextInfo
             {
                 Id = 1,
                 Name = "TestDbContext",
@@ -40,7 +40,7 @@ namespace JsonBridgeEF.Tests
             Type referenceEntityType = typeof(User); // Qualsiasi classe valida nel namespace
 
             // Act
-            var result = await _seeder.SeedAsync(targetDbContextDef, targetNamespace, referenceEntityType);
+            var result = await _seeder.SeedAsync(targetDbContextInfo, targetNamespace, referenceEntityType);
 
             // Assert
             Assert.NotNull(result);
@@ -52,7 +52,7 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync lanci un'eccezione se il contesto target è null.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_NullTargetDbContextDef_ShouldThrowArgumentNullException()
+        public async Task SeedAsync_NullTargetDbContextInfo_ShouldThrowArgumentNullException()
         {
             // Arrange
             string targetNamespace = "JsonBridgeEF.Models.TargetDb";
@@ -71,11 +71,11 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_InvalidNamespace_ShouldThrowArgumentNullException(string? targetNamespace)
         {
             // Arrange
-            var targetDbContextDef = new TargetDbContextDef { Id = 1, Name = "TestDbContext", Namespace = "JsonBridgeEF.Data" };
+            var targetDbContextInfo = new TargetDbContextInfo { Id = 1, Name = "TestDbContext", Namespace = "JsonBridgeEF.Data" };
             Type referenceEntityType = typeof(User);
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(targetDbContextDef, targetNamespace!, referenceEntityType));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(targetDbContextInfo, targetNamespace!, referenceEntityType));
         }
 
         /// <summary>
@@ -85,11 +85,11 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_NullReferenceEntityType_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var targetDbContextDef = new TargetDbContextDef { Id = 1, Name = "TestDbContext", Namespace = "JsonBridgeEF.Data" };
+            var targetDbContextInfo = new TargetDbContextInfo { Id = 1, Name = "TestDbContext", Namespace = "JsonBridgeEF.Data" };
             string targetNamespace = "JsonBridgeEF.Models.TargetDb";
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(targetDbContextDef, targetNamespace, null!));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(targetDbContextInfo, targetNamespace, null!));
         }
     }
 }

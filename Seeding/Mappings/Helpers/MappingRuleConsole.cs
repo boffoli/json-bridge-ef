@@ -15,13 +15,13 @@ namespace JsonBridgeEF.Seeding.Mappings.Helpers
         /// Avvia una sessione interattiva per definire una regola di mapping tra un campo JSON e una proprietà target.
         /// Mostra all'utente l'elenco dei campi JSON disponibili e gli permette di selezionarne uno per la proprietà target specificata.
         /// </summary>
-        /// <param name="jsonFieldDefs">Lista dei campi JSON disponibili per il mapping.</param>
+        /// <param name="jsonFields">Lista dei campi JSON disponibili per il mapping.</param>
         /// <param name="targetProp">Proprietà target del database per la quale creare il mapping.</param>
         /// <param name="mappingProject">Progetto di mapping corrente in cui registrare la regola.</param>
         /// <returns>Un oggetto <see cref="MappingRule"/> contenente la regola creata oppure <c>null</c> se l'utente non seleziona un mapping.</returns>
         public static MappingRule? PromptMappingRuleForProperty(
-            List<JsonFieldDef> jsonFieldDefs,
-            TargetPropertyDef targetProp,
+            List<JsonField> jsonFields,
+            TargetProperty targetProp,
             MappingProject mappingProject)
         {
             Console.WriteLine();
@@ -30,9 +30,9 @@ namespace JsonBridgeEF.Seeding.Mappings.Helpers
             Console.WriteLine("📜 Campi JSON disponibili per il mapping:");
 
             // Mostra l'elenco dei JSON fields disponibili
-            for (int i = 0; i < jsonFieldDefs.Count; i++)
+            for (int i = 0; i < jsonFields.Count; i++)
             {
-                var jsonField = jsonFieldDefs[i];
+                var jsonField = jsonFields[i];
                 Console.WriteLine($"  {i + 1}. {jsonField.SourceFieldPath}");
             }
 
@@ -46,19 +46,19 @@ namespace JsonBridgeEF.Seeding.Mappings.Helpers
             }
 
             // Validazione dell'input
-            if (!int.TryParse(input, out int selection) || selection < 1 || selection > jsonFieldDefs.Count)
+            if (!int.TryParse(input, out int selection) || selection < 1 || selection > jsonFields.Count)
             {
                 Console.WriteLine("⚠️ Input non valido. Mapping non creato per questa proprietà.");
                 return null;
             }
 
             // Creazione della regola di mapping con il campo JSON selezionato
-            var selectedJsonField = jsonFieldDefs[selection - 1];
+            var selectedJsonField = jsonFields[selection - 1];
             var newRule = new MappingRule(new MappingRuleValidator())
             {
                 MappingProjectId = mappingProject.Id,
-                JsonFieldDefId = selectedJsonField.Id,
-                TargetPropertyDefId = targetProp.Id,
+                JsonFieldId = selectedJsonField.Id,
+                TargetPropertyId = targetProp.Id,
                 JsFormula = "" // JS formula vuota per ora
             };
 

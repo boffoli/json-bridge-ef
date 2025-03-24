@@ -9,11 +9,11 @@ namespace JsonBridgeEF.Seeding.Mappings.Models
 {
     /// <summary>
     /// Defines the mapping rule between a JSON source field and a target .NET model property.
-    /// The rule links a JSON field (via JsonFieldDefinition) to a target property defined in TargetPropertyDef,
+    /// The rule links a JSON field (via JsonFieldinition) to a target property defined in TargetProperty,
     /// with an optional transformation specified in JsFormula.
     /// This rule is associated with a MappingProject that defines the common JSON schema.
     /// </summary>
-    internal class MappingRule : ModelBase<MappingRule>
+    internal class MappingRule : BaseModel<MappingRule>
     {
         /// <summary>
         /// Parameterless constructor required by Entity Framework.
@@ -30,11 +30,13 @@ namespace JsonBridgeEF.Seeding.Mappings.Models
             : base(validator) { }
 
         /// <summary>
-        /// Primary key for EF.
-        /// Ensures each mapping rule is uniquely identified.
+        /// Determines whether this entity should generate a slug automatically.
         /// </summary>
-        [Key]
-        public int Id { get; set; }
+        protected override bool HasSlug => false;
+
+        // -------------------------------------------------
+        //   DATABASE PROPERTIES
+        // -------------------------------------------------
 
         /// <summary>
         /// Foreign key to the MappingProject that groups the mapping rules.
@@ -44,30 +46,24 @@ namespace JsonBridgeEF.Seeding.Mappings.Models
         public int MappingProjectId { get; set; }
 
         /// <summary>
-        /// Navigation property to the MappingProject.
-        /// Links this rule to its parent MappingProject.
-        /// </summary>
-        public virtual MappingProject MappingProject { get; set; } = null!;
-
-        /// <summary>
-        /// Foreign key to the JsonFieldDefinition that defines the JSON field path.
+        /// Foreign key to the JsonFieldinition that defines the JSON field path.
         /// Ensures that the rule is associated with a specific JSON field.
         /// </summary>
         [Required]
-        public int JsonFieldDefId { get; set; }
+        public int JsonFieldId { get; set; }
 
         /// <summary>
-        /// Foreign key to the TargetPropertyDef that defines the target property.
-        /// Ensures that each target property is mapped only once within a project.
+        /// Foreign key to the TargetProperty that defines the target property.
+        /// Ensures that each target property can be mapped multiple times within a project.
         /// </summary>
         [Required]
-        public int TargetPropertyDefId { get; set; }
+        public int TargetPropertyId { get; set; }
 
         /// <summary>
         /// JavaScript formula used to transform or validate the source value before mapping.
         /// Required, but defaults to a simple identity transformation.
         /// </summary>
-        [Required]
+        [Required, MaxLength(1000)]
         public string JsFormula { get; set; } = "function transform(value) { return value; }";
 
         // -------------------------------------------------
@@ -75,28 +71,37 @@ namespace JsonBridgeEF.Seeding.Mappings.Models
         // -------------------------------------------------
 
         /// <summary>
+        /// Navigation property to the MappingProject.
+        /// Links this rule to its parent MappingProject.
+        /// </summary>
+        [ForeignKey(nameof(MappingProjectId))]
+        public virtual MappingProject MappingProject { get; set; } = null!;
+
+        /// <summary>
         /// Navigation property to the JSON field definition.
         /// Establishes a relationship between the rule and the JSON field.
         /// </summary>
-        public virtual JsonFieldDef JsonFieldDef { get; set; } = null!;
+        [ForeignKey(nameof(JsonFieldId))]
+        public virtual JsonField JsonField { get; set; } = null!;
 
         /// <summary>
         /// Navigation property to the target property definition.
         /// Establishes a relationship between the rule and the target property.
         /// </summary>
-        public virtual TargetPropertyDef TargetPropertyDef { get; set; } = null!;
+        [ForeignKey(nameof(TargetPropertyId))]
+        public virtual TargetProperty TargetProperty { get; set; } = null!;
 
         // -------------------------------------------------
         //   PROXY PROPERTIES (NOT MAPPED)
         // -------------------------------------------------
 
         /// <summary>
-        /// Gets the fully qualified name of the target property, as defined in the TargetPropertyDef.
+        /// Gets the fully qualified name of the target property, as defined in the TargetProperty.
         /// Example: "JsonBridgeEF.Models.TargetDb.User.ShippingAddress.City.Street".
         /// Not mapped to the database, used for reference in business logic.
         /// </summary>
         [NotMapped]
-        public string FullyQualifiedTargetPropertyName => TargetPropertyDef.FullyQualifiedPropertyName;
+        public string FullyQualifiedTargetPropertyName => TargetProperty.FullyQualifiedPropertyName;
 
         /// <summary>
         /// Gets the class qualified name of the target entity.
@@ -104,6 +109,6 @@ namespace JsonBridgeEF.Seeding.Mappings.Models
         /// Not mapped to the database, used for reference in business logic.
         /// </summary>
         [NotMapped]
-        public string TargetClassQualifiedName => TargetPropertyDef.ClassQualifiedName;
+        public string TargetClassQualifiedName => TargetProperty.ClassQualifiedName;
     }
 }

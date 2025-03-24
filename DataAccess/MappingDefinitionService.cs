@@ -16,12 +16,12 @@ namespace JsonBridgeEF.DataAccess
         /// Aggiunge una nuova definizione di tipo JSON al database.
         /// </summary>
         /// <param name="jsonSchema">Definizione del tipo JSON da aggiungere.</param>
-        public async Task AddJsonSchemaDefAsync(JsonSchemaDef jsonSchema)
+        public async Task AddJsonSchemaAsync(JsonSchema jsonSchema)
         {
             if (string.IsNullOrWhiteSpace(jsonSchema.Name) || string.IsNullOrWhiteSpace(jsonSchema.JsonSchemaIdentifier))
                 throw new InvalidOperationException("Il nome e l'identificatore del tipo JSON non possono essere vuoti.");
 
-            GetRepository<JsonSchemaDef>().Add(jsonSchema);
+            GetRepository<JsonSchema>().Add(jsonSchema);
             await SaveChangesAsync();
         }
 
@@ -29,16 +29,16 @@ namespace JsonBridgeEF.DataAccess
         /// Recupera tutte le definizioni di tipi JSON dal database.
         /// </summary>
         /// <returns>Lista delle definizioni di tipi JSON.</returns>
-        public async Task<List<JsonSchemaDef>> GetJsonSchemaDefAsync() =>
-            await GetRepository<JsonSchemaDef>().GetAllAsync();
+        public async Task<List<JsonSchema>> GetJsonSchemaAsync() =>
+            await GetRepository<JsonSchema>().GetAllAsync();
 
         /// <summary>
         /// Recupera una definizione di tipo JSON specifica tramite identificatore.
         /// </summary>
         /// <param name="id">L'ID della definizione.</param>
         /// <returns>La definizione del tipo JSON se trovata, altrimenti null.</returns>
-        public async Task<JsonSchemaDef?> GetJsonSchemaDefByIdAsync(int id) =>
-            await GetRepository<JsonSchemaDef>().GetByIdAsync(id);
+        public async Task<JsonSchema?> GetJsonSchemaByIdAsync(int id) =>
+            await GetRepository<JsonSchema>().GetByIdAsync(id);
 
         #endregion
 
@@ -48,12 +48,12 @@ namespace JsonBridgeEF.DataAccess
         /// Aggiunge una nuova definizione di campo JSON al database.
         /// </summary>
         /// <param name="jsonField">Definizione del campo JSON da aggiungere.</param>
-        public async Task AddJsonFieldDefAsync(JsonFieldDef jsonField)
+        public async Task AddJsonFieldAsync(JsonField jsonField)
         {
             if (string.IsNullOrWhiteSpace(jsonField.SourceFieldPath))
                 throw new InvalidOperationException("Il percorso del campo JSON non può essere vuoto.");
 
-            GetRepository<JsonFieldDef>().Add(jsonField);
+            GetRepository<JsonField>().Add(jsonField);
             await SaveChangesAsync();
         }
 
@@ -61,16 +61,16 @@ namespace JsonBridgeEF.DataAccess
         /// Recupera tutte le definizioni di campi JSON dal database.
         /// </summary>
         /// <returns>Lista delle definizioni di campi JSON.</returns>
-        public async Task<List<JsonFieldDef>> GetJsonFieldDefsAsync() =>
-            await GetRepository<JsonFieldDef>().GetAllAsync();
+        public async Task<List<JsonField>> GetJsonFieldsAsync() =>
+            await GetRepository<JsonField>().GetAllAsync();
 
         /// <summary>
         /// Recupera una definizione di campo JSON specifica tramite identificatore.
         /// </summary>
         /// <param name="id">L'ID della definizione.</param>
         /// <returns>La definizione del campo JSON se trovata, altrimenti null.</returns>
-        public async Task<JsonFieldDef?> GetJsonFieldDefByIdAsync(int id) =>
-            await GetRepository<JsonFieldDef>().GetByIdAsync(id);
+        public async Task<JsonField?> GetJsonFieldByIdAsync(int id) =>
+            await GetRepository<JsonField>().GetByIdAsync(id);
 
         #endregion
 
@@ -80,7 +80,7 @@ namespace JsonBridgeEF.DataAccess
         /// Aggiunge una nuova definizione di entità target al database.
         /// </summary>
         /// <param name="targetProperty">Definizione dell'entità target da aggiungere.</param>
-        public async Task AddTargetPropertyDefAsync(TargetPropertyDef targetProperty)
+        public async Task AddTargetPropertyAsync(TargetProperty targetProperty)
         {
             if (string.IsNullOrWhiteSpace(targetProperty.Namespace) || string.IsNullOrWhiteSpace(targetProperty.RootClass) ||
                 string.IsNullOrWhiteSpace(targetProperty.Name))
@@ -88,7 +88,7 @@ namespace JsonBridgeEF.DataAccess
                 throw new InvalidOperationException("I dati dell'entità target non possono essere vuoti.");
             }
 
-            GetRepository<TargetPropertyDef>().Add(targetProperty);
+            GetRepository<TargetProperty>().Add(targetProperty);
             await SaveChangesAsync();
         }
 
@@ -96,16 +96,16 @@ namespace JsonBridgeEF.DataAccess
         /// Recupera tutte le definizioni di entità target dal database.
         /// </summary>
         /// <returns>Lista delle definizioni di entità target.</returns>
-        public async Task<List<TargetPropertyDef>> GetTargetPropertyDefsAsync() =>
-            await GetRepository<TargetPropertyDef>().GetAllAsync();
+        public async Task<List<TargetProperty>> GetTargetPropertysAsync() =>
+            await GetRepository<TargetProperty>().GetAllAsync();
 
         /// <summary>
         /// Recupera una definizione di entità target specifica tramite identificatore.
         /// </summary>
         /// <param name="id">L'ID della definizione.</param>
         /// <returns>La definizione dell'entità target se trovata, altrimenti null.</returns>
-        public async Task<TargetPropertyDef?> GetTargetPropertyDefByIdAsync(int id) =>
-            await GetRepository<TargetPropertyDef>().GetByIdAsync(id);
+        public async Task<TargetProperty?> GetTargetPropertyByIdAsync(int id) =>
+            await GetRepository<TargetProperty>().GetByIdAsync(id);
 
         #endregion
 
@@ -115,12 +115,12 @@ namespace JsonBridgeEF.DataAccess
         /// Aggiunge una nuova definizione di TargetDbContext al database.
         /// </summary>
         /// <param name="targetDbContext">Definizione del contesto target da aggiungere.</param>
-        public async Task AddTargetDbContextDefAsync(TargetDbContextDef targetDbContext)
+        public async Task AddTargetDbContextInfoAsync(TargetDbContextInfo targetDbContext)
         {
             if (string.IsNullOrWhiteSpace(targetDbContext.Name) || string.IsNullOrWhiteSpace(targetDbContext.Namespace))
                 throw new InvalidOperationException("Il nome e il namespace del TargetDbContext non possono essere vuoti.");
 
-            GetRepository<TargetDbContextDef>().Add(targetDbContext);
+            GetRepository<TargetDbContextInfo>().Add(targetDbContext);
             await SaveChangesAsync();
         }
 
@@ -128,16 +128,16 @@ namespace JsonBridgeEF.DataAccess
         /// Recupera tutte le definizioni dei contesti database target.
         /// </summary>
         /// <returns>Lista delle definizioni di TargetDbContext.</returns>
-        public async Task<List<TargetDbContextDef>> GetTargetDbContextDefAsync() =>
-            await GetRepository<TargetDbContextDef>().GetAllAsync();
+        public async Task<List<TargetDbContextInfo>> GetTargetDbContextInfoAsync() =>
+            await GetRepository<TargetDbContextInfo>().GetAllAsync();
 
         /// <summary>
         /// Recupera una definizione di TargetDbContext specifica tramite identificatore.
         /// </summary>
         /// <param name="id">L'ID della definizione.</param>
         /// <returns>La definizione del TargetDbContext se trovata, altrimenti null.</returns>
-        public async Task<TargetDbContextDef?> GetTargetDbContextDefByIdAsync(int id) =>
-            await GetRepository<TargetDbContextDef>().GetByIdAsync(id);
+        public async Task<TargetDbContextInfo?> GetTargetDbContextInfoByIdAsync(int id) =>
+            await GetRepository<TargetDbContextInfo>().GetByIdAsync(id);
 
         #endregion
     }

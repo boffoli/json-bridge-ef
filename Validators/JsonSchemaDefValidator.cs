@@ -5,28 +5,28 @@ using JsonBridgeEF.Seeding.SourceJson.Models;
 namespace JsonBridgeEF.Validators
 {
     /// <summary>
-    /// Validator for <see cref="JsonSchemaDef"/> to ensure schema definitions are valid.
+    /// Validator for <see cref="JsonSchema"/> to ensure schema definitions are valid.
     /// </summary>
-    internal partial class JsonSchemaDefValidator : IValidateAndFix<JsonSchemaDef>
+    internal partial class JsonSchemaValidator : IValidateAndFix<JsonSchema>
     {
         private static readonly Regex SchemaIdentifierPattern = MyRegex();
 
         /// <inheritdoc />
-        public void EnsureValid(JsonSchemaDef model)
+        public void EnsureValid(JsonSchema model)
         {
             ValidateId(model.Id);
             ValidateName(model.Name);
             ValidateJsonSchemaIdentifier(model.JsonSchemaIdentifier);
             ValidateDescription(model.Description);
-            ValidateJsonFieldDefs(model.JsonFieldDefs);
+            ValidateJsonFields(model.JsonFields);
         }
 
         /// <inheritdoc />
-        public void Fix(JsonSchemaDef model)
+        public void Fix(JsonSchema model)
         {
             model.Name = FixName(model.Name);
             model.Description = FixDescription(model.Description);
-            model.JsonFieldDefs = FixJsonFieldDefs(model.JsonFieldDefs);
+            model.JsonFields = FixJsonFields(model.JsonFields);
         }
 
         // ======================== METODI PRIVATI PER ID ========================
@@ -77,30 +77,30 @@ namespace JsonBridgeEF.Validators
         }
 
         // ======================== METODI PRIVATI PER JSON FIELD DEFS ========================
-        private static void ValidateJsonFieldDefs(ICollection<JsonFieldDef> jsonFieldDefs)
+        private static void ValidateJsonFields(ICollection<JsonField> jsonFields)
         {
-            if (jsonFieldDefs == null)
-                throw new ValidationException("The JsonFieldDefs collection cannot be null.");
+            if (jsonFields == null)
+                throw new ValidationException("The JsonFields collection cannot be null.");
 
-            foreach (var fieldDef in jsonFieldDefs)
+            foreach (var field in jsonFields)
             {
-                var validator = new JsonFieldDefValidator();
-                validator.EnsureValid(fieldDef);
+                var validator = new JsonFieldValidator();
+                validator.EnsureValid(field);
             }
         }
 
-        private static ICollection<JsonFieldDef> FixJsonFieldDefs(ICollection<JsonFieldDef> jsonFieldDefs)
+        private static ICollection<JsonField> FixJsonFields(ICollection<JsonField> jsonFields)
         {
-            if (jsonFieldDefs == null)
+            if (jsonFields == null)
                 return [];
 
-            var validator = new JsonFieldDefValidator();
-            foreach (var fieldDef in jsonFieldDefs)
+            var validator = new JsonFieldValidator();
+            foreach (var field in jsonFields)
             {
-                validator.Fix(fieldDef);
+                validator.Fix(field);
             }
 
-            return jsonFieldDefs;
+            return jsonFields;
         }
         [GeneratedRegex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled)]
         private static partial Regex MyRegex();

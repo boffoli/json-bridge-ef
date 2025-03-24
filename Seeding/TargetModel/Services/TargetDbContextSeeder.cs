@@ -12,16 +12,16 @@ namespace JsonBridgeEF.Seeding.TargetModel.Services
         /// <summary>
         /// Esegue il seeding della definizione del contesto target nel database.
         /// </summary>
-        /// <param name="targetDbContextDef">L'istanza di TargetDbContextDef da salvare.</param>
-        internal async Task<TargetDbContextDef> SeedAsync(TargetDbContextDef targetDbContextDef)
+        /// <param name="targetDbContextInfo">L'istanza di TargetDbContextInfo da salvare.</param>
+        internal async Task<TargetDbContextInfo> SeedAsync(TargetDbContextInfo targetDbContextInfo)
         {
-            targetDbContextDef.EnsureValid();
+            targetDbContextInfo.EnsureValid();
 
-            Console.WriteLine($"📂 Creazione della definizione del contesto target: {targetDbContextDef.Name}");
+            Console.WriteLine($"📂 Creazione della definizione del contesto target: {targetDbContextInfo.Name}");
 
-            GetRepository<TargetDbContextDef>().Add(targetDbContextDef);
+            GetRepository<TargetDbContextInfo>().Add(targetDbContextInfo);
             await SaveChangesAsync();
-            return targetDbContextDef;
+            return targetDbContextInfo;
         }
     }
 }

@@ -5,23 +5,23 @@ using JsonBridgeEF.Seeding.SourceJson.Models;
 namespace JsonBridgeEF.Validators
 {
     /// <summary>
-    /// Validator for <see cref="JsonFieldDef"/> that ensures correctness of JSON field definitions.
+    /// Validator for <see cref="JsonField"/> that ensures correctness of JSON field definitions.
     /// </summary>
-    internal partial class JsonFieldDefValidator : IValidateAndFix<JsonFieldDef>
+    internal partial class JsonFieldValidator : IValidateAndFix<JsonField>
     {
         private static readonly Regex FieldPathPattern = MyRegex();
 
         /// <inheritdoc />
-        public void EnsureValid(JsonFieldDef model)
+        public void EnsureValid(JsonField model)
         {
             ValidateId(model.Id);
-            ValidateJsonSchemaDefId(model.JsonSchemaDefId);
+            ValidateJsonSchemaId(model.JsonSchemaId);
             ValidateSourceFieldPath(model.SourceFieldPath);
             ValidateDescription(model.Description);
         }
 
         /// <inheritdoc />
-        public void Fix(JsonFieldDef model)
+        public void Fix(JsonField model)
         {
             model.Description = FixDescription(model.Description);
         }
@@ -34,10 +34,10 @@ namespace JsonBridgeEF.Validators
         }
 
         // ======================== METODI PRIVATI PER JSON SCHEMA DEF ID ========================
-        private static void ValidateJsonSchemaDefId(int jsonSchemaDefId)
+        private static void ValidateJsonSchemaId(int jsonSchemaId)
         {
-            if (jsonSchemaDefId <= 0)
-                throw new ValidationException("The JsonSchemaDefId must be a positive number.");
+            if (jsonSchemaId <= 0)
+                throw new ValidationException("The JsonSchemaId must be a positive number.");
         }
 
         // ======================== METODI PRIVATI PER SOURCE FIELD PATH ========================

@@ -5,44 +5,46 @@ using JsonBridgeEF.Seeding.Mappings.Models;
 namespace JsonBridgeEF.Data.Configurations
 {
     /// <summary>
-    /// Configurazione per <see cref="MappingProject"/> in Entity Framework.
-    /// Definisce le relazioni 1-1 verso JsonSchemaDef e TargetDbContextDef (senza cascade)
-    /// e la relazione 1-N verso MappingRule (con cascade).
+    /// Configures the <see cref="MappingProject"/> entity for Entity Framework.
+    /// Defines:
+    /// - 1:1 relationships with <see cref="JsonSchema"/> and <see cref="TargetDbContextInfo"/> (without cascade delete).
+    /// - 1:N relationship with <see cref="MappingRule"/> (with cascade delete).
+    /// - Unique constraint on <see cref="MappingProject.Name"/>.
     /// </summary>
     internal class MappingProjectConfig : IEntityTypeConfiguration<MappingProject>
     {
         public void Configure(EntityTypeBuilder<MappingProject> builder)
         {
-            // 1️⃣ Definisce la chiave primaria
+            // 🔹 Primary key
             builder.HasKey(e => e.Id);
 
-            // 2️⃣ Proprietà obbligatorie
+            // 🔹 Required properties
             builder.Property(e => e.Name)
                    .IsRequired()
                    .HasMaxLength(255);
 
-            // 3️⃣ Relazione 1-1 con JsonSchemaDef (senza cascade)
-            builder.HasOne(e => e.JsonSchemaDef)
-                   .WithOne() // navigazione inversa non implementata
-                   .HasForeignKey<MappingProject>(e => e.JsonSchemaDefId)
+            // 🔹 1:1 Relationship with JsonSchema (no cascade delete)
+            builder.HasOne(e => e.JsonSchema)
+                   .WithOne() // No navigation back to MappingProject
+                   .HasForeignKey<MappingProject>(e => e.JsonSchemaId)
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Restrict);
 
-            // 4️⃣ Relazione 1-1 con TargetDbContextDef (senza cascade)
-            builder.HasOne(e => e.TargetDbContextDef)
-                   .WithOne() // navigazione inversa non implementata
-                   .HasForeignKey<MappingProject>(e => e.TargetDbContextDefId)
+            // 🔹 1:1 Relationship with TargetDbContextInfo (no cascade delete)
+            builder.HasOne(e => e.TargetDbContextInfo)
+                   .WithOne() // No navigation back to MappingProject
+                   .HasForeignKey<MappingProject>(e => e.TargetDbContextInfoId)
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Restrict);
 
-            // 5️⃣ Relazione 1-N con MappingRule (con cascade)
+            // 🔹 1:N Relationship with MappingRule (cascade delete enabled)
             builder.HasMany(e => e.MappingRules)
                    .WithOne(r => r.MappingProject)
                    .HasForeignKey(r => r.MappingProjectId)
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Cascade);
 
-            // 6️⃣ Indice univoco sul nome del progetto
+            // 🔹 Unique index on Name
             builder.HasIndex(e => e.Name)
                    .IsUnique();
         }

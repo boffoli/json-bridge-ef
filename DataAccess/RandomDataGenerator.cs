@@ -73,8 +73,8 @@ internal static class RandomDataGenerator
     {
         // Recupera i dati necessari dal provider
         var mappingProjects = await dataProvider.GetMappingProjectsAsync();
-        var jsonFields = await dataProvider.GetJsonFieldDefAsync();
-        var targetEntities = await dataProvider.GetTargetPropertyDefsAsync();
+        var jsonFields = await dataProvider.GetJsonFieldAsync();
+        var targetEntities = await dataProvider.GetTargetPropertysAsync();
 
         // Verifica che ci siano abbastanza dati per generare le mappature
         if (mappingProjects.Count == 0 || jsonFields.Count == 0 || targetEntities.Count == 0)
@@ -95,8 +95,8 @@ internal static class RandomDataGenerator
             var mapping = new MappingRule(null)//??
             {
                 MappingProjectId = mappingProject.Id, // ✅ Ora fa riferimento al MappingProject
-                JsonFieldDefId = jsonField.Id,
-                TargetPropertyDefId = targetProperty.Id,
+                JsonFieldId = jsonField.Id,
+                TargetPropertyId = targetProperty.Id,
                 JsFormula = "function transform(value) { return value; }"
             };
 

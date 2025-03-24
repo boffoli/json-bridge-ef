@@ -58,8 +58,8 @@ namespace JsonBridgeEF.DataAccess
                 ?? throw new KeyNotFoundException($"Nessuna regola di mapping trovata con ID {mapping.Id}.");
 
             mapping.EnsureValid();
-            existingRule.JsonFieldDefId = mapping.JsonFieldDefId;
-            existingRule.TargetPropertyDefId = mapping.TargetPropertyDefId;
+            existingRule.JsonFieldId = mapping.JsonFieldId;
+            existingRule.TargetPropertyId = mapping.TargetPropertyId;
             existingRule.JsFormula = mapping.JsFormula;
 
             await SaveChangesAsync();

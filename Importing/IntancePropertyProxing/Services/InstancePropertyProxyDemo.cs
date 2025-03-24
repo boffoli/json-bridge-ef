@@ -22,7 +22,7 @@ namespace JsonBridgeEF.Importing.IntancePropertyProxing.Services
         {
             Console.WriteLine("\n🚀 Avvio della demo di InstanceAccessor...");
 
-            List<TargetPropertyDef> targetProperties = LoadTargetProperties();
+            List<TargetProperty> targetProperties = LoadTargetProperties();
 
             var propertiesByRootClass = targetProperties
                 .GroupBy(p => p.ClassQualifiedName)
@@ -47,19 +47,19 @@ namespace JsonBridgeEF.Importing.IntancePropertyProxing.Services
             {
                 if (!propertiesByRootClass.ContainsKey(classQualifiedName)) continue;
 
-                foreach (var propertyDef in propertiesByRootClass[classQualifiedName])
+                foreach (var property in propertiesByRootClass[classQualifiedName])
                 {
-                    object sampleValue = InstancePropertyProxy.GenerateSampleValue(propertyDef.FullyQualifiedPropertyName); Console.WriteLine($"   🔹 Imposto '{propertyDef.FullyQualifiedPropertyName}' = {sampleValue}");
-                    accessor[propertyDef.PropertyPathName] = sampleValue;
+                    object sampleValue = InstancePropertyProxy.GenerateSampleValue(property.FullyQualifiedPropertyName); Console.WriteLine($"   🔹 Imposto '{property.FullyQualifiedPropertyName}' = {sampleValue}");
+                    accessor[property.PropertyPathName] = sampleValue;
                 }
             }
 
             PrintInstances();
         }
 
-        private List<TargetPropertyDef> LoadTargetProperties()
+        private List<TargetProperty> LoadTargetProperties()
         {
-            return [.. _dbContext.TargetPropertyDefs];
+            return [.. _dbContext.TargetPropertys];
         }
 
         private void PrintInstances()

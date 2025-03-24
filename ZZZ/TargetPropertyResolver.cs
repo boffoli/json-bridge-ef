@@ -15,18 +15,18 @@ namespace JsonBridgeEF.ZZZ
     {
 
         /// <summary>
-        /// Restituisce la <see cref="TargetPropertyDef"/> corrispondente,
+        /// Restituisce la <see cref="TargetProperty"/> corrispondente,
         /// oppure null se non viene trovata.
         /// </summary>
         /// <param name="projectName">Nome del progetto di mapping (univoco).</param>
         /// <param name="schemaIdentifier">Identificatore logico dello schema JSON.</param>
         /// <param name="sourceFieldPath">Percorso del campo JSON da cercare.</param>
         /// <returns>
-        /// L'oggetto <see cref="TargetPropertyDef"/> corrispondente alla regola di mapping
+        /// L'oggetto <see cref="TargetProperty"/> corrispondente alla regola di mapping
         /// che collega <paramref name="sourceFieldPath"/> con la proprietà target,
         /// oppure <c>null</c> se non esiste.
         /// </returns>
-        public TargetPropertyDef? ResolveTargetPropertyDefinition(
+        public TargetProperty? ResolveTargetPropertyinition(
             string projectName,
             string schemaIdentifier,
             string sourceFieldPath)
@@ -40,14 +40,14 @@ namespace JsonBridgeEF.ZZZ
             if (schema == null) return null;
 
             // 3) Trova il campo JSON
-            var jsonFieldDef = FindJsonField(schema.Id, sourceFieldPath);
-            if (jsonFieldDef == null) return null;
+            var jsonField = FindJsonField(schema.Id, sourceFieldPath);
+            if (jsonField == null) return null;
 
-            // 4) Trova la mapping rule e carica la TargetPropertyDef
-            var rule = FindMappingRule(project.Id, jsonFieldDef.Id, includeTargetProperty: true);
+            // 4) Trova la mapping rule e carica la TargetProperty
+            var rule = FindMappingRule(project.Id, jsonField.Id, includeTargetProperty: true);
             if (rule == null) return null;
 
-            return rule.TargetPropertyDef;
+            return rule.TargetProperty;
         }
 
         // -------------------------------------------------------------
@@ -61,53 +61,53 @@ namespace JsonBridgeEF.ZZZ
 
             if (project == null)
             {
-                Console.WriteLine($"❌ [ResolveTargetPropertyDefinition] Nessun MappingProject trovato con Name='{projectName}'");
+                Console.WriteLine($"❌ [ResolveTargetPropertyinition] Nessun MappingProject trovato con Name='{projectName}'");
                 return null;
             }
 
             return project;
         }
 
-        private JsonSchemaDef? FindSchemaByIdentifier(string schemaIdentifier)
+        private JsonSchema? FindSchemaByIdentifier(string schemaIdentifier)
         {
-            var schema = dbContext.JsonSchemaDefs
+            var schema = dbContext.JsonSchemas
                 .FirstOrDefault(s => s.JsonSchemaIdentifier == schemaIdentifier);
 
             if (schema == null)
             {
-                Console.WriteLine($"❌ [ResolveTargetPropertyDefinition] Nessuno schema trovato con identifier='{schemaIdentifier}'");
+                Console.WriteLine($"❌ [ResolveTargetPropertyinition] Nessuno schema trovato con identifier='{schemaIdentifier}'");
                 return null;
             }
 
             return schema;
         }
 
-        private JsonFieldDef? FindJsonField(int schemaId, string sourceFieldPath)
+        private JsonField? FindJsonField(int schemaId, string sourceFieldPath)
         {
-            var jsonFieldDef = dbContext.JsonFieldDefs
-                .FirstOrDefault(f => f.JsonSchemaDefId == schemaId && f.SourceFieldPath == sourceFieldPath);
+            var jsonField = dbContext.JsonFields
+                .FirstOrDefault(f => f.JsonSchemaId == schemaId && f.SourceFieldPath == sourceFieldPath);
 
-            if (jsonFieldDef == null)
+            if (jsonField == null)
             {
-                Console.WriteLine($"❌ [ResolveTargetPropertyDefinition] Nessun JsonFieldDef per path='{sourceFieldPath}' in schemaId={schemaId}");
+                Console.WriteLine($"❌ [ResolveTargetPropertyinition] Nessun JsonField per path='{sourceFieldPath}' in schemaId={schemaId}");
                 return null;
             }
 
-            return jsonFieldDef;
+            return jsonField;
         }
 
-        private MappingRule? FindMappingRule(int projectId, int jsonFieldDefId, bool includeTargetProperty)
+        private MappingRule? FindMappingRule(int projectId, int jsonFieldId, bool includeTargetProperty)
         {
             IQueryable<MappingRule> query = dbContext.MappingRules;
 
             if (includeTargetProperty)
-                query = query.Include(r => r.TargetPropertyDef);
+                query = query.Include(r => r.TargetProperty);
 
-            var rule = query.FirstOrDefault(r => r.MappingProjectId == projectId && r.JsonFieldDefId == jsonFieldDefId);
+            var rule = query.FirstOrDefault(r => r.MappingProjectId == projectId && r.JsonFieldId == jsonFieldId);
 
             if (rule == null)
             {
-                Console.WriteLine($"❌ [ResolveTargetPropertyDefinition] Nessuna MappingRule trovata per projectId={projectId}, fieldId={jsonFieldDefId}");
+                Console.WriteLine($"❌ [ResolveTargetPropertyinition] Nessuna MappingRule trovata per projectId={projectId}, fieldId={jsonFieldId}");
                 return null;
             }
 

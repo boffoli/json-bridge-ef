@@ -9,31 +9,31 @@ using JsonBridgeEF.Seeding.SourceJson.Models;
 namespace JsonBridgeEF.Tests
 {
     /// <summary>
-    /// Test per il servizio <see cref="JsonFieldDefSeeder"/>.
+    /// Test per il servizio <see cref="JsonFieldSeeder"/>.
     /// </summary>
-    public class JsonFieldDefSeederTests
+    public class JsonFieldSeederTests
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-        private readonly JsonFieldDefSeeder _seeder;
+        private readonly JsonFieldSeeder _seeder;
 
         /// <summary>
-        /// Inizializza un'istanza di <see cref="JsonFieldDefSeederTests"/>.
+        /// Inizializza un'istanza di <see cref="JsonFieldSeederTests"/>.
         /// </summary>
-        public JsonFieldDefSeederTests()
+        public JsonFieldSeederTests()
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
-            _seeder = new JsonFieldDefSeeder(_mockUnitOfWork.Object);
+            _seeder = new JsonFieldSeeder(_mockUnitOfWork.Object);
         }
 
         /// <summary>
-        /// Verifica che il metodo <see cref="JsonFieldDefSeeder.SeedAsync"/> restituisca correttamente i campi JSON 
+        /// Verifica che il metodo <see cref="JsonFieldSeeder.SeedAsync"/> restituisca correttamente i campi JSON 
         /// quando viene fornito un file JSON valido e uno schema valido.
         /// </summary>
         [Fact]
         public async Task SeedAsync_ValidJsonFileAndSchema_ShouldReturnFields()
         {
             // Arrange
-            var schema = new JsonSchemaDef
+            var schema = new JsonSchema
             {
                 Id = 1,
                 Name = "TestSchema",
@@ -53,21 +53,21 @@ namespace JsonBridgeEF.Tests
         }
 
         /// <summary>
-        /// Verifica che il metodo <see cref="JsonFieldDefSeeder.SeedAsync"/> lanci un'eccezione di tipo <see cref="ArgumentNullException"/>
+        /// Verifica che il metodo <see cref="JsonFieldSeeder.SeedAsync"/> lanci un'eccezione di tipo <see cref="ArgumentNullException"/>
         /// se il percorso del file JSON è nullo.
         /// </summary>
         [Fact]
         public async Task SeedAsync_NullJsonFilePath_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var schema = new JsonSchemaDef { Id = 1, Name = "TestSchema", JsonSchemaIdentifier = "TestID" };
+            var schema = new JsonSchema { Id = 1, Name = "TestSchema", JsonSchemaIdentifier = "TestID" };
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(null!, schema));
         }
 
         /// <summary>
-        /// Verifica che il metodo <see cref="JsonFieldDefSeeder.SeedAsync"/> lanci un'eccezione di tipo <see cref="ArgumentNullException"/>
+        /// Verifica che il metodo <see cref="JsonFieldSeeder.SeedAsync"/> lanci un'eccezione di tipo <see cref="ArgumentNullException"/>
         /// se lo schema JSON è nullo.
         /// </summary>
         [Fact]

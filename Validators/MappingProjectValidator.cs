@@ -16,8 +16,8 @@ namespace JsonBridgeEF.Validators
         {
             ValidateId(model.Id);
             ValidateName(model.Name);
-            ValidateJsonSchemaDefId(model.JsonSchemaDefId);
-            ValidateTargetDbContextDefId(model.TargetDbContextDefId);
+            ValidateJsonSchemaId(model.JsonSchemaId);
+            ValidateTargetDbContextInfoId(model.TargetDbContextInfoId);
             ValidateMappingRules(model.MappingRules);
         }
 
@@ -41,21 +41,21 @@ namespace JsonBridgeEF.Validators
                 throw new ValidationException("The Name cannot be empty.");
         }
 
-        // ======================== METODI PRIVATI PER JsonSchemaDefId ========================
-        private static void ValidateJsonSchemaDefId(int jsonSchemaDefId)
+        // ======================== METODI PRIVATI PER JsonSchemaId ========================
+        private static void ValidateJsonSchemaId(int jsonSchemaId)
         {
-            if (jsonSchemaDefId <= 0)
-                throw new ValidationException("The JsonSchemaDefId must be a positive number.");
+            if (jsonSchemaId <= 0)
+                throw new ValidationException("The JsonSchemaId must be a positive number.");
         }
 
-        // ======================== METODI PRIVATI PER TargetDbContextDefId ========================
-        private static void ValidateTargetDbContextDefId(int targetDbContextDefId)
+        // ======================== METODI PRIVATI PER TargetDbContextInfoId ========================
+        private static void ValidateTargetDbContextInfoId(int targetDbContextInfoId)
         {
-            if (targetDbContextDefId <= 0)
-                throw new ValidationException("The TargetDbContextDefId must be a positive number.");
+            if (targetDbContextInfoId <= 0)
+                throw new ValidationException("The TargetDbContextInfoId must be a positive number.");
 
-            if (!TargetModelInspector.TypeExists(typeof(TargetDbContextDef).FullName!))
-                throw new ValidationException($"The referenced TargetDbContextDef (ID: {targetDbContextDefId}) does not exist.");
+            if (!TargetModelInspector.TypeExists(typeof(TargetDbContextInfo).FullName!))
+                throw new ValidationException($"The referenced TargetDbContextInfo (ID: {targetDbContextInfoId}) does not exist.");
         }
 
         // ======================== METODI PRIVATI PER MappingRules ========================

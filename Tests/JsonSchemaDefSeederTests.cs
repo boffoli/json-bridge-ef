@@ -9,17 +9,17 @@ using JsonBridgeEF.Seeding.SourceJson.Models;
 namespace JsonBridgeEF.Tests
 {
     /// <summary>
-    /// Test per il servizio JsonSchemaDefSeeder.
+    /// Test per il servizio JsonSchemaSeeder.
     /// </summary>
-    public class JsonSchemaDefSeederTests
+    public class JsonSchemaSeederTests
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-        private readonly JsonSchemaDefSeeder _seeder;
+        private readonly JsonSchemaSeeder _seeder;
 
-        public JsonSchemaDefSeederTests()
+        public JsonSchemaSeederTests()
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
-            _seeder = new JsonSchemaDefSeeder(_mockUnitOfWork.Object);
+            _seeder = new JsonSchemaSeeder(_mockUnitOfWork.Object);
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_ValidSchema_ShouldSaveToRepository()
         {
             // Arrange
-            var schema = new JsonSchemaDef(new JsonSchemaDefValidator())
+            var schema = new JsonSchema(new JsonSchemaValidator())
             {
                 Name = "Test Schema",
                 JsonSchemaIdentifier = "TestSchemaV1",
@@ -66,7 +66,7 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_InvalidSchema_ShouldThrowInvalidOperationException(string name, string identifier)
         {
             // Arrange
-            var invalidSchema = new JsonSchemaDef(new JsonSchemaDefValidator())
+            var invalidSchema = new JsonSchema(new JsonSchemaValidator())
             {
                 Name = name,
                 JsonSchemaIdentifier = identifier,
@@ -84,7 +84,7 @@ namespace JsonBridgeEF.Tests
         public async Task SeedAsync_ShouldCallTryValidateAndFix()
         {
             // Arrange
-            var schemaMock = new Mock<JsonSchemaDef>(new JsonSchemaDefValidator()) { CallBase = true };
+            var schemaMock = new Mock<JsonSchema>(new JsonSchemaValidator()) { CallBase = true };
 
             // Act
             await _seeder.SeedAsync(schemaMock.Object);

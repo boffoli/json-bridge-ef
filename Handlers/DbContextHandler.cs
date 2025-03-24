@@ -11,7 +11,7 @@ namespace JsonBridgeEF.Handlers
         /// <summary>
         /// Il contesto delle mappature, sempre fisso per default.
         /// </summary>
-        public ApplicationDbContext MappingContext { get; private set; }
+        public ApplicationDbContext ApplicationContext { get; private set; }
 
         /// <summary>
         /// Il contesto del database target, configurabile dinamicamente.
@@ -28,7 +28,7 @@ namespace JsonBridgeEF.Handlers
             string targetDbPath = AppSettings.Get("Database:TargetDbPath");
 
             // Inizializza i contesti con il percorso completo
-            MappingContext = new ApplicationDbContext(mappingDbPath);
+            ApplicationContext = new ApplicationDbContext(mappingDbPath);
             TargetContext = new TargetDbContext(targetDbPath);
         }
 
@@ -58,7 +58,7 @@ namespace JsonBridgeEF.Handlers
                 throw new ArgumentException("Il percorso del database delle mappature non può essere vuoto.", nameof(newDbPath));
             }
 
-            MappingContext = new ApplicationDbContext(newDbPath);
+            ApplicationContext = new ApplicationDbContext(newDbPath);
             Console.WriteLine($"✅ Switched to MappingDbContext: {newDbPath}");
         }
     }

@@ -5,17 +5,17 @@ using JsonBridgeEF.Seeding.TargetModel.Models;
 namespace JsonBridgeEF.Data.Configurations
 {
     /// <summary>
-    /// Configures the <see cref="TargetDbContextDef"/> entity for Entity Framework.
-    /// Defines the primary key, required properties, and relationships.
+    /// Configures the <see cref="TargetDbContextInfo"/> entity for Entity Framework.
+    /// Defines the primary key, required properties, unique constraints, and relationships.
     /// </summary>
-    internal class TargetDbContextDefConfig : IEntityTypeConfiguration<TargetDbContextDef>
+    internal class TargetDbContextInfoConfig : IEntityTypeConfiguration<TargetDbContextInfo>
     {
-        public void Configure(EntityTypeBuilder<TargetDbContextDef> builder)
+        public void Configure(EntityTypeBuilder<TargetDbContextInfo> builder)
         {
-            // Define primary key
+            // 🔹 Definisce la chiave primaria
             builder.HasKey(e => e.Id);
 
-            // Required properties
+            // 🔹 Proprietà obbligatorie con vincoli
             builder.Property(e => e.Name)
                    .IsRequired()
                    .HasMaxLength(255);
@@ -24,10 +24,14 @@ namespace JsonBridgeEF.Data.Configurations
                    .IsRequired()
                    .HasMaxLength(255);
 
-            // 1:N Relationship with TargetPropertyDef
+            // 🔹 Unicità per Namespace (un DbContext non può avere lo stesso Namespace)
+            builder.HasIndex(e => e.Namespace)
+                   .IsUnique();
+
+            // 🔹 1:N con TargetProperty (Restrict per evitare eliminazioni accidentali)
             builder.HasMany(d => d.TargetProperties)
-                   .WithOne(p => p.TargetDbContextDef)
-                   .HasForeignKey(p => p.TargetDbContextDefId)
+                   .WithOne(p => p.TargetDbContextInfo)
+                   .HasForeignKey(p => p.TargetDbContextInfoId)
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Cascade);
         }

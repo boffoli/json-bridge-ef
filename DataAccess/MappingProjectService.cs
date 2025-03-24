@@ -29,7 +29,7 @@ namespace JsonBridgeEF.DataAccess
             if (string.IsNullOrWhiteSpace(project.Name))
                 throw new InvalidOperationException("Il nome del progetto non può essere vuoto.");
 
-            if (project.JsonSchemaDefId <= 0)
+            if (project.JsonSchemaId <= 0)
                 throw new InvalidOperationException("Il progetto deve essere associato a un tipo JSON valido.");
 
             GetRepository<MappingProject>().Add(project);

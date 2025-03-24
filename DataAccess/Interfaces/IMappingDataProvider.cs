@@ -13,20 +13,20 @@ namespace JsonBridgeEF.DataAccess.Interfaces
         /// <summary>
         /// Restituisce tutte le definizioni di tipi JSON disponibili nel database.
         /// </summary>
-        /// <returns>Una lista di <see cref="JsonSchemaDef"/> disponibili nel database.</returns>
-        Task<List<JsonSchemaDef>> GetJsonSchemaDefAsync();
+        /// <returns>Una lista di <see cref="JsonSchema"/> disponibili nel database.</returns>
+        Task<List<JsonSchema>> GetJsonSchemaAsync();
 
         /// <summary>
         /// Restituisce tutte le definizioni di campi JSON disponibili nel database.
         /// </summary>
-        /// <returns>Una lista di <see cref="JsonFieldDef"/> disponibili nel database.</returns>
-        Task<List<JsonFieldDef>> GetJsonFieldDefAsync();
+        /// <returns>Una lista di <see cref="JsonField"/> disponibili nel database.</returns>
+        Task<List<JsonField>> GetJsonFieldAsync();
 
         /// <summary>
         /// Restituisce tutte le definizioni di entità target disponibili nel database.
         /// </summary>
-        /// <returns>Una lista di <see cref="TargetPropertyDef"/> disponibili nel database.</returns>
-        Task<List<TargetPropertyDef>> GetTargetPropertyDefsAsync();
+        /// <returns>Una lista di <see cref="TargetProperty"/> disponibili nel database.</returns>
+        Task<List<TargetProperty>> GetTargetPropertysAsync();
 
         /// <summary>
         /// Restituisce tutti i progetti di mapping disponibili nel database.

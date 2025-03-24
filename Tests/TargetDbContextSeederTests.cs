@@ -26,13 +26,13 @@ namespace JsonBridgeEF.Tests
 
         /// <summary>
         /// Verifica che il metodo <see cref="TargetDbContextSeeder.SeedAsync"/> 
-        /// salvi correttamente un'istanza valida di <see cref="TargetDbContextDef"/>.
+        /// salvi correttamente un'istanza valida di <see cref="TargetDbContextInfo"/>.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_ValidTargetDbContextDef_ShouldSaveToRepository()
+        public async Task SeedAsync_ValidTargetDbContextInfo_ShouldSaveToRepository()
         {
             // Arrange
-            var targetDbContextDef = new TargetDbContextDef
+            var targetDbContextInfo = new TargetDbContextInfo
             {
                 Name = "TestDbContext",
                 Namespace = "JsonBridgeEF.Data",
@@ -40,7 +40,7 @@ namespace JsonBridgeEF.Tests
             };
 
             // Act
-            var result = await _seeder.SeedAsync(targetDbContextDef);
+            var result = await _seeder.SeedAsync(targetDbContextInfo);
 
             // Assert
             Assert.NotNull(result);
@@ -54,7 +54,7 @@ namespace JsonBridgeEF.Tests
         /// sollevi un'eccezione di tipo <see cref="ArgumentNullException"/> se il parametro è null.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_NullTargetDbContextDef_ShouldThrowArgumentNullException()
+        public async Task SeedAsync_NullTargetDbContextInfo_ShouldThrowArgumentNullException()
         {
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(null!));
@@ -70,10 +70,10 @@ namespace JsonBridgeEF.Tests
         [InlineData("", "JsonBridgeEF.Data")]
         [InlineData("TestDbContext", "")]
         [InlineData("", "")]
-        public async Task SeedAsync_InvalidTargetDbContextDef_ShouldThrowInvalidOperationException(string name, string ns)
+        public async Task SeedAsync_InvalidTargetDbContextInfo_ShouldThrowInvalidOperationException(string name, string ns)
         {
             // Arrange
-            var invalidTargetDbContextDef = new TargetDbContextDef
+            var invalidTargetDbContextInfo = new TargetDbContextInfo
             {
                 Name = name,
                 Namespace = ns,
@@ -81,7 +81,7 @@ namespace JsonBridgeEF.Tests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _seeder.SeedAsync(invalidTargetDbContextDef));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _seeder.SeedAsync(invalidTargetDbContextInfo));
         }
     }
 }

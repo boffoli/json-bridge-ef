@@ -1,5 +1,6 @@
 ﻿using JsonBridgeEF.Client;
-using JsonBridgeEF.Seeding.SourceJson.Helpers;
+using JsonBridgeEF.Handlers;
+using JsonBridgeEF.Common.UnitOfWorks;
 
 namespace JsonBridgeEF
 {
@@ -15,15 +16,15 @@ namespace JsonBridgeEF
         {
             Console.WriteLine("🚀 Avvio di JsonBridgeEF...");
 
-            // Creazione del registro dei blocchi indipendenti per il processamento JSON
-            var registry = new JsonIndepBlockRegistry();
-            registry.AddBlock("utenti", "id_utente");
-            registry.AddBlock("contatti", "id_contatto");
-            registry.AddBlock("metadati", "id_metadato");
+            // Inizializza il gestore dei DbContext
+            var dbContextHandler = new DbContextHandler();
+
+            // Crea UnitOfWork basandosi su ApplicationDbContext gestito dal handler
+            using var unitOfWork = new UnitOfWork(dbContextHandler.ApplicationContext);
 
             // Creazione del servizio di orchestrazione e avvio del workflow
-            var pipelineService = new FullPipelineService(registry);
-            await pipelineService.RunFullPipelineAsync();
+            var pipelineService = new SeedingPipelineService(unitOfWork);
+            await pipelineService.RunSeedingAsync();
 
             Console.WriteLine("✅ Processo completato con successo!");
         }

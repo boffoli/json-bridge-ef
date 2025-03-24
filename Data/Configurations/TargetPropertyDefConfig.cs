@@ -5,18 +5,18 @@ using JsonBridgeEF.Seeding.TargetModel.Models;
 namespace JsonBridgeEF.Data.Configurations
 {
     /// <summary>
-    /// Configures the <see cref="TargetPropertyDef"/> entity for Entity Framework.
-    /// Defines the primary key, required properties, and constraints.
-    /// The relationship with <see cref="TargetDbContextDef"/> is configured on the principal side.
+    /// Configures the <see cref="TargetProperty"/> entity for Entity Framework.
+    /// Defines the primary key, required properties, unique constraints,
+    /// and the relationship with <see cref="TargetDbContextInfo"/>.
     /// </summary>
-    internal class TargetPropertyDefConfig : IEntityTypeConfiguration<TargetPropertyDef>
+    internal class TargetPropertyConfig : IEntityTypeConfiguration<TargetProperty>
     {
-        public void Configure(EntityTypeBuilder<TargetPropertyDef> builder)
+        public void Configure(EntityTypeBuilder<TargetProperty> builder)
         {
-            // Define primary key
+            // 🔹 Definisce la chiave primaria
             builder.HasKey(e => e.Id);
 
-            // Required properties
+            // 🔹 Proprietà obbligatorie con vincoli
             builder.Property(e => e.Namespace)
                    .IsRequired()
                    .HasMaxLength(255);
@@ -29,8 +29,19 @@ namespace JsonBridgeEF.Data.Configurations
                    .IsRequired()
                    .HasMaxLength(255);
 
-            // Note:
-            // The relationship 1:N with TargetDbContextDef is configured exclusively in the TargetDbContextDefConfig.
+            builder.Property(e => e.Path)
+                   .HasMaxLength(500);
+
+            // 🔹 Vincolo di unicità su Namespace, RootClass e Name
+            builder.HasIndex(e => new { e.Namespace, e.RootClass, e.Name })
+                   .IsUnique();
+
+            // 🔹 Relazione con TargetDbContextInfo (Restrict per evitare eliminazioni accidentali)
+            builder.HasOne(e => e.TargetDbContextInfo)
+                   .WithMany(d => d.TargetProperties)
+                   .HasForeignKey(e => e.TargetDbContextInfoId)
+                   .IsRequired()
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

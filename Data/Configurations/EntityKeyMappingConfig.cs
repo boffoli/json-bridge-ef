@@ -10,11 +10,11 @@ namespace JsonBridgeEF.Data.Configurations
         {
             builder.HasKey(e => e.Id);
             builder.Property(e => e.JsonKey).IsRequired();
-            builder.HasOne(e => e.TargetPropertyDef)
+            builder.HasOne(e => e.TargetProperty)
                    .WithMany()
-                   .HasForeignKey(e => e.TargetPropertyDefId)
+                   .HasForeignKey(e => e.TargetPropertyId)
                    .IsRequired();
-            builder.HasIndex(e => new { e.JsonKey, e.TargetPropertyDefId })
+            builder.HasIndex(e => new { e.JsonKey, e.TargetPropertyId })
                    .IsUnique();
         }
     }

@@ -1,69 +1,61 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using JsonBridgeEF.Validators;
 using JsonBridgeEF.Common;
+using JsonBridgeEF.Validators;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
 namespace JsonBridgeEF.Seeding.Mappings.Models
 {
     /// <summary>
-    /// Rappresenta un progetto di mapping che raggruppa un insieme di mapping rule
-    /// e condivide uno schema JSON comune.
+    /// Represents a mapping project that links a source JSON schema to a target database context.
+    /// This is the top-level entity that groups mapping rules.
     /// </summary>
-    internal class MappingProject : ModelBase<MappingProject>
+    internal class MappingProject : BaseModel<MappingProject>
     {
         /// <summary>
-        /// Costruttore richiesto da Entity Framework.
+        /// Constructor required by Entity Framework Core.
         /// </summary>
         internal MappingProject() : base(null) { }
 
         /// <summary>
-        /// Costruttore che accetta un validatore opzionale.
+        /// Constructor that accepts an optional validator.
         /// </summary>
-        /// <param name="validator">Il validatore per questa istanza.</param>
         public MappingProject(IValidateAndFix<MappingProject>? validator)
             : base(validator) { }
 
         /// <summary>
-        /// Identificatore univoco del progetto di mapping.
+        /// Determines whether this entity should generate a slug.
         /// </summary>
-        [Key]
-        public int Id { get; set; }
+        protected override bool HasSlug => true;
 
         /// <summary>
-        /// Nome del progetto di mapping.
+        /// Foreign key linking this mapping project to a JSON schema.
         /// </summary>
         [Required]
-        public string Name { get; set; } = string.Empty;
+        public int JsonSchemaId { get; set; }
 
         /// <summary>
-        /// Riferimento allo schema JSON comune per tutte le rule del progetto.
+        /// Navigation property to the JSON schema being mapped.
+        /// </summary>
+        [ForeignKey(nameof(JsonSchemaId))]
+        public virtual JsonSchema JsonSchema { get; set; } = null!;
+
+        /// <summary>
+        /// Foreign key linking this mapping project to the target database context.
         /// </summary>
         [Required]
-        public int JsonSchemaDefId { get; set; }
+        public int TargetDbContextInfoId { get; set; }
 
         /// <summary>
-        /// Chiave esterna al contesto target di database.
+        /// Navigation property to the target database context.
         /// </summary>
-        [Required]
-        public int TargetDbContextDefId { get; set; } // 🔹 **Aggiunto campo FK**
+        [ForeignKey(nameof(TargetDbContextInfoId))]
+        public virtual TargetDbContextInfo TargetDbContextInfo { get; set; } = null!;
 
         /// <summary>
-        /// Navigation property allo schema JSON.
+        /// Collection of mapping rules associated with this project.
         /// </summary>
-        [ForeignKey(nameof(JsonSchemaDefId))]
-        public virtual JsonSchemaDef JsonSchemaDef { get; set; } = null!;
-
-        /// <summary>
-        /// Collezione di mapping rule associate a questo progetto.
-        /// </summary>
-        public virtual ICollection<MappingRule> MappingRules { get; set; } = [];
-
-        /// <summary>
-        /// Proprietà di navigazione al contesto target.
-        /// </summary>
-        [ForeignKey(nameof(TargetDbContextDefId))] // 🔹 **Associazione alla FK**
-        public virtual TargetDbContextDef TargetDbContextDef { get; set; } = null!;
+        public virtual ICollection<MappingRule> MappingRules { get; set; } = new List<MappingRule>();
     }
 }

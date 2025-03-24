@@ -6,14 +6,14 @@ using JsonBridgeEF.Seeding.TargetModel.Models;
 namespace JsonBridgeEF.Validators
 {
     /// <summary>
-    /// Validator for <see cref="TargetDbContextDef"/> ensuring the validity of database context definitions.
+    /// Validator for <see cref="TargetDbContextInfo"/> ensuring the validity of database context definitions.
     /// </summary>
-    internal partial class TargetDbContextDefValidator : IValidateAndFix<TargetDbContextDef>
+    internal partial class TargetDbContextInfoValidator : IValidateAndFix<TargetDbContextInfo>
     {
         private static readonly Regex NamespacePattern = MyRegex();
 
         /// <inheritdoc />
-        public void EnsureValid(TargetDbContextDef model)
+        public void EnsureValid(TargetDbContextInfo model)
         {
             ValidateId(model.Id);
             ValidateName(model.Name);
@@ -22,7 +22,7 @@ namespace JsonBridgeEF.Validators
         }
 
         /// <inheritdoc />
-        public void Fix(TargetDbContextDef model)
+        public void Fix(TargetDbContextInfo model)
         {
             model.Description = FixDescription(model.Description);
         }
