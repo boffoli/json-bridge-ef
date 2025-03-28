@@ -1,8 +1,8 @@
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.UnitOfWorks;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Models;
 
-namespace JsonBridgeEF.Seeding.Mappings.Services
+namespace JsonBridgeEF.Seeding.Mapping.Services
 {
     /// <summary>
     /// Servizio per il seeding dei progetti di mapping nel database.

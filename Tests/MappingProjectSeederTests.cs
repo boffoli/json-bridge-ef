@@ -1,8 +1,8 @@
 using Xunit;
 using Moq;
-using JsonBridgeEF.Seeding.Mappings.Models;
-using JsonBridgeEF.Validators;
-using JsonBridgeEF.Seeding.Mappings.Services;
+using JsonBridgeEF.Seeding.Mapping.Models;
+using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Seeding.Mapping.Services;
 using JsonBridgeEF.Common.UnitOfWorks;
 using JsonBridgeEF.Common.Repositories;
 

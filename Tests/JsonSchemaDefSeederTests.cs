@@ -1,7 +1,7 @@
 using Xunit;
 using Moq;
 using JsonBridgeEF.Seeding.SourceJson.Services;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.UnitOfWorks;
 using JsonBridgeEF.Seeding.SourceJson.Models;
@@ -32,7 +32,6 @@ namespace JsonBridgeEF.Tests
             var schema = new JsonSchema(new JsonSchemaValidator())
             {
                 Name = "Test Schema",
-                JsonSchemaIdentifier = "TestSchemaV1",
                 Description = "Schema di test per validazione."
             };
 
@@ -42,7 +41,6 @@ namespace JsonBridgeEF.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("Test Schema", result.Name);
-            Assert.Equal("TestSchemaV1", result.JsonSchemaIdentifier);
             _mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
@@ -60,16 +58,14 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync lanci un'eccezione se il nome o l'identificatore è vuoto.
         /// </summary>
         [Theory]
-        [InlineData("", "ValidIdentifier")]
         [InlineData("ValidName", "")]
         [InlineData("", "")]
-        public async Task SeedAsync_InvalidSchema_ShouldThrowInvalidOperationException(string name, string identifier)
+        public async Task SeedAsync_InvalidSchema_ShouldThrowInvalidOperationException(string name)
         {
             // Arrange
             var invalidSchema = new JsonSchema(new JsonSchemaValidator())
             {
                 Name = name,
-                JsonSchemaIdentifier = identifier,
                 Description = "Schema con valori non validi"
             };
 

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using JsonBridgeEF.Data;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Models;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
@@ -19,7 +19,7 @@ namespace JsonBridgeEF.ZZZ
         /// oppure null se non viene trovata.
         /// </summary>
         /// <param name="projectName">Nome del progetto di mapping (univoco).</param>
-        /// <param name="schemaIdentifier">Identificatore logico dello schema JSON.</param>
+        /// <param name="schemaName">Identificatore logico dello schema JSON.</param>
         /// <param name="sourceFieldPath">Percorso del campo JSON da cercare.</param>
         /// <returns>
         /// L'oggetto <see cref="TargetProperty"/> corrispondente alla regola di mapping
@@ -28,7 +28,7 @@ namespace JsonBridgeEF.ZZZ
         /// </returns>
         public TargetProperty? ResolveTargetPropertyinition(
             string projectName,
-            string schemaIdentifier,
+            string schemaName,
             string sourceFieldPath)
         {
             // 1) Trova il progetto di mapping
@@ -36,7 +36,7 @@ namespace JsonBridgeEF.ZZZ
             if (project == null) return null; // se non lo trova, esce
 
             // 2) Trova lo schema
-            var schema = FindSchemaByIdentifier(schemaIdentifier);
+            var schema = FindSchemaByName(schemaName);
             if (schema == null) return null;
 
             // 3) Trova il campo JSON
@@ -68,14 +68,14 @@ namespace JsonBridgeEF.ZZZ
             return project;
         }
 
-        private JsonSchema? FindSchemaByIdentifier(string schemaIdentifier)
+        private JsonSchema? FindSchemaByName(string schemaName)
         {
             var schema = dbContext.JsonSchemas
-                .FirstOrDefault(s => s.JsonSchemaIdentifier == schemaIdentifier);
+                .FirstOrDefault(s => s.Name == schemaName);
 
             if (schema == null)
             {
-                Console.WriteLine($"❌ [ResolveTargetPropertyinition] Nessuno schema trovato con identifier='{schemaIdentifier}'");
+                Console.WriteLine($"❌ [ResolveTargetPropertyinition] Nessuno schema trovato con namer='{schemaName}'");
                 return null;
             }
 

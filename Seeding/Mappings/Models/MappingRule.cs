@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
-namespace JsonBridgeEF.Seeding.Mappings.Models
+namespace JsonBridgeEF.Seeding.Mapping.Models
 {
     /// <summary>
     /// Defines the mapping rule between a JSON source field and a target .NET model property.

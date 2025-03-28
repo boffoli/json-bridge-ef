@@ -1,11 +1,11 @@
 using Xunit;
 using Moq;
-using JsonBridgeEF.Seeding.Mappings.Models;
-using JsonBridgeEF.Seeding.Mappings.Helpers;
+using JsonBridgeEF.Seeding.Mapping.Models;
+using JsonBridgeEF.Seeding.Mapping.Helpers;
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.UnitOfWorks;
 using JsonBridgeEF.Common.Repositories;
-using JsonBridgeEF.Seeding.Mappings.Services;
+using JsonBridgeEF.Seeding.Mapping.Services;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
@@ -27,7 +27,6 @@ namespace JsonBridgeEF.Tests
             _mockRepository = new Mock<IRepository<MappingRule>>();
             _mockRuleConsole = new Mock<IMappingRuleConsole>();
 
-            // Configura il mock per il repository di MappingRule
             _mockUnitOfWork.Setup(u => u.Repository<MappingRule>())
                            .Returns(_mockRepository.Object);
 
@@ -43,8 +42,8 @@ namespace JsonBridgeEF.Tests
             // Arrange
             var jsonFields = new List<JsonField>
             {
-                new() { Id = 1, SourceFieldPath = "utente.nome" },
-                new() { Id = 2, SourceFieldPath = "utente.email" }
+                new() { Id = 1, Name = "nome" },
+                new() { Id = 2, Name = "email" }
             };
 
             var targetProperties = new List<TargetProperty>
@@ -67,7 +66,6 @@ namespace JsonBridgeEF.Tests
                 new() { MappingProjectId = mappingProject.Id, JsonFieldId = 2, TargetPropertyId = 102, JsFormula = "" }
             };
 
-            // Simula il comportamento della console di mapping
             _mockRuleConsole.SetupSequence(rc => rc.PromptMappingRuleForProperty(It.IsAny<List<JsonField>>(), It.IsAny<TargetProperty>(), It.IsAny<MappingProject>()))
                             .Returns(expectedRules[0])
                             .Returns(expectedRules[1]);
@@ -86,12 +84,12 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync restituisca una lista vuota se l'utente non seleziona alcun mapping.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_NoMappings_ShouldReturnEmptyList()
+        public async Task SeedAsync_NoMapping_ShouldReturnEmptyList()
         {
             // Arrange
             var jsonFields = new List<JsonField>
             {
-                new() { Id = 1, SourceFieldPath = "utente.nome" }
+                new() { Id = 1, Name = "nome" }
             };
 
             var targetProperties = new List<TargetProperty>
@@ -107,7 +105,6 @@ namespace JsonBridgeEF.Tests
                 TargetDbContextInfoId = 20
             };
 
-            // Simula il comportamento della console quando nessun mapping viene selezionato
             _mockRuleConsole.Setup(rc => rc.PromptMappingRuleForProperty(It.IsAny<List<JsonField>>(), It.IsAny<TargetProperty>(), It.IsAny<MappingProject>()))
                             .Returns((MappingRule?)null);
 
@@ -127,11 +124,9 @@ namespace JsonBridgeEF.Tests
         [Fact]
         public async Task SeedAsync_NullJsonFields_ShouldThrowArgumentNullException()
         {
-            // Arrange
             var targetProperties = new List<TargetProperty>();
             var mappingProject = new MappingProject();
 
-            // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(null!, targetProperties, mappingProject));
         }
 
@@ -141,11 +136,9 @@ namespace JsonBridgeEF.Tests
         [Fact]
         public async Task SeedAsync_NullTargetPropertys_ShouldThrowArgumentNullException()
         {
-            // Arrange
             var jsonFields = new List<JsonField>();
             var mappingProject = new MappingProject();
 
-            // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(jsonFields, null!, mappingProject));
         }
 
@@ -155,11 +148,9 @@ namespace JsonBridgeEF.Tests
         [Fact]
         public async Task SeedAsync_NullMappingProject_ShouldThrowArgumentNullException()
         {
-            // Arrange
             var jsonFields = new List<JsonField>();
             var targetProperties = new List<TargetProperty>();
 
-            // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _seeder.SeedAsync(jsonFields, targetProperties, null!));
         }
     }

@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.ComponentModel.DataAnnotations.Schema; // Per ForeignKeyAttribute
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.Validators;
 using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 

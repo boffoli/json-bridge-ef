@@ -1,6 +1,6 @@
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.UnitOfWorks;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Models;
 
 namespace JsonBridgeEF.DataAccess
 {

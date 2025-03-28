@@ -1,4 +1,4 @@
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Models;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 

@@ -93,7 +93,7 @@ internal class SeedingPipelineService(IUnitOfWork unitOfWork)
         {
             Console.WriteLine($"\n🔹 Blocco: {block.Name}");
 
-            var fields = block.JsonFields.ToList();
+            var fields = block.Entities.ToList();
             var currentKey = fields.FirstOrDefault(f => f.IsKey);
 
             Console.WriteLine("   📄 Campi del blocco:");

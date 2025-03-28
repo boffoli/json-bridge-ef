@@ -1,6 +1,6 @@
 using Bogus;
 using JsonBridgeEF.DataAccess.Interfaces;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Models;
 using JsonBridgeEF.SampleTargetModel;
 
 namespace JsonBridgeEF.DataAccess.Helpers;
@@ -69,7 +69,7 @@ internal static class RandomDataGenerator
     /// <param name="count">Numero di regole di mappatura da generare.</param>
     /// <returns>Una lista di <see cref="MappingRule"/> generati casualmente.</returns>
     /// <exception cref="InvalidOperationException">Se non ci sono dati sufficienti per generare le regole di mappatura.</exception>
-    public static async Task<List<MappingRule>> GenerateRandomMappingsAsync(IMappingDataProvider dataProvider, int count)
+    public static async Task<List<MappingRule>> GenerateRandomMappingAsync(IMappingDataProvider dataProvider, int count)
     {
         // Recupera i dati necessari dal provider
         var mappingProjects = await dataProvider.GetMappingProjectsAsync();
@@ -83,7 +83,7 @@ internal static class RandomDataGenerator
         }
 
         var faker = new Faker("it");
-        var mappings = new List<MappingRule>();
+        var mapping = new List<MappingRule>();
 
         // Generazione delle regole di mappatura casuali
         for (int i = 0; i < count; i++)
@@ -100,10 +100,10 @@ internal static class RandomDataGenerator
                 JsFormula = "function transform(value) { return value; }"
             };
 
-            mappings.Add(mapping);
+            mapping.Add(mapping);
         }
 
-        return mappings;
+        return mapping;
     }
 
     #endregion

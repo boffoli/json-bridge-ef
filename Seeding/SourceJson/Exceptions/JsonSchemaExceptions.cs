@@ -45,15 +45,9 @@ internal class SchemaNameAlreadyExistsException : JsonSchemaException
 /// </list>
 /// </para>
 /// </summary>
-internal class SchemaContentAlreadyExistsException : JsonSchemaException
+internal class SchemaContentAlreadyExistsException(string existingSchemaName) : JsonSchemaException($"❌ Uno schema identico ('{existingSchemaName}') esiste già nel database.")
 {
-    public string ExistingSchemaName { get; }
-
-    public SchemaContentAlreadyExistsException(string existingSchemaName)
-        : base($"❌ Uno schema identico ('{existingSchemaName}') esiste già nel database.")
-    {
-        ExistingSchemaName = existingSchemaName;
-    }
+    public string ExistingSchemaName { get; } = existingSchemaName;
 }
 
 /// <summary>
@@ -92,5 +86,11 @@ internal class JsonFileNotFoundException : JsonSchemaException
 internal class InvalidJsonContentException : JsonSchemaException
 {
     public InvalidJsonContentException()
-        : base("❌ Il contenuto JSON non può essere vuoto.") { }
+        : base("❌ Il contenuto JSON non può essere vuoto o nullo.") { }
+
+    public InvalidJsonContentException(string message)
+        : base(message) { }
+
+    public InvalidJsonContentException(string message, Exception innerException)
+        : base(message, innerException) { }
 }

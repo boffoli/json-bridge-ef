@@ -10,7 +10,7 @@ namespace JsonBridgeEF.Common
     /// Classe base per i servizi di gestione dei database.
     /// Fornisce funzionalità comuni come la gestione dei repository, il cambio database e la pulizia dei dati.
     /// </summary>
-    internal abstract class BaseDbService
+    internal class BaseDbService
     {
         #region 🔹 Campi privati e costruttore
 

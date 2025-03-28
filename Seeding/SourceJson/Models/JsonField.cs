@@ -1,115 +1,76 @@
-using System.ComponentModel.DataAnnotations;
-using JsonBridgeEF.Common;
-using JsonBridgeEF.Validators;
+using System.ComponentModel;
+using JsonBridgeEF.Common.EfEntities.Base;
+using JsonBridgeEF.Common.Validators;
 
 namespace JsonBridgeEF.Seeding.SourceJson.Models;
 
 /// <summary>
+/// Domain Entity: Campo JSON appartenente a un <see cref="JsonBlock"/>, identificato da un nome univoco.
+/// Può essere designato come chiave logica del blocco.
+/// </summary>
+/// <remarks>
 /// <para><b>Domain Concept:</b><br/>
-/// Campo JSON che rappresenta una singola proprietà di un oggetto JSON,
-/// collegato a un blocco (<see cref="JsonBlock"/>). Può fungere da chiave logica.
-/// </para>
+/// Un <c>JsonField</c> rappresenta una proprietà di un oggetto JSON, mappata come sotto-elemento di un <see cref="JsonBlock"/>.
+/// Ogni campo ha un nome univoco all’interno del blocco e può essere utilizzato come identificatore logico (chiave).</para>
 ///
 /// <para><b>Creation Strategy:</b><br/>
-/// Deve essere creato tramite il metodo statico <see cref="Create"/>.  
-/// I costruttori sono privati o riservati a EF Core.
-/// </para>
+/// Deve essere creato tramite costruttore esplicito fornendo nome e blocco di appartenenza.<br/>
+/// La registrazione nel blocco avviene automaticamente nel costruttore base.</para>
 ///
-/// <para><b>Constraints:</b>
-/// <list type="bullet">
-///   <item><see cref="SourceFieldPath"/> è obbligatorio e non può essere vuoto.</item>
-///   <item>Ogni campo può appartenere a un solo blocco e non può essere riassegnato.</item>
-/// </list>
-/// </para>
+/// <para><b>Constraints:</b><br/>
+/// - <c>Name</c> è obbligatorio e univoco all'interno del blocco.<br/>
+/// - Il blocco di appartenenza deve essere valido e coerente con il tipo <see cref="JsonBlock"/>.</para>
 ///
-/// <para><b>Relationships:</b>
-/// <list type="bullet">
-///   <item>Relazione molti-a-uno con <see cref="JsonBlock"/>.</item>
-/// </list>
-/// </para>
+/// <para><b>Relationships:</b><br/>
+/// - Appartiene a un <see cref="JsonBlock"/> che implementa <see cref="IWithKeyedEntities{JsonField}"/>.<br/>
+/// - Registrato automaticamente nella collezione del blocco al momento della creazione.</para>
 ///
 /// <para><b>Usage Notes:</b><br/>
-/// Il factory method <see cref="Create"/> inizializza il campo e lo registra nel blocco di destinazione.
-/// EF Core gestisce automaticamente la foreign key tramite la proprietà <see cref="JsonBlock"/>.
-/// </para>
-public sealed class JsonField : BaseEfEntity<JsonField>
+/// Utilizzare per modellare proprietà dinamiche dei blocchi JSON, eventualmente marcabili come chiave logica.
+/// Il valore <see cref="IsKey"/> viene gestito dalla collezione nel blocco.</para>
+public sealed class JsonField : BaseEfKeyedOwnedEntity<JsonField, JsonBlock>
 {
-    // 🔹 COSTRUTTORI 🔹
+    // 🔹 COSTRUTTORE RISERVATO A EF CORE 🔹
 
     /// <summary>
-    /// Costruttore richiesto da Entity Framework Core.
-    /// Non deve essere rimosso.
+    /// Infrastructure Constructor: Riservato a Entity Framework Core per la materializzazione da database.
     /// </summary>
-    private JsonField() : base() { }
-
-    /// <summary>
-    /// Costruttore privato usato dalla factory <see cref="Create"/>.
-    /// Inizializza solo il validatore di base.
-    /// </summary>
-    private JsonField(IValidateAndFix<JsonField>? validator)
-        : base(validator) { }
-
-    // 🔹 FACTORY 🔹
-
-    /// <summary>
-    /// Crea un nuovo campo JSON e lo collega al blocco specificato.
-    /// </summary>
-    /// <param name="block">Blocco JSON a cui appartiene. Non può essere null.</param>
-    /// <param name="sourceFieldPath">Percorso logico del campo (es. "nome", "indirizzo.via").</param>
-    /// <param name="validator">Validatore opzionale da applicare al campo.</param>
-    /// <returns>Nuova istanza del campo JSON, già registrata nel blocco.</returns>
-    public static JsonField Create(JsonBlock block, string sourceFieldPath, IValidateAndFix<JsonField>? validator = null)
+#pragma warning disable S1133
+    [Obsolete("Reserved for EF Core materialization only", error: false)]
+#pragma warning disable CS8618
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    private JsonField() : base()
     {
-        ArgumentNullException.ThrowIfNull(block);
+        // ⚠️ EF Core popolerà i campi tramite reflection
+    }
+#pragma warning restore CS8618
+#pragma warning restore S1133
 
-        if (string.IsNullOrWhiteSpace(sourceFieldPath))
-            throw new ArgumentException("Il percorso del campo non può essere vuoto.", nameof(sourceFieldPath));
+    // 🔹 COSTRUTTORE PUBBLICO 🔹
 
-        var field = new JsonField(validator)
-        {
-            SourceFieldPath = sourceFieldPath,
-            JsonBlock = block
-        };
-
-        block.AddField(field); // Tenta la registrazione: se fallisce, solleva eccezione e annulla la creazione
-        return field;
+    /// <summary>
+    /// Domain Constructor: Crea un nuovo campo JSON con nome e blocco di appartenenza.
+    /// </summary>
+    /// <param name="name">Nome univoco del campo all’interno del blocco.</param>
+    /// <param name="block">Blocco JSON a cui il campo appartiene.</param>
+    /// <param name="validator">Validatore opzionale per la logica di dominio.</param>
+    public JsonField(string name, JsonBlock block, IValidateAndFix<JsonField>? validator = null)
+        : base(name, block, validator)
+    {
     }
 
     // 🔹 CONFIGURAZIONE 🔹
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Disattiva la generazione automatica dello slug per i campi JSON.
+    /// </summary>
     protected override bool HasSlug => false;
-
-    // 🔹 RELAZIONI EF 🔹
-
-    [Required]
-    internal int JsonBlockId { get; }
-
-    /// <summary>
-    /// Blocco JSON a cui questo campo appartiene.
-    /// Impostato una sola volta dalla factory.
-    /// </summary>
-    [Required]
-    public JsonBlock JsonBlock { get; private init; } = null!;
-
-    // 🔹 PROPRIETÀ 🔹
-
-    /// <summary>
-    /// Percorso logico del campo all’interno del JSON.
-    /// Es.: "nome", "indirizzo.via", "contatti.telefono".
-    /// </summary>
-    [Required, MaxLength(500)]
-    public string SourceFieldPath { get; private init; } = string.Empty;
-
-    /// <summary>
-    /// Indica se il campo è marcato come chiave logica per l’importazione.
-    /// Può essere impostato solo dal blocco proprietario.
-    /// </summary>
-    public bool IsKey { get; internal set; }
 
     // 🔹 VALIDAZIONE 🔹
 
+    /// <inheritdoc/>
     protected override void OnBeforeValidate() { }
 
+    /// <inheritdoc/>
     protected override void OnAfterValidate() { }
 }

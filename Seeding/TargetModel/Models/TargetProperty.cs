@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using JsonBridgeEF.Common;
-using JsonBridgeEF.Validators;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Seeding.Mapping.Models;
 
 namespace JsonBridgeEF.Seeding.TargetModel.Models;
 

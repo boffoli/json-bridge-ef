@@ -1,77 +1,73 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using JsonBridgeEF.Common;
-using JsonBridgeEF.Seeding.SourceJson.Collections;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.EfEntities.Base;
+using JsonBridgeEF.Common.Validators;
 
 namespace JsonBridgeEF.Seeding.SourceJson.Models;
 
 /// <summary>
+/// Domain Class: Rappresenta la definizione di uno schema JSON come aggregate root,
+/// contenente una collezione di blocchi strutturati (<see cref="JsonBlock"/>).
+/// </summary>
+/// <remarks>
 /// <para><b>Domain Concept:</b><br/>
-/// Rappresenta la definizione di uno schema JSON.  
-/// Centralizza la struttura e i blocchi utilizzati nel processo di mapping JSON-to-Entity.
-/// </para>
+/// Uno schema JSON composto da uno o più blocchi (<see cref="JsonBlock"/>),
+/// ciascuno identificabile per nome e dipendente logicamente dallo schema padre.</para>
 ///
 /// <para><b>Creation Strategy:</b><br/>
-/// Deve essere creato tramite il metodo statico <see cref="Create"/>.  
-/// I costruttori sono privati o riservati a Entity Framework Core.
-/// </para>
+/// Deve essere istanziato tramite il metodo statico <see cref="Create"/> con nome e contenuto JSON validi.
+/// Il costruttore vuoto è riservato a Entity Framework Core.</para>
 ///
-/// <para><b>Constraints:</b>
-/// <list type="bullet">
-///   <item>Il nome deve essere non nullo e non vuoto.</item>
-///   <item>Il contenuto JSON è obbligatorio e salvato come testo (TEXT).</item>
-///   <item>I blocchi devono essere aggiunti solo tramite il metodo interno <see cref="AddBlock"/>.</item>
-/// </list>
-/// </para>
+/// <para><b>Constraints:</b><br/>
+/// - Il nome è obbligatorio e univoco all’interno del contesto di utilizzo.<br/>
+/// - Il contenuto JSON deve essere fornito e salvato come testo persistente.<br/>
+/// - I blocchi aggiunti devono essere univoci per nome e legati allo schema.</para>
 ///
-/// <para><b>Relationships:</b>
-/// <list type="bullet">
-///   <item>Contiene molti <see cref="JsonBlock"/> (relazione uno-a-molti).</item>
-/// </list>
-/// </para>
+/// <para><b>Relationships:</b><br/>
+/// - Aggregate root di <see cref="JsonBlock"/> (relazione uno-a-molti).<br/>
+/// - Le entità figlie sono gestite tramite <see cref="BaseEfEntityWithOwnedEntities{TSelf, TOwned}"/>.<br/>
+/// - Le operazioni CRUD sui blocchi devono passare attraverso <see cref="AddEntity(JsonBlock)"/>.</para>
 ///
 /// <para><b>Usage Notes:</b><br/>
-/// I blocchi vengono registrati nello schema tramite il metodo <see cref="AddBlock"/>,  
-/// invocato internamente dalla factory di <see cref="JsonBlock"/>.  
-/// La collezione non consente la rimozione diretta.
-/// </para>
-public sealed class JsonSchema : BaseEfEntity<JsonSchema>
+/// - Usare <see cref="Create"/> per creare lo schema in modo sicuro.<br/>
+/// - Accedere ai blocchi tramite <see cref="Entities"/> o <see cref="OwnedEntities"/>.<br/>
+/// - L’aggregate è progettato per la serializzazione e validazione semantica dei dati JSON.</para>
+/// </remarks>
+public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonBlock>
 {
     // 🔹 COSTRUTTORI 🔹
 
     /// <summary>
-    /// Costruttore richiesto da Entity Framework Core.
+    /// Infrastructure constructor riservato a Entity Framework Core.
     /// </summary>
-    private JsonSchema() : base(null)
-    {
-        _jsonBlocks = new JsonSchemaBlockCollection(this);
-    }
+#pragma warning disable S1133
+    [Obsolete("Reserved for EF Core materialization only", error: false)]
+#pragma warning disable CS8618
+    private JsonSchema() : base() { }
+#pragma warning restore CS8618
+#pragma warning restore S1133
 
     /// <summary>
-    /// Costruttore privato utilizzato dalla factory <see cref="Create"/>.
+    /// Domain constructor privato, usato dalla factory per creare lo schema inizializzato.
     /// </summary>
     private JsonSchema(string name, string jsonContent, IValidateAndFix<JsonSchema>? validator)
-        : base(validator)
+        : base(name, validator)
     {
-        Name = name;
         JsonSchemaContent = jsonContent;
-        _jsonBlocks = new JsonSchemaBlockCollection(this);
     }
 
-    // 🔹 FACTORY 🔹
+    // 🔹 FACTORY METHOD 🔹
 
     /// <summary>
-    /// Crea una nuova definizione di schema JSON.
+    /// Factory method per creare un nuovo schema JSON validato.
     /// </summary>
-    /// <param name="name">Nome dello schema.</param>
-    /// <param name="jsonContent">Contenuto JSON (stringa completa).</param>
-    /// <param name="validator">Validatore opzionale da applicare allo schema.</param>
-    /// <returns>Nuova istanza dello schema JSON.</returns>
+    /// <param name="name">Nome identificativo dello schema.</param>
+    /// <param name="jsonContent">Contenuto JSON da salvare.</param>
+    /// <param name="validator">Validatore opzionale per la business logic.</param>
+    /// <returns>Nuova istanza di <see cref="JsonSchema"/>.</returns>
+    /// <exception cref="ArgumentException">Se nome o contenuto sono vuoti.</exception>
     public static JsonSchema Create(string name, string jsonContent, IValidateAndFix<JsonSchema>? validator = null)
     {
-        // Validazioni d'ingresso
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Il nome dello schema non può essere vuoto.", nameof(name));
 
@@ -89,40 +85,40 @@ public sealed class JsonSchema : BaseEfEntity<JsonSchema>
     // 🔹 PROPRIETÀ PERSISTENTI 🔹
 
     /// <summary>
-    /// Contenuto JSON dello schema.
+    /// Contenuto JSON associato a questo schema (salvato come TEXT).
     /// </summary>
     [Required]
-    [Column(TypeName = "TEXT")] // Compatibile con SQLite
+    [Column(TypeName = "TEXT")]
     public string JsonSchemaContent { get; private set; } = string.Empty;
 
-    // 🔹 COLLEZIONE BLOCCHI 🔹
-
-    private readonly JsonSchemaBlockCollection _jsonBlocks;
+    // 🔹 DOMAIN PROPERTIES 🔹
 
     /// <summary>
-    /// Collezione di blocchi associati a questo schema.
+    /// Domain Property: Restituisce i blocchi che risultano "indipendenti",
+    /// secondo la logica domain-specific (ad esempio, senza genitore o con chiave definita).
     /// </summary>
-    public IReadOnlyCollection<JsonBlock> JsonBlocks => _jsonBlocks.Items;
-
-    // 🔹 USO INTERNO 🔹
+    public IEnumerable<JsonBlock> IndependentBlocks
+        => OwnedEntities.Where(b => b.IsIndependent());
 
     /// <summary>
-    /// Registra un blocco all'interno dello schema.
-    /// Deve essere invocato solo dalla factory <see cref="JsonBlock.Create"/>.
+    /// Domain Property: Restituisce i blocchi considerati "dipendenti",
+    /// secondo la medesima logica (ad esempio, con genitore definito o senza chiave).
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal void AddBlock(JsonBlock block)
-    {
-        _jsonBlocks.Add(block);
-    }
+    public IEnumerable<JsonBlock> DependentBlocks
+        => OwnedEntities.Where(b => !b.IsIndependent());
 
     // 🔹 VALIDAZIONE 🔹
 
+    /// <inheritdoc/>
     protected override void OnBeforeValidate() { }
+
+    /// <inheritdoc/>
     protected override void OnAfterValidate() { }
 
     // 🔹 TO STRING 🔹
 
+    /// <inheritdoc/>
     public override string ToString()
-        => $"{Name} (Blocks: {_jsonBlocks})";
+        => $"{Name} (Blocks: {Entities.Count})";
+
 }

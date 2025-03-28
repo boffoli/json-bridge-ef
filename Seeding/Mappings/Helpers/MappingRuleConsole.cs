@@ -1,9 +1,9 @@
-using JsonBridgeEF.Seeding.Mappings.Models;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Seeding.Mapping.Models;
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
-namespace JsonBridgeEF.Seeding.Mappings.Helpers
+namespace JsonBridgeEF.Seeding.Mapping.Helpers
 {
     /// <summary>
     /// Classe helper per la definizione interattiva delle regole di mapping tra campi JSON e proprietà target del database.
@@ -29,11 +29,11 @@ namespace JsonBridgeEF.Seeding.Mappings.Helpers
             Console.WriteLine($"   {targetProp.Namespace}.{targetProp.RootClass}.{targetProp.Path}{targetProp.Name}");
             Console.WriteLine("📜 Campi JSON disponibili per il mapping:");
 
-            // Mostra l'elenco dei JSON fields disponibili
+            // Mostra l'elenco dei JSON fields disponibili (usando il nome)
             for (int i = 0; i < jsonFields.Count; i++)
             {
                 var jsonField = jsonFields[i];
-                Console.WriteLine($"  {i + 1}. {jsonField.SourceFieldPath}");
+                Console.WriteLine($"  {i + 1}. {jsonField.Name}");
             }
 
             // Richiesta input all'utente
@@ -63,7 +63,7 @@ namespace JsonBridgeEF.Seeding.Mappings.Helpers
             };
 
             Console.WriteLine($"✅ Regola creata con successo:");
-            Console.WriteLine($"   {targetProp.Namespace}.{targetProp.RootClass}.{targetProp.Path}.{targetProp.Name} <-- {selectedJsonField.SourceFieldPath}");
+            Console.WriteLine($"   {targetProp.Namespace}.{targetProp.RootClass}.{targetProp.Path}.{targetProp.Name} <-- {selectedJsonField.Name}");
 
             return newRule;
         }

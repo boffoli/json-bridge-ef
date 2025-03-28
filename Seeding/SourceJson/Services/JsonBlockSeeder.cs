@@ -96,7 +96,7 @@ internal sealed class JsonBlockSeeder : BaseDbService
     /// </summary>
     private static async Task<bool> HasExistingBlocksAsync(int schemaId, IRepository<JsonBlock> repository)
     {
-        var existingBlocks = await repository.FindAsync(b => b.JsonSchemaId == schemaId);
+        var existingBlocks = await repository.FindAsync(b => b.Id == schemaId);
         return existingBlocks.Count > 0;
     }
 

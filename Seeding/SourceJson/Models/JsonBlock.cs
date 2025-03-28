@@ -1,189 +1,128 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using JsonBridgeEF.Common;
-using JsonBridgeEF.Seeding.SourceJson.Collections;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.EfEntities.Base;
+using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Common.EfEntities.Interfaces.Entities;
 
 namespace JsonBridgeEF.Seeding.SourceJson.Models;
 
 /// <summary>
+/// Domain Class: Blocco JSON che rappresenta una sezione logica di uno schema,
+/// contenente una collezione di campi univoci per nome, uno dei quali può essere marcato come chiave.
+/// Partecipa inoltre a una struttura gerarchica tra blocchi JSON.
+/// </summary>
+/// <remarks>
 /// <para><b>Domain Concept:</b><br/>
-/// Rappresenta un blocco JSON, ovvero una sezione logica di uno schema composta da uno o più campi.
-/// Ogni blocco appartiene a uno schema JSON e può essere indipendente (con una chiave) o connesso ad altri blocchi.
-/// </para>
+/// Ogni blocco appartiene a uno <see cref="JsonSchema"/> e funge da aggregate root locale per un insieme
+/// coerente di <see cref="JsonField"/>.<br/>
+/// Può anche essere collegato gerarchicamente ad altri blocchi.</para>
 ///
 /// <para><b>Creation Strategy:</b><br/>
-/// Deve essere creato tramite il metodo statico <see cref="Create"/>.  
-/// La registrazione all'interno dello <see cref="JsonSchema"/> avviene tramite il metodo <c>AddBlock</c> dello schema stesso.
-/// </para>
+/// Deve essere creato tramite il costruttore dominio, fornendo nome e schema.
+/// Il costruttore EF è riservato al framework.</para>
 ///
-/// <para><b>Constraints:</b>
-/// <list type="bullet">
-///   <item>Deve avere un nome non vuoto.</item>
-///   <item>Deve essere registrato tramite <see cref="JsonSchema.AddBlock(JsonBlock)"/> per impostare correttamente lo schema.</item>
-///   <item>La collezione dei campi JSON garantisce unicità e integrità interna.</item>
-/// </list>
-/// </para>
+/// <para><b>Constraints:</b><br/>
+/// - Il nome è obbligatorio e univoco all'interno dello schema.<br/>
+/// - Solo un campo può essere marcato come chiave.<br/>
+/// - Le relazioni padre-figlio tra blocchi devono essere coerenti e simmetriche.</para>
 ///
-/// <para><b>Relationships:</b>
-/// <list type="bullet">
-///   <item>Appartiene a uno <see cref="JsonSchema"/> (relazione molti-a-uno).</item>
-///   <item>Può contenere molti <see cref="JsonField"/> (relazione uno-a-molti).</item>
-///   <item>Può avere blocchi padri e figli (relazione molti-a-molti ricorsiva).</item>
-/// </list>
-/// </para>
+/// <para><b>Relationships:</b><br/>
+/// - Appartiene a uno <see cref="JsonSchema"/> (owner).<br/>
+/// - Aggrega <see cref="JsonField"/> come entità figlie owned e keyed.<br/>
+/// - Può avere blocchi genitori e figli tramite interfaccia <see cref="IHierarchical{JsonBlock}"/>.</para>
 ///
 /// <para><b>Usage Notes:</b><br/>
-/// Il metodo <c>AddField</c> è riservato internamente a <see cref="JsonField"/> e presume che il campo sia già collegato al blocco.<br/>
-/// Le relazioni con altri blocchi sono sempre bidirezionali.
-/// Una volta aggiunte, non sono rimuovibili a runtime.
-/// </para>
-public sealed class JsonBlock : BaseEfEntity<JsonBlock>
+/// - Usare <see cref="AddEntity(JsonField)"/> per aggiungere un campo.<br/>
+/// - Usare <see cref="GetKeyEntity()"/> per ottenere il campo chiave, se presente.<br/>
+/// - Usare <see cref="AddChild(JsonBlock)"/> e <see cref="AddParent(JsonBlock)"/> per relazioni gerarchiche.</para>
+/// </remarks>
+public sealed class JsonBlock 
+    : BaseEfHierarchicalOwnedEntityWithKeyedOwnedEntities<JsonBlock, JsonSchema, JsonField>
 {
-    // 🔹 COSTRUTTORI 🔹
+    // 🔹 COSTRUTTORE RISERVATO A EF CORE 🔹
+#pragma warning disable S1133
+    [Obsolete("Reserved for EF Core materialization only", error: false)]
+#pragma warning disable CS8618
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    private JsonBlock() : base() { }
+#pragma warning restore CS8618
+#pragma warning restore S1133
+
+    // 🔹 COSTRUTTORE DOMINIO 🔹
 
     /// <summary>
-    /// Costruttore richiesto da Entity Framework Core.
-    /// Inizializza anche la collezione dei campi con riferimento al blocco stesso.
+    /// Domain Constructor: Inizializza un nuovo blocco JSON appartenente a uno schema.
     /// </summary>
-    private JsonBlock() : base()
+    /// <param name="name">Nome del blocco (univoco all'interno dello schema).</param>
+    /// <param name="schema">Schema JSON di appartenenza.</param>
+    /// <param name="validator">Validatore opzionale per le regole di dominio.</param>
+    public JsonBlock(string name, JsonSchema schema, IValidateAndFix<JsonBlock>? validator = null)
+        : base(name, schema, validator)
     {
-        _jsonFields = new JsonBlockFieldCollection(this);
     }
 
-    /// <summary>
-    /// Costruttore privato usato dalla factory <see cref="Create"/>.
-    /// Inizializza il validatore e la collezione dei campi.
-    /// </summary>
-    private JsonBlock(IValidateAndFix<JsonBlock>? validator)
-        : base(validator)
-    {
-        _jsonFields = new JsonBlockFieldCollection(this);
-    }
-
-    // 🔹 FACTORY 🔹
+    // 🔹 DOMAIN PROPERTIES 🔹
 
     /// <summary>
-    /// Crea un nuovo blocco JSON e lo registra nello schema specificato.
+    /// Determina se il blocco è "indipendente", cioè se esiste almeno un campo JSON marcato come chiave.
     /// </summary>
-    /// <param name="schema">Schema di destinazione. Deve essere già valido.</param>
-    /// <param name="name">Nome del blocco. Non può essere nullo o vuoto.</param>
-    /// <param name="validator">Validatore opzionale da applicare al blocco.</param>
-    /// <returns>Nuova istanza del blocco JSON, già registrata nello schema.</returns>
-    public static JsonBlock Create(JsonSchema schema, string name, IValidateAndFix<JsonBlock>? validator = null)
+    /// <returns><c>true</c> se è presente un campo chiave; altrimenti <c>false</c>.</returns>
+    public bool IsIndependent()
     {
-        ArgumentNullException.ThrowIfNull(schema);
-
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Il nome del blocco non può essere vuoto.", nameof(name));
-
-        var block = new JsonBlock(validator)
-        {
-            JsonSchema = schema,
-            Name = name
-        };
-
-        // Tenta la registrazione: se fallisce, viene sollevata un’eccezione e il blocco non è considerato valido
-        schema.AddBlock(block);
-
-        return block;
+        // Se la collezione di campi ha una KeyEntity, significa che il blocco ha un campo marcato come chiave
+        return KeyEntity != null;
     }
 
     // 🔹 CONFIGURAZIONE 🔹
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     protected override bool HasSlug => true;
-
-    // 🔹 RELAZIONI EF 🔹
-
-    [Required]
-    internal int JsonSchemaId { get; }
-
-    /// <summary>
-    /// Schema JSON a cui appartiene il blocco.
-    /// Viene assegnato automaticamente durante la registrazione con <see cref="JsonSchema.AddBlock"/>.
-    /// </summary>
-    [Required]
-    public JsonSchema JsonSchema { get; internal set; } = null!;
-
-    // 🔹 CAMPI 🔹
-
-    /// <summary>
-    /// Collezione interna dei campi JSON appartenenti al blocco.
-    /// Inizializzata nel costruttore con riferimento al blocco stesso.
-    /// </summary>
-    private readonly JsonBlockFieldCollection _jsonFields;
-
-    /// <summary>
-    /// Espone i campi JSON in sola lettura.
-    /// </summary>
-    public IReadOnlyCollection<JsonField> JsonFields => _jsonFields.Fields;
-
-    /// <summary>
-    /// Indica se il blocco è indipendente, ovvero se ha un campo chiave associato.
-    /// </summary>
-    public bool IsIndependent => _jsonFields.GetKeyField() != null;
-
-    // 🔹 RELAZIONI PADRE-FIGLIO 🔹
-
-    private readonly HashSet<JsonBlock> _parentBlocks = [];
-    private readonly HashSet<JsonBlock> _childBlocks = [];
-
-    public IReadOnlyCollection<JsonBlock> ParentBlocks => _parentBlocks;
-    public IReadOnlyCollection<JsonBlock> ChildBlocks => _childBlocks;
-
-    /// <summary>
-    /// Aggiunge un blocco figlio con relazione bidirezionale.
-    /// </summary>
-    public void AddChildBlock(JsonBlock childBlock)
-    {
-        if (_childBlocks.Add(childBlock))
-            childBlock._parentBlocks.Add(this);
-    }
-
-    /// <summary>
-    /// Aggiunge un blocco padre con relazione bidirezionale.
-    /// </summary>
-    public void AddParentBlock(JsonBlock parentBlock)
-    {
-        if (_parentBlocks.Add(parentBlock))
-            parentBlock._childBlocks.Add(this);
-    }
 
     // 🔹 GESTIONE CHIAVE 🔹
 
-    public void MakeIndependent(JsonField keyField) => _jsonFields.AddKey(keyField);
+/// <summary>
+/// Imposta il campo specificato come chiave logica del blocco.
+/// </summary>
+/// <param name="keyField">Campo da marcare come chiave.</param>
+/// <param name="force">Se true, sostituisce un’eventuale chiave esistente.</param>
+public void MakeIndependent(JsonField keyField, bool force = false)
+{
+    // Usa la collezione per marcare il campo come chiave
+    _keyedCollection.AddKey(keyField, force);
+}
 
-    public void MakeIndependent(string fieldName) => _jsonFields.SetKey(fieldName);
+/// <summary>
+/// Imposta come chiave il campo con il nome specificato.
+/// </summary>
+/// <param name="fieldName">Nome del campo da marcare come chiave.</param>
+/// <param name="force">Se true, sostituisce un’eventuale chiave esistente.</param>
+/// <exception cref="KeyedEntityNotFoundException">
+/// Se il campo con il nome indicato non esiste nella collezione.
+/// </exception>
+public void MakeIndependent(string fieldName, bool force = false)
+{
+    _keyedCollection.MarkAsKey(fieldName, force);
+}
 
-    public bool MakeDependent() => _jsonFields.RemoveKey();
-
-    public JsonField? GetKeyField() => _jsonFields.GetKeyField();
-
-    // 🔹 USO INTERNO 🔹
-
-    /// <summary>
-    /// Aggiunge un campo alla collezione del blocco.  
-    /// Presuppone che <c>JsonField.JsonBlock</c> sia già impostato e coerente.  
-    /// Usato solo da <see cref="JsonField"/>.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal void AddField(JsonField field)
-    {
-        if (field.JsonBlock != this)
-            throw new InvalidOperationException($"❌ Il campo '{field.SourceFieldPath}' non appartiene a questo blocco.");
-
-        _jsonFields.Add(field);
-    }
+/// <summary>
+/// Rimuove la chiave logica dal blocco, rendendolo "dipendente".
+/// </summary>
+/// <returns><c>true</c> se una chiave è stata rimossa, <c>false</c> altrimenti.</returns>
+public bool MakeDependent()
+{
+    return _keyedCollection.UnmarkAsKey();
+}
 
     // 🔹 VALIDAZIONE 🔹
 
+    /// <inheritdoc/>
     protected override void OnBeforeValidate() { }
 
+    /// <inheritdoc/>
     protected override void OnAfterValidate() { }
 
     // 🔹 TO STRING 🔹
 
+    /// <inheritdoc/>
     public override string ToString()
-        => $"{Name} (Independent: {IsIndependent}, Fields: {_jsonFields}, Children: {ChildBlocks.Count})";
+        => $"{Name} (Fields: {Entities.Count}, Key: {KeyEntity?.Name ?? "None"})";
 }

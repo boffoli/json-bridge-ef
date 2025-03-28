@@ -10,11 +10,11 @@ namespace JsonBridgeEF.ZZZ
 
             // Parametri fissi
             string projectName = "Mapping Project - User Data";
-            string schemaIdentifier = "UserDataV1";
+            string schemaName = "UserDataV1";
             string sourceFieldPath = "utenti.nome_completo";
 
             var targetProp = resolver.ResolveTargetPropertyinition(
-                projectName, schemaIdentifier, sourceFieldPath
+                projectName, schemaName, sourceFieldPath
             );
 
             if (targetProp == null)

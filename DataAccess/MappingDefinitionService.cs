@@ -18,8 +18,8 @@ namespace JsonBridgeEF.DataAccess
         /// <param name="jsonSchema">Definizione del tipo JSON da aggiungere.</param>
         public async Task AddJsonSchemaAsync(JsonSchema jsonSchema)
         {
-            if (string.IsNullOrWhiteSpace(jsonSchema.Name) || string.IsNullOrWhiteSpace(jsonSchema.JsonSchemaIdentifier))
-                throw new InvalidOperationException("Il nome e l'identificatore del tipo JSON non possono essere vuoti.");
+            if (string.IsNullOrWhiteSpace(jsonSchema.Name))
+                throw new InvalidOperationException("Il nome del tipo JSON non può essere vuoto.");
 
             GetRepository<JsonSchema>().Add(jsonSchema);
             await SaveChangesAsync();
@@ -50,9 +50,6 @@ namespace JsonBridgeEF.DataAccess
         /// <param name="jsonField">Definizione del campo JSON da aggiungere.</param>
         public async Task AddJsonFieldAsync(JsonField jsonField)
         {
-            if (string.IsNullOrWhiteSpace(jsonField.SourceFieldPath))
-                throw new InvalidOperationException("Il percorso del campo JSON non può essere vuoto.");
-
             GetRepository<JsonField>().Add(jsonField);
             await SaveChangesAsync();
         }

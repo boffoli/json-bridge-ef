@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using JsonBridgeEF.Common;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
-namespace JsonBridgeEF.Seeding.Mappings.Models
+namespace JsonBridgeEF.Seeding.Mapping.Models
 {
     /// <summary>
     /// Represents a mapping project that links a source JSON schema to a target database context.

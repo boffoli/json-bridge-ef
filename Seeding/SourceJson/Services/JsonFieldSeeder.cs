@@ -46,7 +46,7 @@ internal sealed class JsonFieldSeeder : BaseDbService
 
         // 💾 Validazione e tracciamento dei campi
         var repository = GetRepository<JsonField>();
-        foreach (var field in block.JsonFields)
+        foreach (var field in block.Entities)
         {
             field.EnsureValid();
             repository.Add(field);
@@ -54,7 +54,7 @@ internal sealed class JsonFieldSeeder : BaseDbService
 
         // 💾 Persistenza dei campi
         await SaveChangesAsync();
-        return [.. block.JsonFields];
+        return [.. block.Entities];
     }
 
     /// <summary>

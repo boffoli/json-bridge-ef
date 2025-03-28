@@ -1,6 +1,6 @@
 using System.Text.Json;
 using JsonBridgeEF.Seeding.SourceJson.Models;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Seeding.SourceJson.Validators;
 
 namespace JsonBridgeEF.Seeding.SourceJson.Helpers;
 
@@ -97,9 +97,9 @@ internal static class JsonFieldExtractor
                 continue;
 
             // ✅ Campo valido: creazione tramite factory e registrazione
-            var field = JsonField.Create(
+            var field = new JsonField(
+                property.Name,
                 block,
-                sourceFieldPath: property.Name,
                 validator: new JsonFieldValidator()
             );
 

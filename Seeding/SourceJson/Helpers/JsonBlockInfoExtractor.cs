@@ -1,6 +1,6 @@
 using System.Text.Json;
 using JsonBridgeEF.Seeding.SourceJson.Models;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Seeding.SourceJson.Validators;
 
 namespace JsonBridgeEF.Seeding.SourceJson.Helpers;
 
@@ -66,20 +66,20 @@ internal static class JsonBlockExtractor
         {
             string blockName = property.Name;
 
-            // 🧱 CREAZIONE BLOCCO tramite factory (schema + nome)
-            var currentBlock = JsonBlock.Create(schema, blockName);
+            // 🧱 CREAZIONE BLOCCO (schema + nome)
+            var currentBlock = new JsonBlock(blockName, schema, validator: new JsonBlockValidator());
 
             // 🔁 RELAZIONE PADRE-FIGLIO (se applicabile)
-            parentBlock?.AddChildBlock(currentBlock);
+            parentBlock?.AddChild(currentBlock);
 
             // 🧩 ESTRAZIONE CAMPI SE IL BLOCCO CONTIENE PROPRIETÀ
             if (property.Value.TryGetProperty("properties", out JsonElement subProperties))
             {
                 foreach (var subProperty in subProperties.EnumerateObject())
                 {
-                    JsonField.Create(
-                        currentBlock,
+                    _ = new JsonField(
                         subProperty.Name,
+                        currentBlock,
                         validator: new JsonFieldValidator()
                     );
                 }

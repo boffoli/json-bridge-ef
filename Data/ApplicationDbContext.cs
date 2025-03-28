@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using JsonBridgeEF.Config;
 using JsonBridgeEF.Data.Configurations;
 using JsonBridgeEF.ZZZ;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Models;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
+using JsonBridgeEF.Data.Configurations.JsonSource;
 
 namespace JsonBridgeEF.Data
 {
@@ -30,7 +31,7 @@ namespace JsonBridgeEF.Data
         public DbSet<TargetProperty> TargetPropertys { get; set; } = null!;
         public DbSet<MappingProject> MappingProjects { get; set; } = null!;
         public DbSet<MappingRule> MappingRules { get; set; } = null!;
-        public DbSet<EntityKeyMapping> EntityKeyMappings { get; set; } = null!;
+        public DbSet<EntityKeyMapping> EntityKeyMapping { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

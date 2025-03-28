@@ -1,7 +1,7 @@
 using Jint;
 using System.Text.RegularExpressions;
 
-namespace JsonBridgeEF.Seeding.Mappings.Helpers
+namespace JsonBridgeEF.Seeding.Mapping.Helpers
 {
     /// <summary>
     /// Gestisce l'esecuzione di una formula JavaScript per trasformare valori.

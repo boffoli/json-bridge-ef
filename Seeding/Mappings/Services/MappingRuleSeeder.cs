@@ -1,11 +1,11 @@
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.UnitOfWorks;
-using JsonBridgeEF.Seeding.Mappings.Helpers;
-using JsonBridgeEF.Seeding.Mappings.Models;
+using JsonBridgeEF.Seeding.Mapping.Helpers;
+using JsonBridgeEF.Seeding.Mapping.Models;
 using JsonBridgeEF.Seeding.SourceJson.Models;
 using JsonBridgeEF.Seeding.TargetModel.Models;
 
-namespace JsonBridgeEF.Seeding.Mappings.Services
+namespace JsonBridgeEF.Seeding.Mapping.Services
 {
     /// <summary>
     /// Servizio per il seeding delle regole di mapping tra campi JSON e proprietà del database target.

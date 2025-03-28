@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common;
-using JsonBridgeEF.Validators;
+using JsonBridgeEF.Common.Validators;
 
 namespace JsonBridgeEF.Seeding.TargetModel.Models;
 
