@@ -5,20 +5,21 @@ using JsonBridgeEF.Common.Validators;
 namespace JsonBridgeEF.Seeding.SourceJson.Models;
 
 /// <summary>
-/// Domain Entity: Campo JSON appartenente a un <see cref="JsonBlock"/>, identificato da un nome univoco.
-/// Può essere designato come chiave logica del blocco.
+/// Domain Entity: Campo JSON appartenente a un <see cref="JsonBlock"/>, identificato da un nome univoco
+/// e da un percorso logico all'interno della struttura JSON. Può essere designato come chiave logica del blocco.
 /// </summary>
 /// <remarks>
 /// <para><b>Domain Concept:</b><br/>
 /// Un <c>JsonField</c> rappresenta una proprietà di un oggetto JSON, mappata come sotto-elemento di un <see cref="JsonBlock"/>.
-/// Ogni campo ha un nome univoco all’interno del blocco e può essere utilizzato come identificatore logico (chiave).</para>
+/// Ogni campo ha un nome, un percorso sorgente nel JSON, e può essere utilizzato come identificatore logico (chiave).</para>
 ///
 /// <para><b>Creation Strategy:</b><br/>
-/// Deve essere creato tramite costruttore esplicito fornendo nome e blocco di appartenenza.<br/>
+/// Deve essere creato tramite costruttore esplicito fornendo nome, blocco di appartenenza, e percorso sorgente.<br/>
 /// La registrazione nel blocco avviene automaticamente nel costruttore base.</para>
 ///
 /// <para><b>Constraints:</b><br/>
-/// - <c>Name</c> è obbligatorio e univoco all'interno del blocco.<br/>
+/// - <c>Name</c> e <c>SourceFieldPath</c> sono obbligatori.<br/>
+/// - <c>SourceFieldPath</c> non può essere vuoto o nullo.<br/>
 /// - Il blocco di appartenenza deve essere valido e coerente con il tipo <see cref="JsonBlock"/>.</para>
 ///
 /// <para><b>Relationships:</b><br/>
@@ -49,7 +50,7 @@ public sealed class JsonField : BaseEfKeyedOwnedEntity<JsonField, JsonBlock>
     // 🔹 COSTRUTTORE PUBBLICO 🔹
 
     /// <summary>
-    /// Domain Constructor: Crea un nuovo campo JSON con nome e blocco di appartenenza.
+    /// Domain Constructor: Crea un nuovo campo JSON con nome, blocco e percorso sorgente.
     /// </summary>
     /// <param name="name">Nome univoco del campo all’interno del blocco.</param>
     /// <param name="block">Blocco JSON a cui il campo appartiene.</param>
