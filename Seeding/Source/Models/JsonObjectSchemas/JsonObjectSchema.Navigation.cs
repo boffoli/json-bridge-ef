@@ -24,6 +24,17 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
         /// <inheritdoc />
         public bool IsRoot => _parentManager.IsRoot;
 
+        /// <summary>
+        /// Configura e inizializza il ParentNavigationManager centralizzando la configurazione dei delegati.
+        /// Questa configurazione definisce la logica che verrà eseguita nei vari hook.
+        /// </summary>
+        private void InitializeNavigation()
+        {
+            // Delegate personalizzato per OnAfterAddParentFlow:
+            // Qui si richiama un metodo esistente (es. Touch) che non necessita di ricevere il parametro.
+            _parentManager.OnAfterAddParentFlow = _ => this.Touch();
+        }
+        
         // --- Metodo per aggiungere un nodo genitore ---
 
         /// <inheritdoc />

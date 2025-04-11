@@ -1,4 +1,5 @@
 using JsonBridgeEF.Shared.Domain.Interfaces;
+using JsonBridgeEF.Shared.Domain.Model;
 
 namespace JsonBridgeEF.Seeding.Source.Model.JsonProperties
 {
@@ -11,7 +12,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonProperties
         /// <summary>
         /// Campo che incapsula i metadati di dominio tramite il value object <see cref="DomainMetadata"/>.
         /// </summary>
-        private readonly IDomainMetadata _metadata;
+        private readonly DomainMetadata _metadata;
 
         // --- Proprietà di metadati di dominio ---
 

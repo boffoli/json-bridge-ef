@@ -40,6 +40,9 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             _metadata = new DomainMetadata(name);
             _parentManager = new ParentNavigationManager<JsonObjectSchema, JsonProperty>(this);
+            
+            // Inizializza la logica di navigazione: la configurazione dei delegati si trova nella partial Navigation.
+            InitializeNavigation();
 
             // Relazione unidirezionale: registra questo oggetto nello schema
             schema.AddObjectSchema(this);
@@ -96,24 +99,34 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
 
         #endregion
 
-        #region Validazione
-
+        /// <inheritdoc />
         /// <summary>
-        /// Esegue validazioni aggiuntive personalizzate su un'entità figlia di tipo <see cref="JsonObjectSchema"/>.
+        /// Metodo hook eseguito automaticamente al termine del flusso di aggiunta di un'entità figlia (<see cref="JsonObjectSchema"/>).
         /// </summary>
-        protected sealed override void AdditionalCustomValidateEntity(JsonObjectSchema child)
+        /// <param name="child">L'entità figlia appena aggiunta.</param>
+        /// <remarks>
+        /// <para><b>Preconditions:</b> Il flusso di aggiunta è stato completato con successo.</para>
+        /// <para><b>Postconditions:</b> Aggiorna lo stato interno tramite <see cref="Touch"/>.</para>
+        /// <para><b>Side Effects:</b> La proprietà <c>UpdatedAt</c> viene aggiornata se implementato.</para>
+        /// </remarks>
+        protected sealed override void OnAfterAddChildFlow(JsonObjectSchema child)
         {
-            // Nessuna validazione aggiuntiva per default.
+            this.Touch();
         }
 
+        /// <inheritdoc />
         /// <summary>
-        /// Esegue validazioni aggiuntive personalizzate su una proprietà figlia di tipo <see cref="JsonProperty"/>.
+        /// Metodo hook eseguito automaticamente al termine del flusso di aggiunta di una proprietà (<see cref="JsonProperty"/>).
         /// </summary>
-        protected sealed override void AdditionalCustomValidateProperty(JsonProperty child)
+        /// <param name="child">La proprietà appena aggiunta.</param>
+        /// <remarks>
+        /// <para><b>Preconditions:</b> Il flusso di aggiunta è stato completato con successo.</para>
+        /// <para><b>Postconditions:</b> Aggiorna lo stato interno tramite <see cref="Touch"/>.</para>
+        /// <para><b>Side Effects:</b> La proprietà <c>UpdatedAt</c> viene aggiornata se implementato.</para>
+        /// </remarks>
+        protected sealed override void OnAfterAddChildFlow(JsonProperty child)
         {
-            // Nessuna validazione aggiuntiva per default.
+            this.Touch();
         }
-
-        #endregion
     }
 }
