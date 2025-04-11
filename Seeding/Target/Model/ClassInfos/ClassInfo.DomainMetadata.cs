@@ -12,7 +12,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
         /// <summary>
         /// Incapsula i metadati di dominio per l'entità, inclusi identificatore globale, descrizione, auditing e slug.
         /// </summary>
-        private readonly IDomainMetadata _metadata;
+        private readonly DomainMetadata _metadata;
 
         // --- Proprietà di metadati di dominio ---
 

@@ -27,7 +27,7 @@ namespace JsonBridgeEF.Seeding.Mapping.Models
         /// <summary>
         /// Determines whether this entity should generate a slug.
         /// </summary>
-        protected override bool HasSlug => true;
+        protected sealed override bool HasSlug => true;
 
         /// <summary>
         /// Foreign key linking this mapping project to a JSON schema.

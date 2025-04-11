@@ -21,7 +21,7 @@ namespace JsonBridgeEF.Data
         public DbSet<UserContact> UserContacts { get; set; } = null!;
         public DbSet<Metadata> Metadata { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected sealed override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
@@ -29,7 +29,7 @@ namespace JsonBridgeEF.Data
             }
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected sealed override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 

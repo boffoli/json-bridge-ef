@@ -5,8 +5,8 @@ using JsonBridgeEF.Shared.Domain.Interfaces;
 using JsonBridgeEF.Shared.Domain.Model;
 using JsonBridgeEF.Shared.EfPersistance.Interfaces;
 using JsonBridgeEF.Shared.EntityModel.Model;
-using JsonBridgeEF.Shared.Navigation.Interfaces;
 using JsonBridgeEF.Shared.Navigation.Helpers;
+using JsonBridgeEF.Shared.Navigation.Interfaces;
 
 namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
 {
@@ -25,7 +25,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
                                                IDomainMetadata,
                                                IEfEntity
     {
-        #region Campi
+        #region Campi Privati
 
         private readonly string _namespace;
         private readonly string _classQualifiedName;
@@ -57,6 +57,9 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
             _metadata = new DomainMetadata(name);
             _parentManager = new ParentNavigationManager<ClassInfo, ClassProperty>(this);
 
+            // Inizializza la logica di navigazione: la configurazione dei delegati si trova nella partial Navigation.
+            InitializeNavigation();
+
             // Collegamento 1:N con il DbContext
             DbContextInfo = dbContext;
             dbContext.AddTargetEntity(this);
@@ -64,7 +67,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
 
         #endregion
 
-        #region Proprietà strutturali
+        #region Proprietà Strutturali
 
         /// <inheritdoc />
         public string Namespace => _namespace;
@@ -83,20 +86,34 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
 
         #endregion
 
-        #region Validazione
-
         /// <inheritdoc />
-        protected override void AdditionalCustomValidateEntity(ClassInfo child)
+        /// <summary>
+        /// Metodo hook eseguito automaticamente al termine del flusso di aggiunta di un'entità figlia (<see cref="ClassInfo"/>).
+        /// </summary>
+        /// <param name="child">L'entità figlia appena aggiunta.</param>
+        /// <remarks>
+        /// <para><b>Preconditions:</b> Il flusso di aggiunta è stato completato con successo.</para>
+        /// <para><b>Postconditions:</b> Aggiorna lo stato interno tramite <see cref="Touch"/>.</para>
+        /// <para><b>Side Effects:</b> La proprietà <c>UpdatedAt</c> viene aggiornata se implementato.</para>
+        /// </remarks>
+        protected sealed override void OnAfterAddChildFlow(ClassInfo child)
         {
-            // Nessuna validazione aggiuntiva per default.
+            this.Touch();
         }
 
         /// <inheritdoc />
-        protected override void AdditionalCustomValidateProperty(ClassProperty child)
+        /// <summary>
+        /// Metodo hook eseguito automaticamente al termine del flusso di aggiunta di una proprietà (<see cref="ClassProperty"/>).
+        /// </summary>
+        /// <param name="child">La proprietà appena aggiunta.</param>
+        /// <remarks>
+        /// <para><b>Preconditions:</b> Il flusso di aggiunta è stato completato con successo.</para>
+        /// <para><b>Postconditions:</b> Aggiorna lo stato interno tramite <see cref="Touch"/>.</para>
+        /// <para><b>Side Effects:</b> La proprietà <c>UpdatedAt</c> viene aggiornata se implementato.</para>
+        /// </remarks>
+        protected sealed override void OnAfterAddChildFlow(ClassProperty child)
         {
-            // Nessuna validazione aggiuntiva per default.
+            this.Touch();
         }
-
-        #endregion
     }
 }

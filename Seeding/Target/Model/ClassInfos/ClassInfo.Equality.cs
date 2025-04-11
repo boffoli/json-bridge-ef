@@ -6,7 +6,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
     internal sealed partial class ClassInfo
     {
         /// <inheritdoc />
-        protected override bool EqualsByValue(ClassInfo other)
+        protected sealed override bool EqualsByValue(ClassInfo other)
         {
             // Due classi sono considerate logicamente uguali se appartengono allo stesso namespace
             // e hanno lo stesso nome qualificato completo (confronto case-insensitive).
@@ -15,7 +15,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
         }
 
         /// <inheritdoc />
-        protected override int GetValueHashCode()
+        protected sealed override int GetValueHashCode()
         {
             // Combina l'hash del namespace e del nome qualificato in modo coerente con EqualsByValue.
             return HashCode.Combine(

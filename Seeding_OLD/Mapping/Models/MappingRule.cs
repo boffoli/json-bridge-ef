@@ -32,7 +32,7 @@ namespace JsonBridgeEF.Seeding.Mapping.Models
         /// <summary>
         /// Determines whether this entity should generate a slug automatically.
         /// </summary>
-        protected override bool HasSlug => false;
+        protected sealed override bool HasSlug => false;
 
         // -------------------------------------------------
         //   DATABASE PROPERTIES

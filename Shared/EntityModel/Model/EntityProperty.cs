@@ -42,7 +42,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
         }
 
         /// <inheritdoc />
-        protected override bool EqualsCore(Node other)
+        protected sealed override bool EqualsCore(Node other)
         {
             if (other is not EntityProperty<TSelf, TEntity> otherProp)
                 return false;
@@ -56,7 +56,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
         }
 
         /// <inheritdoc />
-        protected override int GetHashCodeCore()
+        protected sealed override int GetHashCodeCore()
         {
             // Hashcode base sul nome
             int hash = StringComparer.OrdinalIgnoreCase.GetHashCode(Name);

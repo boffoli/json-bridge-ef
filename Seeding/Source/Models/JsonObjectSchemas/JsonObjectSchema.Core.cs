@@ -101,7 +101,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
         /// <summary>
         /// Esegue validazioni aggiuntive personalizzate su un'entità figlia di tipo <see cref="JsonObjectSchema"/>.
         /// </summary>
-        protected override void AdditionalCustomValidateEntity(JsonObjectSchema child)
+        protected sealed override void AdditionalCustomValidateEntity(JsonObjectSchema child)
         {
             // Nessuna validazione aggiuntiva per default.
         }
@@ -109,7 +109,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
         /// <summary>
         /// Esegue validazioni aggiuntive personalizzate su una proprietà figlia di tipo <see cref="JsonProperty"/>.
         /// </summary>
-        protected override void AdditionalCustomValidateProperty(JsonProperty child)
+        protected sealed override void AdditionalCustomValidateProperty(JsonProperty child)
         {
             // Nessuna validazione aggiuntiva per default.
         }

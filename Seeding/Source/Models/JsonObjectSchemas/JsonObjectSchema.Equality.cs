@@ -14,7 +14,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
         /// </summary>
         /// <param name="other">L'altra istanza di <see cref="JsonObjectSchema"/> da confrontare.</param>
         /// <returns><c>true</c> se gli oggetti hanno lo stesso schema; altrimenti, <c>false</c>.</returns>
-        protected override bool EqualsByValue(JsonObjectSchema other)
+        protected sealed override bool EqualsByValue(JsonObjectSchema other)
         {
             // Due oggetti sono considerati logicamente equivalenti se hanno lo stesso schema associato.
             return Equals(Schema, other.Schema);
@@ -25,7 +25,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
         /// Calcola l'hash code basato sullo schema associato per garantire coerenza con <see cref="EqualsByValue(JsonObjectSchema)"/>.
         /// </summary>
         /// <returns>L'hash code calcolato in base allo schema.</returns>
-        protected override int GetValueHashCode()
+        protected sealed override int GetValueHashCode()
         {
             // Combina l’hash dello schema per coerenza con EqualsByValue.
             return Schema?.GetHashCode() ?? 0;

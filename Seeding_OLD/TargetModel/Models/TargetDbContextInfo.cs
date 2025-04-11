@@ -71,7 +71,7 @@ internal sealed class TargetDbContextInfo : BaseEfEntity<TargetDbContextInfo>
     // ----------------------------
 
     /// <inheritdoc/>
-    protected override bool HasSlug => false;
+    protected sealed override bool HasSlug => false;
 
     /// <summary>
     /// Namespace del DbContext di destinazione.
@@ -90,8 +90,8 @@ internal sealed class TargetDbContextInfo : BaseEfEntity<TargetDbContextInfo>
     // ----------------------------
 
     /// <inheritdoc/>
-    protected override void OnBeforeValidate() { }
+    protected sealed override void OnBeforeValidate() { }
 
     /// <inheritdoc/>
-    protected override void OnAfterValidate() { }
+    protected sealed override void OnAfterValidate() { }
 }

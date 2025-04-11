@@ -65,13 +65,13 @@ public sealed class JsonField : BaseEfKeyedOwnedEntity<JsonField, JsonBlock>
     /// <summary>
     /// Disattiva la generazione automatica dello slug per i campi JSON.
     /// </summary>
-    protected override bool HasSlug => false;
+    protected sealed override bool HasSlug => false;
 
     // 🔹 VALIDAZIONE 🔹
 
     /// <inheritdoc/>
-    protected override void OnBeforeValidate() { }
+    protected sealed override void OnBeforeValidate() { }
 
     /// <inheritdoc/>
-    protected override void OnAfterValidate() { }
+    protected sealed override void OnAfterValidate() { }
 }

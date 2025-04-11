@@ -16,7 +16,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonProperties
         /// </remarks>
         /// <param name="other">L'altra istanza di <see cref="JsonProperty"/> da confrontare.</param>
         /// <returns><c>true</c> se le proprietà sono considerate logicamente equivalenti; altrimenti, <c>false</c>.</returns>
-        protected override bool EqualsByValue(JsonProperty other)
+        protected sealed override bool EqualsByValue(JsonProperty other)
         {
             return true; // Nessuna proprietà aggiuntiva da confrontare
         }
@@ -29,7 +29,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonProperties
         /// Nessun campo aggiuntivo contribuisce all'identità semantica, quindi il valore restituito è neutro.
         /// </remarks>
         /// <returns>Il valore dell'hash.</returns>
-        protected override int GetValueHashCode()
+        protected sealed override int GetValueHashCode()
         {
             return 0;
         }

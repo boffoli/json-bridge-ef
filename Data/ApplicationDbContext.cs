@@ -33,7 +33,7 @@ namespace JsonBridgeEF.Data
         public DbSet<MappingRule> MappingRules { get; set; } = null!;
         public DbSet<EntityKeyMapping> EntityKeyMapping { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected sealed override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
@@ -41,7 +41,7 @@ namespace JsonBridgeEF.Data
             }
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected sealed override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 

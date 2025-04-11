@@ -80,7 +80,7 @@ public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonB
     // 🔹 CONFIGURAZIONE 🔹
 
     /// <inheritdoc/>
-    protected override bool HasSlug => true;
+    protected sealed override bool HasSlug => true;
 
     // 🔹 PROPRIETÀ PERSISTENTI 🔹
 
@@ -110,10 +110,10 @@ public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonB
     // 🔹 VALIDAZIONE 🔹
 
     /// <inheritdoc/>
-    protected override void OnBeforeValidate() { }
+    protected sealed override void OnBeforeValidate() { }
 
     /// <inheritdoc/>
-    protected override void OnAfterValidate() { }
+    protected sealed override void OnAfterValidate() { }
 
     // 🔹 TO STRING 🔹
 

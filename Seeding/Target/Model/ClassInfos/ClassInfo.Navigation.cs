@@ -9,38 +9,30 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
     internal sealed partial class ClassInfo
     {
         // --- Campo di Navigazione ---
-
-        /// <summary>
-        /// Gestore interno della navigazione topologica per la gestione dei genitori.
-        /// </summary>
         private readonly ParentNavigationManager<ClassInfo, ClassProperty> _parentManager;
 
         // --- Proprietà di Navigazione ---
-
         /// <inheritdoc />
         public IReadOnlyCollection<ClassInfo> Parents => _parentManager.Parents;
 
         /// <inheritdoc />
         public bool IsRoot => _parentManager.IsRoot;
 
+        /// <summary>
+        /// Configura e inizializza il ParentNavigationManager centralizzando la configurazione dei delegati.
+        /// Questa configurazione definisce la logica che verrà eseguita nei vari hook.
+        /// </summary>
+        private void InitializeNavigation()
+        {
+            // Delegate personalizzato per OnAfterAddParentFlow:
+            // Qui si richiama un metodo esistente (es. Touch) che non necessita di ricevere il parametro.
+            _parentManager.OnAfterAddParentFlow = _ => this.Touch();
+        }
+
         /// <inheritdoc />
         public void AddParent(ClassInfo parent)
         {
             _parentManager.AddParent(parent);
-            this.Touch(); // aggiorna UpdatedAt
-        }
-
-        /// <inheritdoc />
-        protected override void OnBeforeExecution(ClassInfo child)
-        {
-            // Aggiunge il nodo corrente come genitore del figlio
-            _parentManager.AddParent(child);
-        }
-
-        /// <inheritdoc />
-        protected override void OnAfterExecution(ClassInfo child)
-        {
-            this.Touch(); // aggiorna UpdatedAt
         }
     }
 }

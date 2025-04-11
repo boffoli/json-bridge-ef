@@ -76,7 +76,7 @@ namespace JsonBridgeEF.Seeding.TargetModel.Models;
         // 🔹 CONFIGURAZIONE / SLUG 🔹
 
         /// <inheritdoc />
-        protected override bool HasSlug => true;
+        protected sealed override bool HasSlug => true;
 
         // 🔹 GESTIONE CHIAVE 🔹
 
@@ -112,10 +112,10 @@ namespace JsonBridgeEF.Seeding.TargetModel.Models;
         // 🔹 VALIDAZIONE (override se necessario) 🔹
 
         /// <inheritdoc/>
-        protected override void OnBeforeValidate() { /* ... */ }
+        protected sealed override void OnBeforeValidate() { /* ... */ }
 
         /// <inheritdoc/>
-        protected override void OnAfterValidate() { /* ... */ }
+        protected sealed override void OnAfterValidate() { /* ... */ }
 
         // 🔹 TO STRING (opzionale) 🔹
 
