@@ -74,7 +74,7 @@ internal static class RandomDataGenerator
         // Recupera i dati necessari dal provider
         var mappingProjects = await dataProvider.GetMappingProjectsAsync();
         var jsonFields = await dataProvider.GetJsonFieldAsync();
-        var targetEntities = await dataProvider.GetTargetPropertysAsync();
+        var targetEntities = await dataProvider.GetTargetPropertiesAsync();
 
         // Verifica che ci siano abbastanza dati per generare le mappature
         if (mappingProjects.Count == 0 || jsonFields.Count == 0 || targetEntities.Count == 0)

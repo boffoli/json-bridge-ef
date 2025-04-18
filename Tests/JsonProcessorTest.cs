@@ -12,7 +12,7 @@ namespace JsonBridgeEF.Tests
     public class JsonProcessorTests
     {
         private readonly JsonProcessor _processor;
-        private const string IndependentBlocksKey = "independent_blocks"; // 🔹 Definisce una costante per il nome della chiave JSON
+        private const string IndependentJsonEntitiesKey = "independent_jsonEntities"; // 🔹 Definisce una costante per il nome della chiave JSON
 
         /// <summary>
         /// Inizializza un'istanza di <see cref="JsonProcessorTests"/> con un registro di test preconfigurato.
@@ -20,10 +20,10 @@ namespace JsonBridgeEF.Tests
         public JsonProcessorTests()
         {
             // Inizializza il registro dei blocchi indipendenti per i test come variabile locale
-            var testRegistry = new JsonIndepBlockRegistry();
-            testRegistry.AddBlock("utenti", "id_utente");
-            testRegistry.AddBlock("contatti", "id_contatto");
-            testRegistry.AddBlock("metadati", "id_metadato");
+            var testRegistry = new JsonIndepJsonEntityRegistry();
+            testRegistry.AddJsonEntity("utenti", "id_utente");
+            testRegistry.AddJsonEntity("contatti", "id_contatto");
+            testRegistry.AddJsonEntity("metadati", "id_metadato");
 
             _processor = new JsonProcessor(testRegistry);
         }
@@ -33,7 +33,7 @@ namespace JsonBridgeEF.Tests
         /// restituendo i blocchi indipendenti ordinati.
         /// </summary>
         [Fact]
-        public async Task ProcessJsonFile_ValidJson_ShouldReturnOrderedBlocks()
+        public async Task ProcessJsonFile_ValidJson_ShouldReturnOrderedJsonEntities()
         {
             // Arrange
             string testJson = @"
@@ -51,8 +51,8 @@ namespace JsonBridgeEF.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.ContainsKey(IndependentBlocksKey)); // ✅ Usa la costante
-            Assert.Equal(3, result[IndependentBlocksKey]?.Count()); // ✅ Usa la costante
+            Assert.True(result.ContainsKey(IndependentJsonEntitiesKey)); // ✅ Usa la costante
+            Assert.Equal(3, result[IndependentJsonEntitiesKey]?.Count()); // ✅ Usa la costante
 
             File.Delete(tempFilePath);
         }
@@ -62,7 +62,7 @@ namespace JsonBridgeEF.Tests
         /// restituendo i blocchi indipendenti ordinati.
         /// </summary>
         [Fact]
-        public void ProcessJsonString_ValidJson_ShouldReturnOrderedBlocks()
+        public void ProcessJsonString_ValidJson_ShouldReturnOrderedJsonEntities()
         {
             // Arrange
             string testJson = @"
@@ -77,8 +77,8 @@ namespace JsonBridgeEF.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.ContainsKey(IndependentBlocksKey)); // ✅ Usa la costante
-            Assert.Equal(3, result[IndependentBlocksKey]?.Count()); // ✅ Usa la costante
+            Assert.True(result.ContainsKey(IndependentJsonEntitiesKey)); // ✅ Usa la costante
+            Assert.Equal(3, result[IndependentJsonEntitiesKey]?.Count()); // ✅ Usa la costante
         }
 
         /// <summary>

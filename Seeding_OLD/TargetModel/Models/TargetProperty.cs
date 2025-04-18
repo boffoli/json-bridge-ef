@@ -34,7 +34,7 @@ internal sealed class TargetProperty : BaseEfKeyedOwnedEntity<TargetProperty, Ta
     private TargetProperty() : base() { }
 
     // 🔹 Costruttore di dominio
-    public TargetProperty(string name, TargetClass owner, TargetDbContextInfo contextInfo, IValidateAndFix<TargetProperty>? validator = null)
+    public TargetProperty(string name, TargetClass owner, TargetDbContextInfo contextInfo, IValidateAndFix<TargetProperty>? validator)
         : base(name, owner, validator)
     {
         TargetDbContextInfo = contextInfo;

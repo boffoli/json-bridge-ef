@@ -18,6 +18,6 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonProperties
         /// <summary>
         /// Chiave esterna che fa riferimento all'oggetto JSON proprietario.
         /// </summary>
-        public int JsonObjectSchemaId { get; private set; }
+        public int JsonEntityId { get; private set; }
     }
 }

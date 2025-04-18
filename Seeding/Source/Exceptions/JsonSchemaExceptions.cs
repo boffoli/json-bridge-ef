@@ -1,4 +1,4 @@
-namespace JsonBridgeEF.Seeding.SourceJson.Exceptions;
+namespace JsonBridgeEF.Seeding.Source.Exceptions;
 
 /// <summary>
 /// <para><b>Domain Concept:</b><br/>

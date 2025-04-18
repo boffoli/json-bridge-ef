@@ -1,79 +1,103 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using JsonBridgeEF.Common.Exceptions; // Per InvalidSlugException
 using JsonBridgeEF.Common.Validators;
-using JsonBridgeEF.Seeding.SourceJson.Exceptions;
-using JsonBridgeEF.Seeding.SourceJson.Helpers;
-using JsonBridgeEF.Seeding.SourceJson.Models;
+using JsonBridgeEF.Seeding.Source.Exceptions;
+using JsonBridgeEF.Seeding.Source.Helpers;
+using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
+using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
 
-namespace JsonBridgeEF.Seeding.SourceJson.Validators
+namespace JsonBridgeEF.Seeding.Source.Validators
 {
     /// <summary>
-    /// Validator for <see cref="JsonSchema"/> to ensure schema definitions are valid.
+    /// Domain Concept: Validatore concreto per <see cref="JsonSchema"/> che garantisce la correttezza semantica dello schema JSON e dei blocchi associati.
     /// </summary>
-    internal class JsonSchemaValidator : IValidateAndFix<JsonSchema>
+    /// <remarks>
+    /// <para><b>Creation Strategy:</b><br/>
+    /// Istanza con injection opzionale del validatore di blocco (<see cref="JsonEntityValidator"/>).</para>
+    /// <para><b>Constraints:</b><br/>
+    /// Nome non nullo o vuoto, contenuto JSON valido, descrizione entro limiti, blocchi con nome univoco e ownership corretta.</para>
+    /// <para><b>Relationships:</b><br/>
+    /// Collabora con <see cref="JsonEntityValidator"/> per la validazione ricorsiva dei blocchi JSON.</para>
+    /// <para><b>Usage Notes:</b>  
+    /// Valido per ambienti di seeding o validazione dominio pre-persistenza.</para>
+    /// </remarks>
+    internal sealed class JsonSchemaValidator : IValidateAndFix<JsonSchema>
     {
-        private readonly JsonBlockValidator _blockValidator = new();
+        private readonly IValidateAndFix<JsonEntity> _jsonEntityValidator;
+        private const int MaxDescriptionLength = 1000;
 
-        /// <inheritdoc />
-        public void EnsureValid(JsonSchema model)
+        /// <summary>
+        /// Costruttore con injection opzionale del validatore dei blocchi JSON.
+        /// </summary>
+        /// <param name="jsonEntityValidator">
+        /// Validatore per <see cref="JsonEntity"/>. 
+        /// Se <c>null</c>, viene usato <see cref="JsonEntityValidator"/>.
+        /// </param>
+        public JsonSchemaValidator(IValidateAndFix<JsonEntity>? jsonEntityValidator = null)
         {
-            ValidateName(model.Name);
-            ValidateSlug(model.Slug);
-            ValidateJsonContent(model.JsonSchemaContent);
-            ValidateUniqueId(model.UniqueId);
-            ValidateBlocks(model);
+            _jsonEntityValidator = jsonEntityValidator ?? new JsonEntityValidator();
         }
 
         /// <inheritdoc />
-        public void Fix(JsonSchema model)
+        public void EnsureValid(JsonSchema schema)
         {
-            foreach (var block in model.Entities)
-                _blockValidator.Fix(block);
+            ValidateName(schema.Name);
+            ValidateDescription(schema.Description);
+            ValidateJsonContent(schema.JsonSchemaContent);
+            ValidateJsonEntities(schema);
+        }
+
+        /// <inheritdoc />
+        public void Fix(JsonSchema schema)
+        {
+            // correzione dei blocchi JSON
+            foreach (var jsonEntity in schema.JsonEntities)
+                _jsonEntityValidator.Fix(jsonEntity);
+
+            // normalizzo la descrizione se è null
+            schema.Description = FixDescription(schema.Description);
         }
 
         // ======================== NAME ========================
+
         private static void ValidateName(string? name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ValidationException("The Name of the schema cannot be null or empty.");
         }
 
-        // ======================== SLUG ========================
-        private static void ValidateSlug(string? slug)
+        // ======================== DESCRIPTION ========================
+
+        private static void ValidateDescription(string? description)
         {
-            if (string.IsNullOrWhiteSpace(slug))
-                throw new InvalidSlugException(slug);
+            if (description != null && description.Length > MaxDescriptionLength)
+                throw new ValidationException(
+                    $"The schema description cannot exceed {MaxDescriptionLength} characters.");
         }
+
+        private static string FixDescription(string? description)
+            => description ?? string.Empty;
 
         // ======================== JSON CONTENT ========================
+
         private static void ValidateJsonContent(string? content)
-        {
-            JsonSchemaHelper.EnsureJsonContentIsValid(content);
-        }
+            => JsonSchemaHelper.EnsureJsonContentIsValid(content);
 
-        // ======================== UNIQUE ID ========================
-        private static void ValidateUniqueId(Guid uniqueId)
-        {
-            if (uniqueId == Guid.Empty)
-                throw new ValidationException("The UniqueId must be a valid, non-empty GUID.");
-        }
+        // ======================== ENTITIES ========================
 
-        // ======================== BLOCKS ========================
-        private void ValidateBlocks(JsonSchema schema)
+        private void ValidateJsonEntities(JsonSchema schema)
         {
-            var nameSet = new HashSet<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var block in schema.Entities)
+            foreach (var jsonEntity in schema.JsonEntities)
             {
-                // Validazione del singolo blocco
-                _blockValidator.EnsureValid(block);
+                _jsonEntityValidator.EnsureValid(jsonEntity);
 
-                // Verifica duplicati
-                if (!nameSet.Add(block.Name))
-                    throw new BlockAlreadyExistsException(block.Name);
+                if (!seen.Add(jsonEntity.Name))
+                    throw new JsonEntityAlreadyExistsException(jsonEntity.Name);
 
-                // Verifica coerenza del blocco con lo schema corrente
-                JsonSchemaHelper.EnsureBlockBelongsToSchema(schema, block);
+                JsonSchemaHelper.EnsureJsonEntityBelongsToSchema(schema, jsonEntity);
             }
         }
     }

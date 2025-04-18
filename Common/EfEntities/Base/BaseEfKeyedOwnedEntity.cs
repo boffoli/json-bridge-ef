@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.EfEntities.Interfaces.Entities;
 using JsonBridgeEF.Common.Validators;
 
@@ -55,7 +54,7 @@ public abstract class BaseEfKeyedOwnedEntity<TSelf, TOwner>
     /// <param name="name">Nome descrittivo.</param>
     /// <param name="owner">Entità owner (aggregate root).</param>
     /// <param name="validator">Validatore opzionale.</param>
-    protected BaseEfKeyedOwnedEntity(string name, TOwner owner, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfKeyedOwnedEntity(string name, TOwner owner, IValidateAndFix<TSelf>? validator)
         : base(name, owner, validator)
     {
     }

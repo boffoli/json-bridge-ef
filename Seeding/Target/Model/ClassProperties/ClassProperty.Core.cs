@@ -1,41 +1,53 @@
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Seeding.Target.Model.ClassInfos;
-using JsonBridgeEF.Shared.Domain.Model;
-using JsonBridgeEF.Shared.EntityModel.Model;
 using JsonBridgeEF.Shared.Domain.Interfaces;
+using JsonBridgeEF.Shared.Domain.Model;
 using JsonBridgeEF.Shared.EfPersistance.Interfaces;
+using JsonBridgeEF.Shared.EntityModel.Model;
 using JsonBridgeEF.Seeding.Target.Interfaces;
+using JsonBridgeEF.Seeding.Target.Validators;
 
 namespace JsonBridgeEF.Seeding.Target.Model.Properties
 {
     /// <inheritdoc cref="IClassProperty{TSelf, TParent}"/>
     /// <summary>
-    /// Concrete Domain Class: rappresenta una proprietà associata a un oggetto <see cref="ClassModel"/> nel modello orientato agli oggetti.
+    /// Concrete Domain Class: rappresenta una proprietà associata a un oggetto <see cref="ClassInfo"/>.
     /// </summary>
     /// <remarks>
-    /// <para><b>Creation Strategy:</b> Costruita tramite costruttore con nome, classe genitore e nome qualificato completo.</para>
-    /// <para><b>Constraints:</b> Il nome qualificato completo non può essere nullo o vuoto.</para>
-    /// <para><b>Relationships:</b> Associata a una classe genitore <see cref="ClassInfo"/> come parte del modello aggregato.</para>
+    /// <para><b>Creation Strategy:</b><br/>
+    /// Iniezione via costruttore di nome, classe genitore, flag chiave, descrizione e validatore.</para>
+    /// <para><b>Constraints:</b><br/>
+    /// - Il <paramref name="name"/> non può essere nullo, vuoto o whitespace.<br/>
+    /// - Il <paramref name="parent"/> non può essere null.<br/>
+    /// - La <paramref name="description"/> è opzionale (null viene trattato come stringa vuota).</para>
+    /// <para><b>Relationships:</b><br/>
+    /// - Associata all’entità <see cref="ClassInfo"/> come foglia nel modello aggregato.<br/>
+    /// - Collabora con il validator <see cref="ClassPropertyValidator"/> per applicare i vincoli.</para>
     /// </remarks>
-    internal sealed partial class ClassProperty : EntityProperty<ClassProperty, ClassInfo>,
-                                                  IClassProperty<ClassProperty, ClassInfo>,
-                                                  IDomainMetadata,
-                                                  IEfEntity
+    /// <param name="name">Nome della proprietà.</param>
+    /// <param name="parent">Classe proprietaria.</param>
+    /// <param name="isKey">Se <c>true</c>, la proprietà viene marcata come chiave logica.</param>
+    /// <param name="description">Descrizione della proprietà.</param>
+    /// <param name="validator">
+    /// Validator da iniettare per <see cref="ClassProperty"/>; se null verrà usato <see cref="ClassPropertyValidator"/>.</param>
+    internal sealed partial class ClassProperty(
+        string name,
+        ClassInfo parent,
+        bool isKey,
+        string? description,
+        IValidateAndFix<ClassProperty>? validator
+    )
+        : EntityProperty<ClassProperty, ClassInfo>(
+            name,
+            parent,
+            isKey,
+            validator ?? new ClassPropertyValidator()
+          ),
+          IClassProperty<ClassProperty, ClassInfo>,
+          IDomainMetadata,
+          IEfEntity
     {
-        private readonly string _fullyQualifiedPropertyName;
-
-        /// <summary>
-        /// Inizializza una nuova istanza di <see cref="ClassProperty"/>.
-        /// </summary>
-        /// <param name="name">Nome della proprietà.</param>
-        /// <param name="parent">Classe proprietaria.</param>
-        /// <param name="isKey">Indica se la proprietà è una chiave logica.</param>
-        public ClassProperty(string name, ClassInfo parent, bool isKey = false)
-            : base(name, parent, isKey)
-        {
-            ArgumentNullException.ThrowIfNull(parent);
-            _fullyQualifiedPropertyName = $"{parent.ClassQualifiedName}.{name}";
-            _metadata = new DomainMetadata(name);
-        }
+        private readonly string _fullyQualifiedPropertyName = $"{parent.ClassQualifiedName}.{name}";
 
         /// <inheritdoc />
         public string FullyQualifiedPropertyName => _fullyQualifiedPropertyName;

@@ -1,10 +1,10 @@
-namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
+namespace JsonBridgeEF.Seeding.Source.Model.JsonEntities
 {
     /// <summary>
-    /// Partial class di <see cref="JsonObjectSchema"/> contenente gli override per l'uguaglianza semantica
+    /// Partial class di <see cref="JsonEntity"/> contenente gli override per l'uguaglianza semantica
     /// basata sulla struttura interna: nome, figli aggregati, figli foglia, identificabilità e proprietà chiave.
     /// </summary>
-    internal sealed partial class JsonObjectSchema
+    internal sealed partial class JsonEntity
     {
         /// <inheritdoc />
         /// <summary>
@@ -21,9 +21,9 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
         ///         essa è uguale nell'altro oggetto; oppure nessuno dei due la possiede.</description></item>
         /// </list>
         /// </summary>
-        /// <param name="other">L'altra istanza di <see cref="JsonObjectSchema"/> da confrontare.</param>
+        /// <param name="other">L'altra istanza di <see cref="JsonEntity"/> da confrontare.</param>
         /// <returns><c>true</c> se i due oggetti sono logicamente equivalenti; altrimenti <c>false</c>.</returns>
-        protected sealed override bool EqualsByValue(JsonObjectSchema other)
+        protected sealed override bool EqualsByValue(JsonEntity other)
         {
             // Confronta i nomi in modo case-insensitive.
             if (!string.Equals(this.Name, other.Name, StringComparison.OrdinalIgnoreCase))
@@ -84,7 +84,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
 
         /// <inheritdoc />
         /// <summary>
-        /// Calcola l'hash code in modo da essere coerente con <see cref="EqualsByValue(JsonObjectSchema)"/>.
+        /// Calcola l'hash code in modo da essere coerente con <see cref="EqualsByValue(JsonEntity)"/>.
         /// Combina:
         /// <list type="bullet">
         ///   <item><description>Il <c>Name</c> normalizzato (trim e lowercase).</description></item>

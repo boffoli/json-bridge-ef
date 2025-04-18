@@ -3,7 +3,7 @@ namespace JsonBridgeEF.Seeding.Source.Interfaces
     /// <summary>
     /// Domain Interface: Aggregate root per la definizione di uno schema JSON.
     /// </summary>
-    /// <typeparam name="TObjectSchema">Il tipo concreto degli oggetti definiti nello schema.</typeparam>
+    /// <typeparam name="TJsonEntity">Il tipo concreto degli oggetti definiti nello schema.</typeparam>
     /// <typeparam name="TProperty">Il tipo delle proprietà contenute negli oggetti.</typeparam>
     /// <remarks>
     /// <para><b>Domain Concept:</b><br/>
@@ -23,18 +23,18 @@ namespace JsonBridgeEF.Seeding.Source.Interfaces
     /// - Gli oggetti possono essere identificabili o non identificabili a seconda della presenza di una key property.</para>
     /// 
     /// <para><b>Relationships:</b><br/>
-    /// - Contiene oggetti <see cref="IJsonObjectSchema{TObjectSchema, TProperty}"/> come elementi strutturali.<br/>
+    /// - Contiene oggetti <see cref="IJsonEntity{TJsonEntity, TProperty}"/> come elementi strutturali.<br/>
     /// - Gli oggetti sono logicamente posseduti dallo schema.<br/>
     /// - Ereditando da <see cref="IJsonComponent"/>, lo schema integra le funzionalità di persistenza e metadati (come <c>UniqueId</c>, <c>Description</c>, <c>Slug</c> e <c>Trackable</c>) definite in <c>IEfPersistable</c>.</para>
     /// 
     /// <para><b>Usage Notes:</b><br/>
-    /// - Utilizzare <see cref="IdentObjectSchemas"/> e <see cref="NonIdentObjectSchemas"/> per distinguere semanticamente gli oggetti.<br/>
+    /// - Utilizzare <see cref="IdentJsonEntities"/> e <see cref="NonIdentJsonEntities"/> per distinguere semanticamente gli oggetti.<br/>
     /// - Il contenuto JSON originale è accessibile tramite <see cref="JsonSchemaContent"/>.<br/>
-    /// - <see cref="ObjectSchemas"/> espone l'intera collezione, in sola lettura.</para>
+    /// - <see cref="JsonEntities"/> espone l'intera collezione, in sola lettura.</para>
     /// </remarks>
-    public interface IJsonSchema<TObjectSchema, TProperty> : IJsonComponent
-        where TObjectSchema : class, IJsonObjectSchema<TObjectSchema, TProperty>
-        where TProperty : class, IJsonProperty<TProperty, TObjectSchema>
+    public interface IJsonSchema<TJsonEntity, TProperty> : IJsonComponent
+        where TJsonEntity : class, IJsonEntity<TJsonEntity, TProperty>
+        where TProperty : class, IJsonProperty<TProperty, TJsonEntity>
     {
         /// <summary>
         /// Contenuto JSON grezzo associato allo schema.
@@ -49,37 +49,37 @@ namespace JsonBridgeEF.Seeding.Source.Interfaces
         /// Tutti gli oggetti JSON definiti all'interno dello schema.
         /// </summary>
         /// <remarks>
-        /// <b>Semantics:</b> Include tutte le istanze di <typeparamref name="TObjectSchema"/> presenti nello schema.<br/>
+        /// <b>Semantics:</b> Include tutte le istanze di <typeparamref name="TJsonEntity"/> presenti nello schema.<br/>
         /// <b>Access:</b> Collezione in sola lettura.
         /// </remarks>
-        IReadOnlyCollection<TObjectSchema> ObjectSchemas { get; }
+        IReadOnlyCollection<TJsonEntity> JsonEntities { get; }
 
         /// <summary>
         /// Oggetti JSON identificabili, cioè dotati di una proprietà chiave logica.
         /// </summary>
         /// <remarks>
-        /// <b>Semantics:</b> Filtra <see cref="ObjectSchemas"/> mantenendo solo quelli con chiave logica definita.<br/>
+        /// <b>Semantics:</b> Filtra <see cref="JsonEntities"/> mantenendo solo quelli con chiave logica definita.<br/>
         /// <b>Access:</b> Vista calcolata in sola lettura.
         /// </remarks>
-        IReadOnlyCollection<TObjectSchema> IdentObjectSchemas { get; }
+        IReadOnlyCollection<TJsonEntity> IdentJsonEntities { get; }
 
         /// <summary>
         /// Oggetti JSON non identificabili, privi di chiave logica.
         /// </summary>
         /// <remarks>
-        /// <b>Semantics:</b> Filtra <see cref="ObjectSchemas"/> mantenendo solo quelli senza key definita.<br/>
+        /// <b>Semantics:</b> Filtra <see cref="JsonEntities"/> mantenendo solo quelli senza key definita.<br/>
         /// <b>Access:</b> Vista calcolata in sola lettura.
         /// </remarks>
-        IReadOnlyCollection<TObjectSchema> NonIdentObjectSchemas { get; }
+        IReadOnlyCollection<TJsonEntity> NonIdentJsonEntities { get; }
 
         /// <summary>
         /// Aggiunge un oggetto JSON allo schema.
         /// </summary>
-        /// <param name="objectSchema">L'oggetto JSON da aggiungere allo schema.</param>
+        /// <param name="jsonEntity">L'oggetto JSON da aggiungere allo schema.</param>
         /// <remarks>
-        /// <para><b>Preconditions:</b> <paramref name="objectSchema"/> non deve essere <c>null</c> e deve avere un nome univoco all'interno dello schema.</para>
-        /// <para><b>Side Effects:</b> L'oggetto viene aggiunto alla collezione <see cref="ObjectSchemas"/>.</para>
+        /// <para><b>Preconditions:</b> <paramref name="jsonEntity"/> non deve essere <c>null</c> e deve avere un nome univoco all'interno dello schema.</para>
+        /// <para><b>Side Effects:</b> L'oggetto viene aggiunto alla collezione <see cref="JsonEntities"/>.</para>
         /// </remarks>
-        void AddObjectSchema(TObjectSchema objectSchema);
+        void AddJsonEntity(TJsonEntity jsonEntity);
     }
 }

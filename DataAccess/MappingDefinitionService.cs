@@ -93,7 +93,7 @@ namespace JsonBridgeEF.DataAccess
         /// Recupera tutte le definizioni di entità target dal database.
         /// </summary>
         /// <returns>Lista delle definizioni di entità target.</returns>
-        public async Task<List<TargetProperty>> GetTargetPropertysAsync() =>
+        public async Task<List<TargetProperty>> GetTargetPropertiesAsync() =>
             await GetRepository<TargetProperty>().GetAllAsync();
 
         /// <summary>

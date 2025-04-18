@@ -1,13 +1,13 @@
 using JsonBridgeEF.Shared.Domain.Interfaces;
 using JsonBridgeEF.Shared.Domain.Model;
 
-namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
+namespace JsonBridgeEF.Seeding.Source.Model.JsonEntities
 {
     /// <inheritdoc cref="IDomainMetadata"/>
     /// <summary>
-    /// Partial class di <see cref="JsonObjectSchema"/> responsabile dell'implementazione di <see cref="IDomainMetadata"/>.
+    /// Partial class di <see cref="JsonEntity"/> responsabile dell'implementazione di <see cref="IDomainMetadata"/>.
     /// </summary>
-    internal sealed partial class JsonObjectSchema
+    internal sealed partial class JsonEntity
     {
         // --- Campo Domain Metadata ---
 

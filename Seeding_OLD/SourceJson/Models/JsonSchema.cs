@@ -7,11 +7,11 @@ namespace JsonBridgeEF.Seeding.SourceJson.Models;
 
 /// <summary>
 /// Domain Class: Rappresenta la definizione di uno schema JSON come aggregate root,
-/// contenente una collezione di blocchi strutturati (<see cref="JsonBlock"/>).
+/// contenente una collezione di blocchi strutturati (<see cref="JsonEntities"/>).
 /// </summary>
 /// <remarks>
 /// <para><b>Domain Concept:</b><br/>
-/// Uno schema JSON composto da uno o più blocchi (<see cref="JsonBlock"/>),
+/// Uno schema JSON composto da uno o più blocchi (<see cref="JsonEntities"/>),
 /// ciascuno identificabile per nome e dipendente logicamente dallo schema padre.</para>
 ///
 /// <para><b>Creation Strategy:</b><br/>
@@ -24,16 +24,16 @@ namespace JsonBridgeEF.Seeding.SourceJson.Models;
 /// - I blocchi aggiunti devono essere univoci per nome e legati allo schema.</para>
 ///
 /// <para><b>Relationships:</b><br/>
-/// - Aggregate root di <see cref="JsonBlock"/> (relazione uno-a-molti).<br/>
+/// - Aggregate root di <see cref="JsonEntities"/> (relazione uno-a-molti).<br/>
 /// - Le entità figlie sono gestite tramite <see cref="BaseEfEntityWithOwnedEntities{TSelf, TOwned}"/>.<br/>
-/// - Le operazioni CRUD sui blocchi devono passare attraverso <see cref="AddEntity(JsonBlock)"/>.</para>
+/// - Le operazioni CRUD sui blocchi devono passare attraverso <see cref="AddEntity(JsonEntities)"/>.</para>
 ///
 /// <para><b>Usage Notes:</b><br/>
 /// - Usare <see cref="Create"/> per creare lo schema in modo sicuro.<br/>
 /// - Accedere ai blocchi tramite <see cref="Entities"/> o <see cref="OwnedEntities"/>.<br/>
 /// - L’aggregate è progettato per la serializzazione e validazione semantica dei dati JSON.</para>
 /// </remarks>
-public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonBlock>
+public sealed class JsonSchema2 : BaseEfEntityWithOwnedEntities<JsonSchema, JsonEntities>
 {
     // 🔹 COSTRUTTORI 🔹
 
@@ -66,7 +66,7 @@ public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonB
     /// <param name="validator">Validatore opzionale per la business logic.</param>
     /// <returns>Nuova istanza di <see cref="JsonSchema"/>.</returns>
     /// <exception cref="ArgumentException">Se nome o contenuto sono vuoti.</exception>
-    public static JsonSchema Create(string name, string jsonContent, IValidateAndFix<JsonSchema>? validator = null)
+    public static JsonSchema Create(string name, string jsonContent, IValidateAndFix<JsonSchema>? validator)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Il nome dello schema non può essere vuoto.", nameof(name));
@@ -97,14 +97,14 @@ public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonB
     /// Domain Property: Restituisce i blocchi che risultano "indipendenti",
     /// secondo la logica domain-specific (ad esempio, senza genitore o con chiave definita).
     /// </summary>
-    public IEnumerable<JsonBlock> IndependentBlocks
+    public IEnumerable<JsonEntity> IndependentJsonEntities
         => OwnedEntities.Where(b => b.IsIndependent());
 
     /// <summary>
     /// Domain Property: Restituisce i blocchi considerati "dipendenti",
     /// secondo la medesima logica (ad esempio, con genitore definito o senza chiave).
     /// </summary>
-    public IEnumerable<JsonBlock> DependentBlocks
+    public IEnumerable<JsonEntity> DependentJsonEntities
         => OwnedEntities.Where(b => !b.IsIndependent());
 
     // 🔹 VALIDAZIONE 🔹
@@ -119,6 +119,6 @@ public sealed class JsonSchema : BaseEfEntityWithOwnedEntities<JsonSchema, JsonB
 
     /// <inheritdoc/>
     public override string ToString()
-        => $"{Name} (Blocks: {Entities.Count})";
+        => $"{Name} (JsonEntities: {Entities.Count})";
 
 }

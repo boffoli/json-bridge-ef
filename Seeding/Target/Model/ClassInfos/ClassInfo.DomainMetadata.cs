@@ -9,11 +9,6 @@ namespace JsonBridgeEF.Seeding.Target.Model.ClassInfos
     /// </summary>
     internal sealed partial class ClassInfo
     {
-        /// <summary>
-        /// Incapsula i metadati di dominio per l'entità, inclusi identificatore globale, descrizione, auditing e slug.
-        /// </summary>
-        private readonly DomainMetadata _metadata;
-
         // --- Proprietà di metadati di dominio ---
 
         /// <inheritdoc />

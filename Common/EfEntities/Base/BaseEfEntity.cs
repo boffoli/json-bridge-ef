@@ -74,7 +74,7 @@ public abstract partial class BaseEfEntity<TSelf> : INamed
     /// <para><b>Creation Strategy:</b> Deve essere invocato da factory o costruttori protetti delle entità figlie.</para>
     /// <para><b>Constraints:</b> Il nome deve essere non nullo e non vuoto. Lo slug è generato se <c>HasSlug</c> è attivo.</para>
     /// </remarks>
-    protected BaseEfEntity(string name, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfEntity(string name, IValidateAndFix<TSelf>? validator)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 

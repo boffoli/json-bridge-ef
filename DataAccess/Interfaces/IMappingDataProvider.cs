@@ -26,7 +26,7 @@ namespace JsonBridgeEF.DataAccess.Interfaces
         /// Restituisce tutte le definizioni di entità target disponibili nel database.
         /// </summary>
         /// <returns>Una lista di <see cref="TargetProperty"/> disponibili nel database.</returns>
-        Task<List<TargetProperty>> GetTargetPropertysAsync();
+        Task<List<TargetProperty>> GetTargetPropertiesAsync();
 
         /// <summary>
         /// Restituisce tutti i progetti di mapping disponibili nel database.

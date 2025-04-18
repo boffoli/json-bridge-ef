@@ -12,7 +12,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonProperties
         /// <summary>
         /// Campo che incapsula i metadati di dominio tramite il value object <see cref="DomainMetadata"/>.
         /// </summary>
-        private readonly DomainMetadata _metadata;
+        private readonly DomainMetadata _metadata = new(name, description);
 
         // --- Proprietà di metadati di dominio ---
 

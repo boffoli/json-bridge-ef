@@ -1,68 +1,93 @@
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Model;
 using JsonBridgeEF.Shared.EntityModel.Interfaces;
+using JsonBridgeEF.Shared.Navigation.Helpers;
 
 namespace JsonBridgeEF.Shared.EntityModel.Model
 {
     /// <inheritdoc cref="IEntity{TSelf, TEntityProperty}"/>
     /// <summary>
     /// <para><b>Concrete Domain Class:</b><br/>
-    /// Implementazione base per un'entità che aggrega proprietà e può essere parte di un DAG.</para>
+    /// Implementazione base per un’entità che aggrega proprietà e supporta navigazione topologica verso i genitori.</para>
     /// 
     /// <para><b>Creation Strategy:</b><br/>
-    /// Creato tramite costruttore con nome valido. Le proprietà vengono aggiunte tramite <c>AddChild</c>.</para>
+    /// Creato tramite costruttore con nome valido e validatore opzionale. Le proprietà vengono aggiunte tramite <c>AddChild</c>,
+    /// i genitori tramite <c>AddParent</c>.</para>
     /// 
     /// <para><b>Constraints:</b><br/>
-    /// - Solo una proprietà può essere designata come chiave logica.</para>
+    /// - Solo una proprietà può essere designata come chiave logica.<br/>
+    /// - La gerarchia parentale non deve creare cicli.</para>
     /// 
     /// <para><b>Relationships:</b><br/>
-    /// - Aggrega istanze di <typeparamref name="TEntityProperty"/>.<br/>
-    /// - Estende <see cref="AggregateNode{TSelf, TEntityProperty}"/>.<br/>
-    /// - Implementa <see cref="IEntity{TSelf, TEntityProperty}"/>.</para>
+    /// - Aggrega istanze di <typeparamref name="TEntityProperty"/> (<see cref="IAggregateNode{TSelf, TEntityProperty}"/>).<br/>
+    /// - Implementa <see cref="IEntity{TSelf, TEntityProperty}"/>, che eredita la navigazione genitori da <see cref="IParentNavigableNode{TSelf}"/>.</para>
     /// 
     /// <para><b>Usage Notes:</b><br/>
-    /// - La proprietà <c>Properties</c> è un alias semantico per <c>ValueChildren</c>.<br/>
-    /// - I vincoli di integrità vengono applicati tramite <c>OnBeforeChildAdded</c> e hook custom.</para>
+    /// - La proprietà <c>Properties</c> è un alias semantico per <see cref="IAggregateNode{TSelf, TEntityProperty}.ValueChildren"/>.<br/>
+    /// - I vincoli su figli e genitori vengono applicati tramite hook <see cref="OnBeforeChildAdded(TSelf)"/>,
+    ///   <see cref="OnBeforeChildAdded(TEntityProperty)"/> e dalla logica di <see cref="ParentNavigationManager{TNode, TValue}"/>.</para>
     /// </summary>
-    /// <typeparam name="TSelf">Tipo concreto dell'entità.</typeparam>
+    /// <typeparam name="TSelf">Tipo concreto dell’entità.</typeparam>
     /// <typeparam name="TEntityProperty">Tipo delle proprietà aggregate.</typeparam>
-    internal abstract class Entity<TSelf, TEntityProperty>(string name)
-        : AggregateNode<TSelf, TEntityProperty>(name), IEntity<TSelf, TEntityProperty>
-        where TSelf : Entity<TSelf, TEntityProperty>, IEntity<TSelf, TEntityProperty>
-        where TEntityProperty : class, IEntityProperty<TEntityProperty, TSelf>
+    internal abstract class Entity<TSelf, TEntityProperty> 
+        : AggregateNode<TSelf, TEntityProperty>,
+          IEntity<TSelf, TEntityProperty>
+        where TSelf           : Entity<TSelf, TEntityProperty>, IEntity<TSelf, TEntityProperty>
+        where TEntityProperty: class, IEntityProperty<TEntityProperty, TSelf>
     {
         // === Fields ===
 
+        private readonly ParentNavigationManager<TSelf, TEntityProperty> _parentManager;
         private TEntityProperty? _keyProperty;
 
-        // === Properties ===
+        // === Constructor ===
 
-        /// <inheritdoc />
-        /// <remarks>Alias semantico per <c>ValueChildren</c>.</remarks>
-        public IReadOnlyCollection<TEntityProperty> Properties => base.ValueChildren;
+        /// <summary>
+        /// Crea una nuova istanza di <see cref="Entity{TSelf,TEntityProperty}"/>,
+        /// inizializzando il gestore per la navigazione verso i genitori.
+        /// </summary>
+        /// <param name="name">Nome univoco dell’entità.</param>
+        /// <param name="validator">Validatore opzionale per il tipo concreto <typeparamref name="TSelf"/>.</param>
+        protected Entity(
+            string name,
+            IValidateAndFix<TSelf>? validator
+        ) : base(name, validator)
+        {
+            _parentManager = new ParentNavigationManager<TSelf, TEntityProperty>((TSelf)this);
+        }
 
-        /// <inheritdoc />
+        // === IAggregateNode / IEntity ===
+
+        /// <inheritdoc/>
+        /// <remarks>Alias semantico per <see cref="IAggregateNode{TSelf, TEntityProperty}.ValueChildren"/>.</remarks>
+        public IReadOnlyCollection<TEntityProperty> Properties => ValueChildren;
+
+        /// <inheritdoc/>
         public TEntityProperty? GetKeyProperty() => _keyProperty;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public bool IsIdentifiable() => _keyProperty is not null;
+
+        // === Parent Navigation (ereditata da IEntity) ===
+
+        /// <inheritdoc/>
+        public IReadOnlyCollection<TSelf> Parents => _parentManager.Parents;
+
+        /// <inheritdoc/>
+        public bool IsRoot => _parentManager.IsRoot;
+
+        /// <inheritdoc/>
+        public void AddParent(TSelf parent) => _parentManager.AddParent(parent);
 
         // === Equality ===
 
-        /// <inheritdoc />
-        /// <remarks>
-        /// <para><b>Comparison Logic:</b> Confronta nome e valore logico.</para>
-        /// </remarks>
-        protected sealed override bool EqualsCore(Node other)
+        protected sealed override bool EqualsCore(Node<TSelf> other)
         {
-            return other is TSelf entity &&
-                   string.Equals(Name, entity.Name, StringComparison.OrdinalIgnoreCase) &&
-                   EqualsByValue(entity);
+            return other is TSelf entity
+                && string.Equals(Name, entity.Name, StringComparison.OrdinalIgnoreCase)
+                && EqualsByValue(entity);
         }
 
-        /// <inheritdoc />
-        /// <remarks>
-        /// <para><b>Hashing Strategy:</b> Combina nome e valore logico specifico.</para>
-        /// </remarks>
         protected sealed override int GetHashCodeCore()
         {
             int hash = StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
@@ -70,67 +95,42 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
         }
 
         /// <summary>
-        /// <b>Logical Equality Hook</b><br/>
-        /// Determina se due entità sono logicamente equivalenti (oltre al nome).
+        /// Hook per confronto logico aggiuntivo nella sottoclasse.
         /// </summary>
-        /// <param name="other">Entità da confrontare.</param>
-        /// <returns><c>true</c> se logicamente equivalenti, altrimenti <c>false</c>.</returns>
         protected abstract bool EqualsByValue(TSelf other);
 
         /// <summary>
-        /// <b>Logical Hash Hook</b><br/>
-        /// Calcola l'hash logico personalizzato per la sottoclasse.
+        /// Hook per calcolo hash logico nella sottoclasse.
         /// </summary>
-        /// <returns>Hash code della parte logica dell'entità.</returns>
         protected abstract int GetValueHashCode();
 
-        // === Validation ===
+        // === Validation Hooks ===
 
-        /// <inheritdoc />
-        /// <remarks>
-        /// Invoca <see cref="OnBeforeEntityAdded"/> per applicare vincoli specifici sull'entità figlia.
-        /// </remarks>
         protected sealed override void OnBeforeChildAdded(TSelf child)
         {
             OnBeforeEntityAdded(child);
         }
 
-        /// <inheritdoc />
-        /// <remarks>
-        /// Esegue validazioni su <paramref name="child"/> e gestisce l'unicità della proprietà chiave:
-        /// <list type="bullet">
-        ///   <item><description>Invoca <see cref="OnBeforePropertyAdded"/> per logica personalizzata.</description></item>
-        ///   <item><description>Se <c>child.IsKey</c> è true, verifica unicità e aggiorna <c>_keyProperty</c>.</description></item>
-        /// </list>
-        /// </remarks>
-        /// <exception cref="InvalidOperationException">
-        /// Sollevata se viene aggiunta più di una proprietà chiave.
-        /// </exception>
         protected sealed override void OnBeforeChildAdded(TEntityProperty child)
         {
             OnBeforePropertyAdded(child);
-
             if (child.IsKey)
             {
                 if (_keyProperty is not null)
-                    throw new InvalidOperationException($"L'entità '{Name}' ha già una proprietà chiave: '{_keyProperty.Name}'.");
-
+                    throw new InvalidOperationException(
+                        $"L'entità '{Name}' ha già una proprietà chiave: '{_keyProperty.Name}'.");
                 _keyProperty = child;
             }
         }
 
-        // === Hooks ===
+        /// <summary>
+        /// Hook per validazioni specifiche prima di aggiungere una entità figlia.
+        /// </summary>
+        protected virtual void OnBeforeEntityAdded(TSelf child) { }
 
         /// <summary>
-        /// Hook per validazioni specifiche sull’entità aggregata prima dell'aggiunta.
+        /// Hook per validazioni specifiche prima di aggiungere una proprietà figlia.
         /// </summary>
-        /// <param name="child">Entità figlia da validare.</param>
-        protected virtual void OnBeforeEntityAdded(TSelf child){}
-
-        /// <summary>
-        /// Hook per validazioni specifiche sulla proprietà prima dell'aggiunta.
-        /// </summary>
-        /// <param name="child">Proprietà da validare.</param>
-        protected virtual void OnBeforePropertyAdded(TEntityProperty child){}
+        protected virtual void OnBeforePropertyAdded(TEntityProperty child) { }
     }
 }

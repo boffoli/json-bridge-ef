@@ -1,7 +1,7 @@
-namespace JsonBridgeEF.Seeding.Source.Model.JsonObjectSchemas
+namespace JsonBridgeEF.Seeding.Source.Model.JsonEntities
 {
     /// <inheritdoc cref="IEfEntity"/>
-    internal sealed partial class JsonObjectSchema
+    internal sealed partial class JsonEntity
     {
         // --- Proprietà EfEntity ---
 

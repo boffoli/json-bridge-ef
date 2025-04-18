@@ -1,5 +1,5 @@
+using JsonBridgeEF.Shared.Dag.Helpers;
 using JsonBridgeEF.Shared.Dag.Interfaces;
-using JsonBridgeEF.Shared.Dag.Validators;
 using JsonBridgeEF.Shared.Infrastructure.HookedExecutionFlow;
 using JsonBridgeEF.Shared.Navigation.Interfaces;
 
@@ -11,7 +11,7 @@ namespace JsonBridgeEF.Shared.Navigation.Helpers
     /// <remarks>
     /// <para>Creation Strategy: Inizializzato tramite costruttore con il nodo da gestire.</para>
     /// <para>Constraints: Il nodo deve implementare sia <see cref="IAggregateNode{TNode, TValue}"/> che <see cref="IParentNavigableNode{TNode}"/>.</para>
-    /// <para>Relationships: Collabora con il validatore <see cref="AggregateNodeValidator"/> per garantire l’integrità strutturale.</para>
+    /// <para>Relationships: Collabora con il validatore <see cref="AggregateNodeRelationGuard"/> per garantire l’integrità strutturale.</para>
     /// <para>Usage Notes: Da utilizzare in contesti che richiedono risalita e sincronizzazione bidirezionale dei riferimenti parentali.</para>
     /// </remarks>
     /// <remarks>
@@ -80,7 +80,7 @@ namespace JsonBridgeEF.Shared.Navigation.Helpers
             HookedExecutionFlow
                 .For<TNode>()
                 .WithOnStartFlowHook(OnBeforeAddParentFlow) // Esegue la callback d'inizio flusso
-                .WithInitialValidation(p => AggregateNodeValidator.EnsureCanAddParent<TNode, TValue>(_node, p)) // Validazione semantica
+                .WithInitialValidation(p => AggregateNodeRelationGuard.EnsureCanAddParent<TNode, TValue>(_node, p)) // Validazione semantica
                 .WithOnPreActionHook(OnBeforeParentAdded) // Esegue la callback prima dell'aggiunta vera e propria
                 .WithAction(p => EstablishBidirectionalRelation(p))
                 .WithOnPostActionHook(OnAfterParentAdded) // Esegue la callback subito dopo l'aggiunta

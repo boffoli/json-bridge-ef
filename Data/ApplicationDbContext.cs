@@ -28,7 +28,7 @@ namespace JsonBridgeEF.Data
         public DbSet<JsonSchema> JsonSchemas { get; set; } = null!;
         public DbSet<JsonField> JsonFields { get; set; } = null!;
         public DbSet<TargetDbContextInfo> TargetDbContextInfos { get; set; } = null!;
-        public DbSet<TargetProperty> TargetPropertys { get; set; } = null!;
+        public DbSet<TargetProperty> TargetProperties { get; set; } = null!;
         public DbSet<MappingProject> MappingProjects { get; set; } = null!;
         public DbSet<MappingRule> MappingRules { get; set; } = null!;
         public DbSet<EntityKeyMapping> EntityKeyMapping { get; set; } = null!;
@@ -47,7 +47,7 @@ namespace JsonBridgeEF.Data
 
             // Caricamento delle configurazioni da file separati
             modelBuilder.ApplyConfiguration(new JsonSchemaConfig());
-            modelBuilder.ApplyConfiguration(new JsonBlockConfig());
+            modelBuilder.ApplyConfiguration(new JsonEntitiesConfig());
             modelBuilder.ApplyConfiguration(new JsonFieldConfig());
             modelBuilder.ApplyConfiguration(new TargetDbContextInfoConfig());
             modelBuilder.ApplyConfiguration(new TargetPropertyConfig());

@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Shared.Dag.Interfaces;
+using JsonBridgeEF.Shared.Navigation.Interfaces;
 
 namespace JsonBridgeEF.Shared.EntityModel.Interfaces
 {
@@ -14,8 +17,6 @@ namespace JsonBridgeEF.Shared.EntityModel.Interfaces
     /// Nessuno specifico, funge da radice comune.</para>
     /// <para><b>Relationships:</b><br/>
     /// Estende <see cref="INode"/> per garantire l’identificazione nominale nel grafo.</para>
-    /// <para><b>Usage Notes:</b><br/>
-    /// Utile come punto comune per funzioni generiche su elementi del modello.</para>
     /// </remarks>
     public interface IComponentModel : INode
     {
@@ -28,19 +29,17 @@ namespace JsonBridgeEF.Shared.EntityModel.Interfaces
     /// <typeparam name="TEntityProperty">Tipo della proprietà foglia.</typeparam>
     /// <remarks>
     /// <para><b>Domain Concept:</b><br/>
-    /// Estende <see cref="INode"/> aggiungendo due parametri generici per definire il contesto del modello a entità (entità/proprietà).</para>
+    /// Marker per componenti che legano un'entità alle sue proprietà.</para>
     /// <para><b>Creation Strategy:</b><br/>
-    /// Interfaccia marker, implementata implicitamente dai componenti concreti.</para>
+    /// Interfaccia vuota, implementata implicitamente dai componenti concreti.</para>
     /// <para><b>Constraints:</b><br/>
-    /// Nessuno diretto, dipende dai vincoli delle interfacce aggregate.</para>
+    /// Nessuno diretto, dipende dai vincoli di <see cref="IEntity{TSelf,TEntityProperty}"/> e <see cref="IEntityProperty{TSelf,TEntity}"/>.</para>
     /// <para><b>Relationships:</b><br/>
-    /// Estende <see cref="IComponentModel"/> e <see cref="INode{TEntity, TEntityProperty}"/>.</para>
-    /// <para><b>Usage Notes:</b><br/>
-    /// Implementato da componenti che necessitano di conoscere la tipizzazione degli aggregati e delle foglie.</para>
+    /// Estende <see cref="IComponentModel"/>.</para>
     /// </remarks>
-    public interface IComponent<TEntity, TEntityProperty> : IComponentModel, INode<TEntity, TEntityProperty>
-        where TEntity : class, IEntity<TEntity, TEntityProperty>
-        where TEntityProperty : class, IEntityProperty<TEntityProperty, TEntity>
+    public interface IComponent<TEntity, TEntityProperty> : IComponentModel
+        where TEntity         : class, IEntity<TEntity, TEntityProperty>
+        where TEntityProperty: class, IEntityProperty<TEntityProperty, TEntity>
     {
     }
 
@@ -61,14 +60,15 @@ namespace JsonBridgeEF.Shared.EntityModel.Interfaces
     /// - Aggrega istanze di <typeparamref name="TEntityProperty"/>.<br/>
     /// - Può essere connessa gerarchicamente ad altre entità.</para>
     /// <para><b>Usage Notes:</b><br/>
-    /// Interfaccia base per strutture JSON o classi OO.<br/>
-    /// La proprietà <c>Properties</c> è un alias semantico per <c>ValueChildren</c>.</para>
+    /// - Interfaccia base per strutture JSON o classi OO.<br/>
+    /// - La proprietà <c>Properties</c> è un alias semantico per <see cref="IAggregateNode{TSelf, TEntityProperty}.ValueChildren"/>.</para>
     /// </remarks>
-    public interface IEntity<TSelf, TEntityProperty> :
-        IComponent<TSelf, TEntityProperty>,
-        IAggregateNode<TSelf, TEntityProperty>
-        where TSelf : class, IEntity<TSelf, TEntityProperty>
-        where TEntityProperty : class, IEntityProperty<TEntityProperty, TSelf>
+    public interface IEntity<TSelf, TEntityProperty>
+        : IComponent<TSelf, TEntityProperty>,
+          IAggregateNode<TSelf, TEntityProperty>,
+          IParentNavigableNode<TSelf>
+        where TSelf           : class, IEntity<TSelf, TEntityProperty>
+        where TEntityProperty: class, IEntityProperty<TEntityProperty, TSelf>
     {
         /// <summary>
         /// Collezione delle proprietà associate all'entità.
@@ -76,8 +76,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Interfaces
         /// <remarks>
         /// <b>Purpose:</b> Accesso semantico alle proprietà come foglie del grafo.<br/>
         /// <b>Access:</b> Sola lettura.<br/>
-        /// <b>Note:</b> Alias per <see cref="IAggregateNode{TSelf,TEntityProperty}.ValueChildren"/>.
-        /// </remarks>
+        /// <b>Note:</b> Alias per <see cref="IAggregateNode{TSelf,TEntityProperty}.ValueChildren"/>.</remarks>
         IReadOnlyCollection<TEntityProperty> Properties { get; }
 
         /// <summary>
@@ -102,19 +101,19 @@ namespace JsonBridgeEF.Shared.EntityModel.Interfaces
     /// <para><b>Domain Concept:</b><br/>
     /// Nodo foglia che rappresenta una proprietà logica appartenente a un'entità aggregata.</para>
     /// <para><b>Creation Strategy:</b><br/>
-    /// Creato con nome valido, assegnato a una entità tramite <c>AddProperty</c>.</para>
+    /// Creato con nome valido, assegnato a un'entità tramite metodo <c>AddChild</c> dell'aggregato.</para>
     /// <para><b>Constraints:</b><br/>
     /// - Deve appartenere a una singola entità.<br/>
     /// - Può essere marcata come chiave una sola volta all’interno dell’entità.</para>
     /// <para><b>Relationships:</b><br/>
     /// - Appartiene a un'entità che implementa <typeparamref name="TEntity"/>.</para>
     /// <para><b>Usage Notes:</b><br/>
-    /// Non può avere figli. Funziona come terminale semantico della struttura entità.</para>
+    /// - Non può avere figli. Funziona come terminale semantico della struttura entità.</para>
     /// </remarks>
-    public interface IEntityProperty<TSelf, TEntity> :
-        IComponent<TEntity, TSelf>,
-        IValueNode<TSelf, TEntity>
-        where TSelf : class, IEntityProperty<TSelf, TEntity>
+    public interface IEntityProperty<TSelf, TEntity>
+        : IComponent<TEntity, TSelf>,
+          IValueNode<TSelf, TEntity>
+        where TSelf   : class, IEntityProperty<TSelf, TEntity>
         where TEntity : class, IEntity<TEntity, TSelf>
     {
         /// <summary>
@@ -122,9 +121,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Interfaces
         /// </summary>
         /// <remarks>
         /// <b>Purpose:</b> Determina l’identificabilità logica dell'entità.<br/>
-        /// <b>Access:</b> Sola lettura.
-        /// </remarks>
+        /// <b>Access:</b> Sola lettura.</remarks>
         bool IsKey { get; }
     }
 }
-

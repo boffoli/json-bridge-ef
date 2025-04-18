@@ -59,7 +59,7 @@ namespace JsonBridgeEF.Importing.IntancePropertyProxing.Services
 
         private List<TargetProperty> LoadTargetProperties()
         {
-            return [.. _dbContext.TargetPropertys];
+            return [.. _dbContext.TargetProperties];
         }
 
         private void PrintInstances()

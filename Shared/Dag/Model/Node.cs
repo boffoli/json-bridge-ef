@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Interfaces;
 
 namespace JsonBridgeEF.Shared.Dag.Model
@@ -6,46 +7,55 @@ namespace JsonBridgeEF.Shared.Dag.Model
     /// <summary>
     /// Domain Class: Nodo base identificabile in una struttura a grafo.
     /// </summary>
+    /// <typeparam name="TSelf">Tipo concreto del nodo che implementa <see cref="INode"/>.</typeparam>
     /// <remarks>
     /// <para><b>Domain Concept:</b><br/>
     /// Rappresenta l'unità fondamentale del grafo, con identificazione univoca tramite il nome.</para>
     /// <para><b>Creation Strategy:</b><br/>
-    /// Inizializzato tramite costruttore protetto, il nome viene validato ed è immutabile.</para>
+    /// Inizializzato tramite costruttore protetto, accetta un validatore opzionale per la verifica a runtime.</para>
     /// <para><b>Invariants:</b><br/>
-    /// - Nome non nullo, non vuoto e immutabile.</para>
+    /// - Nome non nullo, non vuoto e immutabile (validato esternamente).</para>
     /// <para><b>Relationships:</b><br/>
     /// - Punto di partenza comune per nodi aggregati e foglia.</para>
+    /// <para><b>Usage Notes:</b><br/>
+    /// - Il validatore può essere iniettato per eseguire controlli aggiuntivi senza modificare la logica del nodo.</para>
     /// </remarks>
-    internal abstract class Node : INode, IEquatable<Node>
+    internal abstract class Node<TSelf> : INode, IEquatable<Node<TSelf>>
+        where TSelf : INode
     {
+        private readonly IValidateAndFix<TSelf>? _validator;
+
         /// <inheritdoc />
         [Required]
         public string Name { get; }
 
         /// <summary>
-        /// Costruttore protetto: impone la validazione del nome come identificatore univoco.
+        /// Costruttore protetto: opzionalmente accetta un validatore per delegare i controlli.
         /// </summary>
-        /// <param name="name">Nome del nodo (obbligatorio e immutabile).</param>
-        /// <exception cref="ArgumentException">Se <paramref name="name"/> è nullo o vuoto.</exception>
-        protected Node(string name)
+        /// <param name="name">Nome del nodo (obbligatorio ma validato esternamente).</param>
+        /// <param name="validator">Validatore opzionale per la validazione del nodo.</param>
+        protected Node(string name, IValidateAndFix<TSelf>? validator)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Il nome non può essere nullo o vuoto.", nameof(name));
-
             Name = name;
+            _validator = validator;
+
+            if (_validator is not null)
+            {
+                if (GetType() != typeof(TSelf))
+                    throw new InvalidCastException($"Istanza di tipo {GetType()} non corrisponde esattamente a {typeof(TSelf)}.");
+
+                _validator.EnsureValid((TSelf)(object)this);
+            }
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(this, obj))
-                return true;
-
-            return obj is Node other && Equals(other);
+            return obj is Node<TSelf> other && Equals(other);
         }
 
         /// <inheritdoc />
-        public bool Equals(Node? other)
+        public bool Equals(Node<TSelf>? other)
         {
             if (ReferenceEquals(this, other))
                 return true;
@@ -61,43 +71,24 @@ namespace JsonBridgeEF.Shared.Dag.Model
         /// </summary>
         /// <param name="other">Altro nodo da confrontare.</param>
         /// <returns><c>true</c> se i nodi sono logicamente equivalenti.</returns>
-        protected abstract bool EqualsCore(Node other);
+        protected abstract bool EqualsCore(Node<TSelf> other);
 
         /// <summary>
         /// Implementazione astratta del calcolo dell'hash code.
         /// </summary>
-        /// <returns>Valore hash coerente con <see cref="EqualsCore"/>.</returns>
+        /// <returns>Valore hash coerente con <see cref="EqualsCore(Node{TSelf})"/>.</returns>
         protected abstract int GetHashCodeCore();
 
         /// <summary>
-        /// Operatore di uguaglianza basato su <see cref="Equals(Node?)"/>.
+        /// Operatore di uguaglianza basato su <see cref="Equals(Node{TSelf}?)"/>.
         /// </summary>
-        public static bool operator ==(Node? left, Node? right) => Equals(left, right);
+        public static bool operator ==(Node<TSelf>? left, Node<TSelf>? right)
+            => Equals(left, right);
 
         /// <summary>
-        /// Operatore di disuguaglianza basato su <see cref="Equals(Node?)"/>.
+        /// Operatore di disuguaglianza basato su <see cref="Equals(Node{TSelf}?)"/>.
         /// </summary>
-        public static bool operator !=(Node? left, Node? right) => !Equals(left, right);
-    }
-
-
-    /// <inheritdoc cref="INode{TAggregate, TValue}" />
-    /// <summary>
-    /// Domain Class: Nodo generico tipizzato per relazioni aggregato/figlio.
-    /// </summary>
-    /// <typeparam name="TAggregate">Tipo del nodo aggregato.</typeparam>
-    /// <typeparam name="TValue">Tipo del nodo foglia.</typeparam>
-    /// <remarks>
-    /// <para><b>Domain Concept:</b><br/>
-    /// Nodo base dotato di tipizzazione generica, utile per costruire strutture fortemente tipizzate.</para>
-    /// <para><b>Relationships:</b><br/>
-    /// Estende <see cref="Node"/> e implementa <see cref="INode{TAggregate, TValue}"/>.</para>
-    /// </remarks>
-    internal abstract class Node<TAggregate, TValue>(string name)
-        : Node(name), INode<TAggregate, TValue>
-        where TAggregate : class, IAggregateNode<TAggregate, TValue>
-        where TValue : class, IValueNode<TValue, TAggregate>
-    {
-        // Classe di supporto per la tipizzazione nei modelli aggregati e foglia
+        public static bool operator !=(Node<TSelf>? left, Node<TSelf>? right)
+            => !Equals(left, right);
     }
 }

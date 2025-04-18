@@ -61,7 +61,7 @@ namespace JsonBridgeEF.Seeding.TargetModel.Models;
         public TargetClass(
             string name,
             TargetDbContextInfo dbContextInfo,
-            IValidateAndFix<TargetClass>? validator = null
+            IValidateAndFix<TargetClass>?! validator
         ) : base(name, dbContextInfo, validator)
         {
         }

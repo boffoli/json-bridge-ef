@@ -1,4 +1,4 @@
-namespace JsonBridgeEF.Seeding.SourceJson.Exceptions;
+namespace JsonBridgeEF.Seeding.Source.Exceptions;
 
 /// <summary>
 /// <para><b>Domain Concept:</b><br/>
@@ -11,20 +11,20 @@ namespace JsonBridgeEF.Seeding.SourceJson.Exceptions;
 /// </para>
 ///
 /// <para><b>Example:</b><br/>
-/// <c>throw new BlockRelationshipException("Un blocco non può essere padre di sé stesso.");</c>
+/// <c>throw new JsonEntityRelationshipException("Un blocco non può essere padre di sé stesso.");</c>
 /// </para>
 /// </summary>
-public sealed class BlockRelationshipException : Exception
+public sealed class JsonEntityRelationshipException : Exception
 {
     /// <summary>
     /// Crea una nuova istanza con il messaggio di errore specificato.
     /// </summary>
-    public BlockRelationshipException(string message)
+    public JsonEntityRelationshipException(string message)
         : base(message) { }
 
     /// <summary>
     /// Crea una nuova istanza con un messaggio e un’eccezione interna.
     /// </summary>
-    public BlockRelationshipException(string message, Exception innerException)
+    public JsonEntityRelationshipException(string message, Exception innerException)
         : base(message, innerException) { }
 }

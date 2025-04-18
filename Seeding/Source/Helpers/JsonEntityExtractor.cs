@@ -1,8 +1,9 @@
 using System.Text.Json;
-using JsonBridgeEF.Seeding.SourceJson.Models;
-using JsonBridgeEF.Seeding.SourceJson.Validators;
+using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
+using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
+using JsonBridgeEF.Seeding.Source.Validators;
 
-namespace JsonBridgeEF.Seeding.SourceJson.Helpers;
+namespace JsonBridgeEF.Seeding.Source.Helpers;
 
 /// <summary>
 /// <para><b>Domain Concept:</b><br/>
@@ -18,30 +19,29 @@ namespace JsonBridgeEF.Seeding.SourceJson.Helpers;
 /// <para><b>Constraints:</b>
 /// <list type="bullet">
 ///   <item>Solo i nodi JSON di tipo "object" o "array" generano blocchi figli.</item>
-///   <item>I blocchi devono essere registrati nello schema tramite <see cref="JsonBlock.Create"/>.</item>
 /// </list>
 /// </para>
 ///
 /// <para><b>Usage Notes:</b><br/>
-/// Il metodo <see cref="ExtractJsonBlocks(JsonSchema)"/> è l’unica entrypoint pubblica.
+/// Il metodo <see cref="ExtractJsonEntity(JsonSchema)"/> è l’unica entrypoint pubblica.
 /// La ricorsione avviene internamente, preservando relazioni e integrità.
 /// </para>
-internal static class JsonBlockExtractor
+internal static class JsonEntityExtractor
 {
     /// <summary>
     /// Estrae tutti i blocchi JSON a partire da uno schema e ne costruisce l’albero padre-figlio.
     /// </summary>
     /// <param name="schema">Schema contenente il contenuto JSON da esplorare.</param>
     /// <returns>Lista piatta dei blocchi estratti, ciascuno già registrato nello schema.</returns>
-    public static IReadOnlyList<JsonBlock> ExtractJsonBlocks(JsonSchema schema)
+    public static IReadOnlyList<JsonEntity> ExtractJsonEntity(JsonSchema schema)
     {
         using var jsonDoc = JsonDocument.Parse(schema.JsonSchemaContent);
-        var blocks = new List<JsonBlock>();
+        var jsonEntity = new List<JsonEntity>();
 
         // 🔁 Avvia ricorsione dal nodo root
-        ExtractBlocksRecursive(jsonDoc.RootElement, schema, parentBlock: null, blocks);
+        ExtractJsonEntityRecursive(jsonDoc.RootElement, schema, parentJsonEntity: null, jsonEntity);
 
-        return blocks;
+        return jsonEntity;
     }
 
     /// <summary>
@@ -50,9 +50,9 @@ internal static class JsonBlockExtractor
     /// </summary>
     /// <param name="element">Elemento JSON di partenza.</param>
     /// <param name="schema">Schema a cui i blocchi appartengono.</param>
-    /// <param name="parentBlock">Blocco padre (null se radice).</param>
+    /// <param name="parentJsonEntity">Blocco padre (null se radice).</param>
     /// <param name="candidates">Lista cumulativa dei blocchi estratti.</param>
-    private static void ExtractBlocksRecursive(JsonElement element, JsonSchema schema, JsonBlock? parentBlock, List<JsonBlock> candidates)
+    private static void ExtractJsonEntityRecursive(JsonElement element, JsonSchema schema, JsonEntity? parentJsonEntity, List<JsonEntity> candidates)
     {
         // 🔒 Verifica che l'elemento sia un oggetto JSON valido
         if (element.ValueKind != JsonValueKind.Object)
@@ -64,29 +64,44 @@ internal static class JsonBlockExtractor
 
         foreach (var property in properties.EnumerateObject())
         {
-            string blockName = property.Name;
+            string jsonEntityName = property.Name;
 
-            // 🧱 CREAZIONE BLOCCO (schema + nome)
-            var currentBlock = new JsonBlock(blockName, schema, validator: new JsonBlockValidator());
+            // 📝 Descrizione automatica del blocco
+            var entityDescription = $"Blocco JSON '{jsonEntityName}' estratto dallo schema.";
+
+            // 🧱 CREAZIONE BLOCCO (schema + nome + descrizione)
+            var currentJsonEntity = new JsonEntity(
+                name: jsonEntityName,
+                schema: schema,
+                description: entityDescription,
+                validator: new JsonEntityValidator()
+            );
 
             // 🔁 RELAZIONE PADRE-FIGLIO (se applicabile)
-            parentBlock?.AddChild(currentBlock);
+            parentJsonEntity?.AddChild(currentJsonEntity);
 
             // 🧩 ESTRAZIONE CAMPI SE IL BLOCCO CONTIENE PROPRIETÀ
             if (property.Value.TryGetProperty("properties", out JsonElement subProperties))
             {
                 foreach (var subProperty in subProperties.EnumerateObject())
                 {
-                    _ = new JsonField(
-                        subProperty.Name,
-                        currentBlock,
-                        validator: new JsonFieldValidator()
+                    // 📝 Descrizione automatica o da attributo "description"
+                    var fieldDescription = subProperty.Value.TryGetProperty("description", out var descElement)
+                        ? descElement.GetString() ?? $"Campo '{subProperty.Name}'"
+                        : $"Campo '{subProperty.Name}' di tipo primitivo";
+
+                    _ = new Model.JsonProperties.JsonProperty(
+                        name: subProperty.Name,
+                        parent: currentJsonEntity,
+                        isKey: false,
+                        description: fieldDescription,
+                        validator: new JsonPropertyValidator()
                     );
                 }
             }
 
             // ➕ Aggiunta del blocco alla lista dei risultati
-            candidates.Add(currentBlock);
+            candidates.Add(currentJsonEntity);
 
             // 🔁 RICORSIONE SU OGGETTI O ARRAY
             if (property.Value.TryGetProperty("type", out JsonElement typeElement))
@@ -94,11 +109,11 @@ internal static class JsonBlockExtractor
                 string type = typeElement.GetString()!;
                 if (type == "object")
                 {
-                    ExtractBlocksRecursive(property.Value, schema, currentBlock, candidates);
+                    ExtractJsonEntityRecursive(property.Value, schema, currentJsonEntity, candidates);
                 }
                 else if (type == "array" && property.Value.TryGetProperty("items", out JsonElement arrayItems))
                 {
-                    ExtractBlocksRecursive(arrayItems, schema, currentBlock, candidates);
+                    ExtractJsonEntityRecursive(arrayItems, schema, currentJsonEntity, candidates);
                 }
             }
         }

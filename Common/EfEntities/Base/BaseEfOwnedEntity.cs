@@ -59,7 +59,7 @@ public abstract class BaseEfOwnedEntity<TSelf, TOwner>
     /// <param name="name">Nome dell'entità.</param>
     /// <param name="owner">Istanza del proprietario (aggregate root).</param>
     /// <param name="validator">Validatore opzionale per la business rule dell’entità.</param>
-    protected BaseEfOwnedEntity(string name, TOwner owner, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfOwnedEntity(string name, TOwner owner, IValidateAndFix<TSelf>? validator)
         : base(name, validator)
     {
         Owner = owner ?? throw new ArgumentNullException(nameof(owner));

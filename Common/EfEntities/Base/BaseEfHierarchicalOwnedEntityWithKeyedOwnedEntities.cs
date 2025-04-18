@@ -75,7 +75,7 @@ public abstract class BaseEfHierarchicalOwnedEntityWithKeyedOwnedEntities<TSelf,
     /// <summary>
     /// Domain constructor: inizializza nome, owner e validatore.
     /// </summary>
-    protected BaseEfHierarchicalOwnedEntityWithKeyedOwnedEntities(string name, TOwner owner, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfHierarchicalOwnedEntityWithKeyedOwnedEntities(string name, TOwner owner, IValidateAndFix<TSelf>? validator)
         : base(name, owner, validator)
     {
         _keyedCollection = new EfKeyedOwnedEntityCollection<TEntity, TSelf>((TSelf)this);

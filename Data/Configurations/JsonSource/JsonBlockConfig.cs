@@ -5,12 +5,12 @@ using JsonBridgeEF.Seeding.SourceJson.Models;
 namespace JsonBridgeEF.Data.Configurations.JsonSource
 {
     /// <summary>
-    /// Configura l'entità <see cref="JsonBlock"/> per Entity Framework.
+    /// Configura l'entità <see cref="JsonEntities"/> per Entity Framework.
     /// Definisce la struttura, i vincoli e le relazioni verso <see cref="JsonSchema"/> e <see cref="JsonField"/>.
     /// </summary>
-    internal class JsonBlockConfig : IEntityTypeConfiguration<JsonBlock>
+    internal class JsonEntitiesConfig : IEntityTypeConfiguration<JsonEntity>
     {
-        public void Configure(EntityTypeBuilder<JsonBlock> builder)
+        public void Configure(EntityTypeBuilder<JsonEntity> builder)
         {
             // 🔹 Chiave primaria
             builder.HasKey(b => b.Id);
@@ -32,7 +32,7 @@ namespace JsonBridgeEF.Data.Configurations.JsonSource
             // 🔹 Relazione molti-a-molti auto-relazionale (padre-figlio tra blocchi)
             builder.HasMany(b => b.Children)
                    .WithMany(b => b.Parents)
-                   .UsingEntity(j => j.ToTable("JsonBlockRelationships"));
+                   .UsingEntity(j => j.ToTable("JsonEntitiesRelationships"));
 
             // 🔹 Relazione con i campi (1:N)
             builder.HasMany(b => b.Entities)

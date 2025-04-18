@@ -28,22 +28,22 @@ namespace JsonBridgeEF.Seeding.SourceJson.Models;
 /// <para><b>Relationships:</b><br/>
 /// - Appartiene a uno <see cref="JsonSchema"/> (owner).<br/>
 /// - Aggrega <see cref="JsonField"/> come entità figlie owned e keyed.<br/>
-/// - Può avere blocchi genitori e figli tramite interfaccia <see cref="IHierarchical{JsonBlock}"/>.</para>
+/// - Può avere blocchi genitori e figli tramite interfaccia <see cref="IHierarchical{JsonEntities}"/>.</para>
 ///
 /// <para><b>Usage Notes:</b><br/>
 /// - Usare <see cref="AddEntity(JsonField)"/> per aggiungere un campo.<br/>
 /// - Usare <see cref="GetKeyEntity()"/> per ottenere il campo chiave, se presente.<br/>
-/// - Usare <see cref="AddChild(JsonBlock)"/> e <see cref="AddParent(JsonBlock)"/> per relazioni gerarchiche.</para>
+/// - Usare <see cref="AddChild(JsonEntities)"/> e <see cref="AddParent(JsonEntities)"/> per relazioni gerarchiche.</para>
 /// </remarks>
-public sealed class JsonBlock 
-    : BaseEfHierarchicalOwnedEntityWithKeyedOwnedEntities<JsonBlock, JsonSchema, JsonField>
+public sealed class JsonEntities2 
+    : BaseEfHierarchicalOwnedEntityWithKeyedOwnedEntities<JsonEntities, JsonSchema, JsonField>
 {
     // 🔹 COSTRUTTORE RISERVATO A EF CORE 🔹
 #pragma warning disable S1133
     [Obsolete("Reserved for EF Core materialization only", error: false)]
 #pragma warning disable CS8618
     [EditorBrowsable(EditorBrowsableState.Never)]
-    private JsonBlock() : base() { }
+    private JsonEntities() : base() { }
 #pragma warning restore CS8618
 #pragma warning restore S1133
 
@@ -55,7 +55,7 @@ public sealed class JsonBlock
     /// <param name="name">Nome del blocco (univoco all'interno dello schema).</param>
     /// <param name="schema">Schema JSON di appartenenza.</param>
     /// <param name="validator">Validatore opzionale per le regole di dominio.</param>
-    public JsonBlock(string name, JsonSchema schema, IValidateAndFix<JsonBlock>? validator = null)
+    public JsonEntities(string name, JsonSchema schema, IValidateAndFix<JsonEntity>? validator)
         : base(name, schema, validator)
     {
     }

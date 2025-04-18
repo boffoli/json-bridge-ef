@@ -67,7 +67,7 @@ public abstract class BaseEfEntityWithOwnedEntities<TSelf, TOwned>
     /// </summary>
     /// <param name="name">Nome obbligatorio per l'entità.</param>
     /// <param name="validator">Validatore opzionale per le regole di dominio.</param>
-    protected BaseEfEntityWithOwnedEntities(string name, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfEntityWithOwnedEntities(string name, IValidateAndFix<TSelf>? validator)
         : base(name, validator)
     {
         _collection = new EfOwnedEntityCollection<TOwned, TSelf>((TSelf)this);

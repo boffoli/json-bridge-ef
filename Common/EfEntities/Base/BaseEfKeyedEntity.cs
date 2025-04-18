@@ -54,7 +54,7 @@ public abstract class BaseEfKeyedEntity<TSelf>
     /// </summary>
     /// <param name="name">Nome dell’entità.</param>
     /// <param name="validator">Validatore opzionale per le regole di dominio.</param>
-    protected BaseEfKeyedEntity(string name, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfKeyedEntity(string name, IValidateAndFix<TSelf>? validator)
         : base(name, validator)
     {
     }

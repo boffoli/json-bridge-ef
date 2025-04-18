@@ -19,7 +19,7 @@ namespace JsonBridgeEF.Shared.Navigation.Interfaces
     /// - Applicare questa interfaccia solo quando è richiesta navigazione verso i genitori.<br/>
     /// - Non usata per i nodi foglia.</para>
     /// </remarks>
-    internal interface IParentNavigableNode<TSelf>
+    public interface IParentNavigableNode<TSelf>
         where TSelf : class
     {
         /// <summary>

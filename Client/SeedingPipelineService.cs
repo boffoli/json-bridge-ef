@@ -11,7 +11,7 @@ namespace JsonBridgeEF.Client;
 internal class SeedingPipelineService(IUnitOfWork unitOfWork)
 {
     private readonly JsonSchemaSeeder _jsonSchemaSeeder = new(unitOfWork);
-    private readonly JsonBlockSeeder _jsonBlockSeeder = new(unitOfWork);
+    private readonly JsonEntitiesSeeder _jsonEntitySeeder = new(unitOfWork);
     private readonly JsonFieldSeeder _jsonFieldSeeder = new(unitOfWork);
     private JsonSchema? _jsonSchema;
 
@@ -26,9 +26,9 @@ internal class SeedingPipelineService(IUnitOfWork unitOfWork)
         {
             _jsonSchema = await SeedJsonSchemaAsync();
 
-            var jsonBlocks = await SeedJsonBlocksAsync(_jsonSchema);
-            await HandleBlockPromotionAsync(_jsonSchema);
-            await SeedJsonFieldsAsync(_jsonSchema, jsonBlocks);
+            var jsonEntities = await SeedJsonEntitiessAsync(_jsonSchema);
+            await HandleJsonEntityPromotionAsync(_jsonSchema);
+            await SeedJsonFieldsAsync(_jsonSchema, jsonEntities);
 
             Console.WriteLine("\n✅ **Seeding completato con successo.**\n");
         }
@@ -74,26 +74,26 @@ internal class SeedingPipelineService(IUnitOfWork unitOfWork)
     /// <summary>
     /// Esegue il seeding dei blocchi JSON associati allo schema.
     /// </summary>
-    private async Task<List<JsonBlock>> SeedJsonBlocksAsync(JsonSchema schema)
+    private async Task<List<JsonEntity>> SeedJsonEntitiessAsync(JsonSchema schema)
     {
         Console.WriteLine("\n📌 **Avvio del seeding dei blocchi JSON...**");
-        var blocks = await _jsonBlockSeeder.SeedAsync(schema);
-        Console.WriteLine($"✅ **{blocks.Count} blocchi JSON salvati.**\n");
-        return blocks.ToList();
+        var jsonEntities = await _jsonEntitySeeder.SeedAsync(schema);
+        Console.WriteLine($"✅ **{jsonEntities.Count} blocchi JSON salvati.**\n");
+        return jsonEntities.ToList();
     }
 
     /// <summary>
     /// Gestisce interattivamente la promozione opzionale dei blocchi a indipendenti.
     /// </summary>
-    private async Task HandleBlockPromotionAsync(JsonSchema schema)
+    private async Task HandleJsonEntityPromotionAsync(JsonSchema schema)
     {
         Console.WriteLine("🔧 **Configurazione blocchi indipendenti**");
 
-        foreach (var block in _jsonBlockSeeder.SeededBlocks)
+        foreach (var jsonEntity in _jsonEntitySeeder.SeededJsonEntities)
         {
-            Console.WriteLine($"\n🔹 Blocco: {block.Name}");
+            Console.WriteLine($"\n🔹 Blocco: {jsonEntity.Name}");
 
-            var fields = block.Entities.ToList();
+            var fields = jsonEntity.Entities.ToList();
             var currentKey = fields.FirstOrDefault(f => f.IsKey);
 
             Console.WriteLine("   📄 Campi del blocco:");
@@ -124,7 +124,7 @@ internal class SeedingPipelineService(IUnitOfWork unitOfWork)
 
             try
             {
-                await _jsonBlockSeeder.PromoteToIndependentAsync(block.Name, selectedFieldName, schema.Name);
+                await _jsonEntitySeeder.PromoteToIndependentAsync(jsonEntity.Name, selectedFieldName, schema.Name);
             }
             catch (Exception ex)
             {
@@ -136,12 +136,12 @@ internal class SeedingPipelineService(IUnitOfWork unitOfWork)
     /// <summary>
     /// Esegue il seeding dei campi per ciascun blocco.
     /// </summary>
-    private async Task SeedJsonFieldsAsync(JsonSchema schema, List<JsonBlock> blocks)
+    private async Task SeedJsonFieldsAsync(JsonSchema schema, List<JsonEntity> jsonEntities)
     {
         Console.WriteLine("\n📌 **Avvio del seeding dei campi JSON...**");
-        foreach (var block in blocks)
+        foreach (var jsonEntity in jsonEntities)
         {
-            await _jsonFieldSeeder.SeedAsync(schema, block);
+            await _jsonFieldSeeder.SeedAsync(schema, jsonEntity);
         }
         Console.WriteLine("✅ **Seeding dei campi JSON completato.**\n");
     }

@@ -1,7 +1,8 @@
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.UnitOfWorks;
-using JsonBridgeEF.Seeding.SourceJson.Models;
-using JsonBridgeEF.Seeding.SourceJson.Helpers;
+using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
+using JsonBridgeEF.Seeding.Source.Helpers;
+using JsonBridgeEF.Seeding.Source.Validators;
 
 namespace JsonBridgeEF.Seeding.Source.Services;
 
@@ -40,7 +41,7 @@ internal sealed class JsonSchemaSeeder(IUnitOfWork unitOfWork) : BaseDbService(u
     {
         // 📄 Controllo esistenza e lettura file
         JsonSchemaHelper.EnsureFileExists(sampleJsonFilePath);
-        string sampleJsonContent = await JsonSchemaHelper.ReadJsonFileAsync(sampleJsonFilePath);
+        string sampleJsonContent = await JsonSchemaHelper.ReadJsonFileContentAsync(sampleJsonFilePath);
 
         // ↪️ Delega al metodo che gestisce direttamente contenuto stringa
         return await SeedFromSampleJsonAsync(schemaName, sampleJsonContent, forceSave);
@@ -55,7 +56,7 @@ internal sealed class JsonSchemaSeeder(IUnitOfWork unitOfWork) : BaseDbService(u
     internal async Task<JsonSchema> SeedFromSampleJsonAsync(string schemaName, string sampleJsonContent, bool forceSave = false)
     {
         // 🧬 Genera lo schema da esempio
-        string generatedSchema = JsonSchemaHelper.GenerateJsonSchemaFromSample(sampleJsonContent);
+        string generatedSchema = JsonSchemaHelper.GenerateSchemaFromSample(sampleJsonContent);
 
         // ↪️ Delega al metodo che salva uno schema completo in formato stringa
         return await SeedFromSchemaAsync(schemaName, generatedSchema, forceSave);
@@ -71,7 +72,7 @@ internal sealed class JsonSchemaSeeder(IUnitOfWork unitOfWork) : BaseDbService(u
     {
         // 📄 Controllo esistenza e lettura file
         JsonSchemaHelper.EnsureFileExists(jsonSchemaFilePath);
-        string jsonSchemaContent = await JsonSchemaHelper.ReadJsonFileAsync(jsonSchemaFilePath);
+        string jsonSchemaContent = await JsonSchemaHelper.ReadJsonFileContentAsync(jsonSchemaFilePath);
 
         // ↪️ Delega al metodo che salva direttamente uno schema da stringa
         return await SeedFromSchemaAsync(schemaName, jsonSchemaContent, forceSave);
@@ -88,14 +89,14 @@ internal sealed class JsonSchemaSeeder(IUnitOfWork unitOfWork) : BaseDbService(u
         var repo = GetRepository<JsonSchema>();
 
         // ✅ Validazione nome univoco
-        await JsonSchemaHelper.ValidateSchemaNameAsync(schemaName, repo);
+        await JsonSchemaHelper.EnsureSchemaNameIsValidAsync(schemaName, repo);
 
         // ✅ Validazione contenuto
         JsonSchemaHelper.EnsureJsonContentIsValid(jsonSchemaContent);
-        await JsonSchemaHelper.ValidateSchemaContentAsync(jsonSchemaContent, repo, forceSave);
+        await JsonSchemaHelper.EnsureSchemaContentIsUniqueAsync(jsonSchemaContent, repo, forceSave);
 
         // 🧱 Composizione dell'entità dominio
-        var jsonSchema = JsonSchema.Create(schemaName, jsonSchemaContent);
+        var jsonSchema = new JsonSchema(schemaName, jsonSchemaContent, "", new JsonSchemaValidator());
 
         // 💾 Persistenza
         return await SaveSchemaAsync(jsonSchema);

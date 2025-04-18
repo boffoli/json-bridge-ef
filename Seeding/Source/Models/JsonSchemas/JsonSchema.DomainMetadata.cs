@@ -1,5 +1,5 @@
-
 using JsonBridgeEF.Shared.Domain.Interfaces;
+using JsonBridgeEF.Shared.Domain.Model;
 
 namespace JsonBridgeEF.Seeding.Source.Model.JsonSchemas
 {
@@ -9,7 +9,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonSchemas
     /// </summary>
     internal sealed partial class JsonSchema
     {
-        private readonly IDomainMetadata _metadata;
+        private readonly DomainMetadata _metadata;
 
         /// <inheritdoc />
         public Guid UniqueId => _metadata.UniqueId;

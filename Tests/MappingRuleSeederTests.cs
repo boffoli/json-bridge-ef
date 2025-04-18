@@ -134,7 +134,7 @@ namespace JsonBridgeEF.Tests
         /// Verifica che il metodo SeedAsync lanci un'eccezione se la lista di proprietà target è nulla.
         /// </summary>
         [Fact]
-        public async Task SeedAsync_NullTargetPropertys_ShouldThrowArgumentNullException()
+        public async Task SeedAsync_NullTargetProperties_ShouldThrowArgumentNullException()
         {
             var jsonFields = new List<JsonField>();
             var mappingProject = new MappingProject();

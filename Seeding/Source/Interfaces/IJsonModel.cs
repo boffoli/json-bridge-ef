@@ -26,7 +26,7 @@ namespace JsonBridgeEF.Seeding.Source.Interfaces
     /// Domain Interface: Oggetto JSON (schema di oggetto).
     /// </summary>
     /// <typeparam name="TSelf">
-    /// Il tipo concreto dell'oggetto JSON. Deve ereditare da <see cref="IJsonObjectSchema{TSelf, TJsonProperty}"/>.
+    /// Il tipo concreto dell'oggetto JSON. Deve ereditare da <see cref="IJsonEntity{TSelf, TJsonProperty}"/>.
     /// </typeparam>
     /// <typeparam name="TJsonProperty">
     /// Il tipo concreto della proprietà JSON. Deve ereditare da <see cref="IJsonProperty{TJsonProperty, TSelf}"/>.
@@ -43,8 +43,8 @@ namespace JsonBridgeEF.Seeding.Source.Interfaces
     /// <para><b>Usage Notes:</b><br/>
     /// - I metodi <c>MakeIdentifiable</c> consentono di designare una proprietà come chiave logica, utile per l'identificazione univoca.</para>
     /// </remarks>
-    public interface IJsonObjectSchema<TSelf, TJsonProperty> : IJsonComponent, IEntity<TSelf, TJsonProperty>
-        where TSelf : class, IJsonObjectSchema<TSelf, TJsonProperty>
+    public interface IJsonEntity<TSelf, TJsonProperty> : IJsonComponent, IEntity<TSelf, TJsonProperty>
+        where TSelf : class, IJsonEntity<TSelf, TJsonProperty>
         where TJsonProperty : class, IJsonProperty<TJsonProperty, TSelf>
     {
         /// <summary>
@@ -75,20 +75,20 @@ namespace JsonBridgeEF.Seeding.Source.Interfaces
     /// Il tipo concreto della proprietà JSON. Deve ereditare da <c>IJsonProperty&lt;TSelf, TParent&gt;</c>.
     /// </typeparam>
     /// <typeparam name="TParent">
-    /// Il tipo dell'oggetto JSON proprietario. Deve ereditare da <c>IJsonObjectSchema&lt;TParent, TSelf&gt;</c>.
+    /// Il tipo dell'oggetto JSON proprietario. Deve ereditare da <c>IJsonEntity&lt;TParent, TSelf&gt;</c>.
     /// </typeparam>
     /// <remarks>
     /// <para><b>Domain Concept:</b><br/>
     /// Rappresenta un campo o attributo di un oggetto JSON, che può essere designato come chiave logica per l'identificazione univoca.</para>
     /// <para><b>Relationships:</b><br/>
-    /// - Appartiene a un oggetto JSON che implementa <see cref="IJsonObjectSchema{TParent, TSelf}"/>.<br/>
+    /// - Appartiene a un oggetto JSON che implementa <see cref="IJsonEntity{TParent, TSelf}"/>.<br/>
     /// - Estende <see cref="IJsonComponent"/> e implementa <see cref="IEntityProperty{TSelf, TParent}"/> per supportare l'ownership e l'identificazione.</para>
     /// <para><b>Usage Notes:</b><br/>
     /// - I metodi <c>MarkAsKey</c> e <c>UnmarkAsKey</c> controllano la designazione della proprietà come chiave logica.</para>
     /// </remarks>
     public interface IJsonProperty<TSelf, TParent> : IJsonComponent, IEntityProperty<TSelf, TParent>
         where TSelf : class, IJsonProperty<TSelf, TParent>
-        where TParent : class, IJsonObjectSchema<TParent, TSelf>
+        where TParent : class, IJsonEntity<TParent, TSelf>
     {
         /// <summary>
         /// Designa questa proprietà come chiave logica per l'oggetto JSON proprietario.

@@ -1,4 +1,4 @@
-namespace JsonBridgeEF.Seeding.SourceJson.Exceptions;
+namespace JsonBridgeEF.Seeding.Source.Exceptions;
 
 /// <summary>
 /// <para><b>Domain Concept:</b><br/>
@@ -9,7 +9,7 @@ namespace JsonBridgeEF.Seeding.SourceJson.Exceptions;
 /// Viene utilizzata come base per eccezioni semantiche come blocchi mancanti o promozioni fallite.
 /// </para>
 /// </summary>
-internal abstract class JsonBlockException(string message) : InvalidOperationException(message)
+internal abstract class JsonEntitiesException(string message) : InvalidOperationException(message)
 {
 }
 
@@ -19,20 +19,20 @@ internal abstract class JsonBlockException(string message) : InvalidOperationExc
 /// </para>
 ///
 /// <para><b>Usage:</b><br/>
-/// Viene sollevata da <c>JsonSchemaBlockCollection</c> quando si viola il vincolo di unicità del nome.
+/// Viene sollevata da <c>JsonSchemaJsonEntityCollection</c> quando si viola il vincolo di unicità del nome.
 /// </para>
 ///
 /// <para><b>Example:</b><br/>
-/// <c>throw new BlockAlreadyExistsException("Indirizzo");</c>
+/// <c>throw new JsonEntityAlreadyExistsException("Indirizzo");</c>
 /// </para>
 /// </summary>
-internal class BlockAlreadyExistsException(string blockName)
-    : JsonBlockException($"❌ Esiste già un blocco con il nome '{blockName}'.")
+internal class JsonEntityAlreadyExistsException(string jsonEntityName)
+    : JsonEntitiesException($"❌ Esiste già un blocco con il nome '{jsonEntityName}'.")
 {
     /// <summary>
     /// Nome del blocco duplicato.
     /// </summary>
-    public string BlockName { get; } = blockName;
+    public string JsonEntityName { get; } = jsonEntityName;
 }
 
 /// <summary>
@@ -41,20 +41,20 @@ internal class BlockAlreadyExistsException(string blockName)
 /// </para>
 ///
 /// <para><b>Usage:</b><br/>
-/// Sollevata tipicamente da metodi come <c>GetBlock(string name)</c> su <see cref="JsonSchema"/>.
+/// Sollevata tipicamente da metodi come <c>GetJsonEntity(string name)</c> su <see cref="JsonSchema"/>.
 /// </para>
 ///
 /// <para><b>Example:</b><br/>
-/// <c>throw new BlockNotFoundException("Utente", "Anagrafica");</c>
+/// <c>throw new JsonEntityNotFoundException("Utente", "Anagrafica");</c>
 /// </para>
 /// </summary>
-internal class BlockNotFoundException(string blockName, string schemaName)
-    : JsonBlockException($"❌ Blocco '{blockName}' non trovato nello schema '{schemaName}'.")
+internal class JsonEntityNotFoundException(string jsonEntityName, string schemaName)
+    : JsonEntitiesException($"❌ Blocco '{jsonEntityName}' non trovato nello schema '{schemaName}'.")
 {
     /// <summary>
     /// Nome del blocco mancante.
     /// </summary>
-    public string BlockName { get; } = blockName;
+    public string JsonEntityName { get; } = jsonEntityName;
 
     /// <summary>
     /// Nome dello schema in cui è avvenuta la ricerca.
@@ -68,21 +68,21 @@ internal class BlockNotFoundException(string blockName, string schemaName)
 /// </para>
 ///
 /// <para><b>Usage:</b><br/>
-/// Viene tipicamente generata da metodi come <c>MakeIndependent</c> su <see cref="JsonBlock"/>
+/// Viene tipicamente generata da metodi come <c>MakeIndependent</c> su <see cref="JsonEntities"/>
 /// quando le condizioni per la promozione non sono soddisfatte.
 /// </para>
 ///
 /// <para><b>Example:</b><br/>
-/// <c>throw new BlockPromotionException("Cliente", "CodiceFiscale", "Campo non valido");</c>
+/// <c>throw new JsonEntityPromotionException("Cliente", "CodiceFiscale", "Campo non valido");</c>
 /// </para>
 /// </summary>
-internal class BlockPromotionException(string blockName, string keyFieldName, string reason)
-    : JsonBlockException($"❌ Impossibile promuovere il blocco '{blockName}' come indipendente con chiave '{keyFieldName}': {reason}")
+internal class JsonEntityPromotionException(string jsonEntityName, string keyFieldName, string reason)
+    : JsonEntitiesException($"❌ Impossibile promuovere il blocco '{jsonEntityName}' come indipendente con chiave '{keyFieldName}': {reason}")
 {
     /// <summary>
     /// Nome del blocco coinvolto.
     /// </summary>
-    public string BlockName { get; } = blockName;
+    public string JsonEntityName { get; } = jsonEntityName;
 
     /// <summary>
     /// Nome del campo proposto come chiave.

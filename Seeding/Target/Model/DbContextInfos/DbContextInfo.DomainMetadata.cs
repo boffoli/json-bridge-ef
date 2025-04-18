@@ -1,4 +1,5 @@
 using JsonBridgeEF.Shared.Domain.Interfaces;
+using JsonBridgeEF.Shared.Domain.Model;
 
 namespace JsonBridgeEF.Seeding.Target.Model.DbContextInfos
 {
@@ -8,7 +9,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.DbContextInfos
     /// </summary>
     internal partial class DbContextInfo
     {
-        private readonly IDomainMetadata _metadata;
+        private readonly DomainMetadata _metadata;
 
         /// <inheritdoc />
         public Guid UniqueId => _metadata.UniqueId;

@@ -1,5 +1,7 @@
+using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Model;
 using JsonBridgeEF.Shared.EntityModel.Interfaces;
+using JsonBridgeEF.Shared.EntityModel.Validators;
 
 namespace JsonBridgeEF.Shared.EntityModel.Model
 {
@@ -12,8 +14,9 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
     /// <param name="name">Nome della proprietà (obbligatorio e immutabile).</param>
     /// <param name="parent">Entità proprietaria (obbligatoria e immutabile).</param>
     /// <param name="isKey">Indica se la proprietà è una chiave logica.</param>
-    internal abstract class EntityProperty<TSelf, TEntity>(string name, TEntity parent, bool isKey = false)
-        : ValueNode<TSelf, TEntity>(name, parent), IEntityProperty<TSelf, TEntity>
+    /// <param name="validator">Validatore opzionale per questa proprietà.</param>
+    internal abstract class EntityProperty<TSelf, TEntity>(string name, TEntity parent, bool isKey, IValidateAndFix<TSelf>? validator)
+        : ValueNode<TSelf, TEntity>(name, parent, validator), IEntityProperty<TSelf, TEntity>
         where TSelf : EntityProperty<TSelf, TEntity>, IEntityProperty<TSelf, TEntity>
         where TEntity : class, IEntity<TEntity, TSelf>
     {
@@ -42,7 +45,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
         }
 
         /// <inheritdoc />
-        protected sealed override bool EqualsCore(Node other)
+        protected sealed override bool EqualsCore(Node<TSelf> other)
         {
             if (other is not EntityProperty<TSelf, TEntity> otherProp)
                 return false;
@@ -73,7 +76,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
         protected abstract bool EqualsByValue(TSelf other);
 
         /// <summary>
-        /// Hook per calcolare l'hash specifico nella sottoclasse.
+        /// Hook per calcolare l'hash specifico nella sottoclassa.
         /// </summary>
         /// <returns>Hash code logico della sottoclasse.</returns>
         protected abstract int GetValueHashCode();

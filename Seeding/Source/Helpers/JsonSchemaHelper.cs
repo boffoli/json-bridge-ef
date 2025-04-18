@@ -1,143 +1,140 @@
 using System.Text.Json;
+using JsonBridgeEF.Common.EfEntities.Exceptions;
 using JsonBridgeEF.Common.Repositories;
-using JsonBridgeEF.Seeding.SourceJson.Exceptions;
-using JsonBridgeEF.Seeding.SourceJson.Models;
-using JsonBridgeEF.Common.Exceptions;
-using JsonBridgeEF.Common.EfEntities.Exceptions; // Aggiunto per usare EntityOwnershipMismatchException
+using JsonBridgeEF.Seeding.Source.Exceptions;
+using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
+using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
 
-namespace JsonBridgeEF.Seeding.SourceJson.Helpers
+namespace JsonBridgeEF.Seeding.Source.Helpers;
+
+/// <summary>
+/// <para><b>Domain Concept:</b><br/>
+/// Helper statico per la gestione e validazione di schemi JSON nell’ambito del modello concettuale.
+/// Si occupa di coerenza tra contenuto, nome e relazioni tra schemi, oggetti e proprietà.</para>
+///
+/// <para><b>Usage Notes:</b><br/>
+/// Tutti i metodi sono privi di stato e destinati a essere utilizzati in seeding, import o validazioni manuali.</para>
+///
+/// <para><b>Constraints:</b><br/>
+/// Richiede repository compatibili con <see cref="IRepository{JsonSchema}"/>.  
+/// Gli oggetti coinvolti devono rispettare la semantica DDD e le relazioni di ownership.</para>
+/// </summary>
+internal static class JsonSchemaHelper
 {
+    #region Validazioni
+
     /// <summary>
     /// <para><b>Domain Concept:</b><br/>
-    /// Helper statico dedicato alla validazione e gestione dei JSON Schema.
-    /// Contiene metodi per verificare nomi, contenuti, esistenza di file e generazione dinamica.
+    /// Verifica che il nome di uno schema sia valido e univoco nel contesto del repository.
     /// </para>
-    ///
-    /// <para><b>Usage Notes:</b><br/>
-    /// Tutti i metodi sono statici e privi di stato.  
-    /// Utilizzare prima <c>EnsureFileExists</c> e <c>EnsureJsonContentIsValid</c> prima di creare o registrare uno schema.
-    /// </para>
-    ///
-    /// <para><b>Constraints:</b><br/>
-    /// Richiede un repository compatibile con <see cref="IRepository{JsonSchema}"/> per eseguire le validazioni.
-    /// </para>
-    ///
-    /// <para><b>Creation Strategy:</b><br/>
-    /// Non instanziabile. Usato come helper statico all’interno dei processi di seeding o validazione.
-    /// </para>
-    internal static class JsonSchemaHelper
+    /// <param name="schemaName">Nome proposto per lo schema.</param>
+    /// <param name="repository">Repository su cui effettuare il controllo.</param>
+    /// <exception cref="ArgumentException">Se il nome è nullo o vuoto.</exception>
+    /// <exception cref="SchemaNameAlreadyExistsException">Se il nome è già presente.</exception>
+    public static async Task EnsureSchemaNameIsValidAsync(string schemaName, IRepository<JsonSchema> repository)
     {
-        /// <summary>
-        /// Verifica che il nome fornito per uno schema sia valido e univoco.
-        /// </summary>
-        /// <param name="schemaName">Nome proposto per il nuovo schema.</param>
-        /// <param name="repository">Repository per verificare la presenza nel database.</param>
-        /// <exception cref="ArgumentException">Se il nome è nullo o vuoto.</exception>
-        /// <exception cref="SchemaNameAlreadyExistsException">Se il nome è già presente nel database.</exception>
-        public static async Task ValidateSchemaNameAsync(string schemaName, IRepository<JsonSchema> repository)
-        {
-            if (string.IsNullOrWhiteSpace(schemaName))
-                throw new ArgumentException("Il nome dello schema non può essere vuoto.", nameof(schemaName));
+        if (string.IsNullOrWhiteSpace(schemaName))
+            throw new ArgumentException("Il nome dello schema non può essere vuoto.", nameof(schemaName));
 
-            if (await repository.ExistsAsync(s => s.Name == schemaName))
-                throw new SchemaNameAlreadyExistsException(schemaName);
+        if (await repository.ExistsAsync(s => s.Name == schemaName))
+            throw new SchemaNameAlreadyExistsException(schemaName);
+    }
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Verifica che il contenuto di uno schema JSON sia unico, evitando duplicazioni semantiche.
+    /// </para>
+    /// <param name="jsonSchemaContent">Contenuto JSON da validare.</param>
+    /// <param name="repository">Repository per il controllo.</param>
+    /// <param name="forceSave">Indica se ignorare il vincolo in caso di duplicato.</param>
+    /// <exception cref="SchemaContentAlreadyExistsException">Se il contenuto è già presente e non è forzato il salvataggio.</exception>
+    public static async Task EnsureSchemaContentIsUniqueAsync(string jsonSchemaContent, IRepository<JsonSchema> repository, bool forceSave)
+    {
+        var existing = await repository.FirstOrDefaultAsync(s => s.JsonSchemaContent == jsonSchemaContent);
+        if (existing is not null && !forceSave)
+            throw new SchemaContentAlreadyExistsException(existing.Name);
+    }
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Verifica che il file JSON fornito esista sul filesystem.
+    /// </para>
+    /// <param name="filePath">Percorso assoluto del file.</param>
+    /// <exception cref="ArgumentException">Se il percorso è nullo o vuoto.</exception>
+    /// <exception cref="JsonFileNotFoundException">Se il file non è trovato.</exception>
+    public static void EnsureFileExists(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("Il percorso del file è nullo o vuoto.", nameof(filePath));
+
+        if (!File.Exists(filePath))
+            throw new JsonFileNotFoundException(filePath);
+    }
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Verifica che un contenuto JSON sia ben formato secondo la sintassi.
+    /// </para>
+    /// <param name="jsonContent">Contenuto da validare.</param>
+    /// <exception cref="InvalidJsonContentException">Se il contenuto è nullo o non valido.</exception>
+    public static void EnsureJsonContentIsValid(string? jsonContent)
+    {
+        if (string.IsNullOrWhiteSpace(jsonContent))
+            throw new InvalidJsonContentException("Il contenuto JSON è nullo o vuoto.");
+
+        try
+        {
+            using var doc = JsonDocument.Parse(jsonContent);
         }
-
-        /// <summary>
-        /// Verifica che il contenuto JSON non sia già presente in un altro schema.
-        /// </summary>
-        /// <param name="jsonSchemaContent">Contenuto dello schema da confrontare.</param>
-        /// <param name="repository">Repository per accedere agli schemi esistenti.</param>
-        /// <param name="forceSave">Se true, bypassa la validazione.</param>
-        /// <exception cref="SchemaContentAlreadyExistsException">Se lo schema esiste e <c>forceSave</c> è false.</exception>
-        public static async Task ValidateSchemaContentAsync(string jsonSchemaContent, IRepository<JsonSchema> repository, bool forceSave)
+        catch (JsonException ex)
         {
-            var existingSchema = await repository.FirstOrDefaultAsync(s => s.JsonSchemaContent == jsonSchemaContent);
-            if (existingSchema != null && !forceSave)
-                throw new SchemaContentAlreadyExistsException(existingSchema.Name);
-        }
-
-        /// <summary>
-        /// Verifica l’esistenza fisica del file JSON specificato.
-        /// </summary>
-        /// <param name="filePath">Percorso completo del file da controllare.</param>
-        /// <exception cref="ArgumentException">Se il percorso è nullo o vuoto.</exception>
-        /// <exception cref="JsonFileNotFoundException">Se il file non esiste sul disco.</exception>
-        public static void EnsureFileExists(string filePath)
-        {
-            if (string.IsNullOrWhiteSpace(filePath))
-                throw new ArgumentException("❌ Percorso file JSON non valido o inesistente.", nameof(filePath));
-
-            if (!File.Exists(filePath))
-                throw new JsonFileNotFoundException(filePath);
-        }
-
-        /// <summary>
-        /// Verifica che il contenuto JSON fornito sia sintatticamente valido.
-        /// </summary>
-        /// <param name="jsonContent">Contenuto JSON da validare.</param>
-        /// <exception cref="InvalidJsonContentException">Se il contenuto è nullo o vuoto.</exception>
-        public static void EnsureJsonContentIsValid(string? jsonContent)
-        {
-            if (string.IsNullOrWhiteSpace(jsonContent))
-                throw new InvalidJsonContentException("The JSON content is empty or null.");
-
-            try
-            {
-                using var doc = JsonDocument.Parse(jsonContent);
-            }
-            catch (JsonException ex)
-            {
-                throw new InvalidJsonContentException("The JSON content is not syntactically valid.", ex);
-            }
-        }
-
-        /// <summary>
-        /// Genera uno schema JSON a partire da un esempio di JSON.
-        /// </summary>
-        /// <param name="sampleJsonContent">Contenuto JSON di esempio.</param>
-        /// <returns>Schema JSON generato in formato stringa.</returns>
-        /// <exception cref="InvalidJsonContentException">Se il contenuto è vuoto o non valido.</exception>
-        public static string GenerateJsonSchemaFromSample(string sampleJsonContent)
-        {
-            EnsureJsonContentIsValid(sampleJsonContent);
-            var schema = NJsonSchema.JsonSchema.FromSampleJson(sampleJsonContent);
-            return schema.ToJson();
-        }
-
-        /// <summary>
-        /// Carica il contenuto JSON da un file su disco.
-        /// </summary>
-        /// <param name="filePath">Percorso assoluto del file JSON.</param>
-        /// <returns>Contenuto completo del file come stringa.</returns>
-        /// <exception cref="JsonFileNotFoundException">Se il file non esiste.</exception>
-        public static async Task<string> ReadJsonFileAsync(string filePath)
-        {
-            EnsureFileExists(filePath);
-            return await File.ReadAllTextAsync(filePath);
-        }
-
-        /// <summary>
-        /// <para><b>Domain Concept:</b><br/>
-        /// Verifica che il blocco specificato sia effettivamente collegato allo schema fornito.<br/>
-        /// Utilizza il riferimento oggetto e non gli identificatori numerici.
-        /// </para>
-        ///
-        /// <para><b>Usage:</b><br/>
-        /// Può essere utilizzato nei seeder o nei validatori per assicurare coerenza tra blocco e schema.
-        /// </para>
-        ///
-        /// <param name="schema">Istanza dello schema JSON atteso.</param>
-        /// <param name="block">Istanza del blocco da verificare.</param>
-        /// <exception cref="EntityOwnershipMismatchException">
-        /// Se il blocco non è associato allo schema fornito.
-        /// </exception>
-        public static void EnsureBlockBelongsToSchema(JsonSchema schema, JsonBlock block)
-        {
-            if (!ReferenceEquals(block.Owner, schema))
-            {
-                throw new EntityOwnershipMismatchException(block.Name, schema.Name);
-            }
+            throw new InvalidJsonContentException("Il contenuto JSON non è valido.", ex);
         }
     }
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Garantisce che un’entità JSON appartenga effettivamente allo schema previsto.
+    /// </para>
+    /// <param name="schema">Schema di riferimento.</param>
+    /// <param name="jsonEntity">Entità da validare.</param>
+    /// <exception cref="EntityOwnershipMismatchException">Se la relazione tra blocco e schema è incoerente.</exception>
+    public static void EnsureJsonEntityBelongsToSchema(JsonSchema schema, JsonEntity jsonEntity)
+    {
+        if (!ReferenceEquals(jsonEntity.Schema, schema))
+            throw new EntityOwnershipMismatchException(jsonEntity.Name, schema.Name);
+    }
+
+    #endregion
+
+    #region Generazione e Lettura
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Genera uno schema JSON valido a partire da un esempio di JSON di input.
+    /// </para>
+    /// <param name="sampleJsonContent">Contenuto di esempio.</param>
+    /// <returns>Lo schema JSON generato.</returns>
+    /// <exception cref="InvalidJsonContentException">Se l’esempio è malformato.</exception>
+    public static string GenerateSchemaFromSample(string sampleJsonContent)
+    {
+        EnsureJsonContentIsValid(sampleJsonContent);
+        var schema = NJsonSchema.JsonSchema.FromSampleJson(sampleJsonContent);
+        return schema.ToJson();
+    }
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Legge un file JSON da disco in modo asincrono e restituisce il contenuto.
+    /// </para>
+    /// <param name="filePath">Percorso del file.</param>
+    /// <returns>Contenuto del file come stringa.</returns>
+    /// <exception cref="JsonFileNotFoundException">Se il file non esiste.</exception>
+    public static async Task<string> ReadJsonFileContentAsync(string filePath)
+    {
+        EnsureFileExists(filePath);
+        return await File.ReadAllTextAsync(filePath);
+    }
+
+    #endregion
 }

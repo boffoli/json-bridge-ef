@@ -23,21 +23,21 @@ namespace JsonBridgeEF.Seeding.Mapping.Abstractions
         /// Collezione di regole di mapping a livello di blocco.
         /// Ogni regola definisce come un blocco JSON viene mappato su una classe target.
         /// </summary>
-        IReadOnlyCollection<IBlockMappingRule> BlockMappingRules { get; }
+        IReadOnlyCollection<IJsonEntityMappingRule> JsonEntityMappingRules { get; }
 
         /// <summary>
         /// Aggiunge una nuova regola di mapping a livello di blocco al progetto.
         /// </summary>
-        /// <param name="blockMappingRule">La regola di mapping del blocco da aggiungere.</param>
-        void AddBlockMappingRule(IBlockMappingRule blockMappingRule);
+        /// <param name="jsonEntityMappingRule">La regola di mapping del blocco da aggiungere.</param>
+        void AddJsonEntityMappingRule(IJsonEntityMappingRule jsonEntityMappingRule);
     }
 
     /// <summary>
     /// Interfaccia per la regola di mapping che lega un blocco JSON (fonte) a una classe target (destinazione).
-    /// Il blocco JSON è rappresentato da un oggetto conforme a IJsonObjectSchema, mentre la classe target è
+    /// Il blocco JSON è rappresentato da un oggetto conforme a IJsonEntity, mentre la classe target è
     /// rappresentata da un IClassModel.
     /// </summary>
-    public interface IBlockMappingRule
+    public interface IJsonEntityMappingRule
     {
         /// <summary>
         /// Nome univoco della regola di mapping per il blocco.
@@ -45,9 +45,9 @@ namespace JsonBridgeEF.Seeding.Mapping.Abstractions
         string Name { get; }
 
         /// <summary>
-        /// Il blocco JSON sorgente da mappare, ad es. un oggetto che implementa IJsonObjectSchema.
+        /// Il blocco JSON sorgente da mappare, ad es. un oggetto che implementa IJsonEntity.
         /// </summary>
-        IJsonObjectSchema JsonBlock { get; }
+        IJsonEntity JsonEntities { get; }
 
         /// <summary>
         /// La classe target in cui verranno mappati i dati.
@@ -129,12 +129,12 @@ namespace JsonBridgeEF.Seeding.Mapping.Abstractions
         /// Collezione di regole di mapping a livello di blocco che contribuiscono al mapping composito.
         /// Ogni regola specifica il mapping di un blocco JSON contenente una parte dei dati.
         /// </summary>
-        IReadOnlyCollection<IBlockMappingRule> BlockMappingRules { get; }
+        IReadOnlyCollection<IJsonEntityMappingRule> JsonEntityMappingRules { get; }
 
         /// <summary>
         /// Aggiunge una nuova regola di mapping a livello di blocco alla regola composita.
         /// </summary>
-        /// <param name="blockMappingRule">La regola di mapping del blocco da aggiungere.</param>
-        void AddBlockMappingRule(IBlockMappingRule blockMappingRule);
+        /// <param name="jsonEntityMappingRule">La regola di mapping del blocco da aggiungere.</param>
+        void AddJsonEntityMappingRule(IJsonEntityMappingRule jsonEntityMappingRule);
     }
 }

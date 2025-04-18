@@ -4,7 +4,7 @@ namespace JsonBridgeEF.Common.Validators
     /// Interfaccia generica per validare e correggere un'istanza.
     /// </summary>
     /// <typeparam name="TModel">Il tipo del modello da validare e correggere.</typeparam>
-    public interface IValidateAndFix<in TModel>
+    public interface IValidateAndFix<TModel>
     {
         /// <summary>
         /// Verifica che l'istanza sia valida.

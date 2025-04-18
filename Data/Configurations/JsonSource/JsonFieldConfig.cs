@@ -15,11 +15,11 @@ namespace JsonBridgeEF.Data.Configurations.JsonSource
             // 🔹 Chiave primaria
             builder.HasKey(f => f.Id);
 
-            // 🔹 La FK verso JsonBlock è obbligatoria
+            // 🔹 La FK verso JsonEntities è obbligatoria
             builder.Property(f => f.OwnerId)
                    .IsRequired();
 
-            // 🔹 Relazione con JsonBlock (1:N) - Cascade delete
+            // 🔹 Relazione con JsonEntities (1:N) - Cascade delete
             builder.HasOne(f => f.Owner)
                    .WithMany(b => b.Entities)
                    .HasForeignKey(f => f.OwnerId)

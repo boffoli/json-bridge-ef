@@ -47,7 +47,7 @@ namespace JsonBridgeEF.Seeding.SourceJson.Validators
         private static void ValidateOwner(JsonField model)
         {
             if (model.Owner == null)
-                throw new ValidationException("The JsonField must have a valid owner (JsonBlock).");
+                throw new ValidationException("The JsonField must have a valid owner (JsonEntities).");
         }
 
         // ======================== UNIQUE ID ========================

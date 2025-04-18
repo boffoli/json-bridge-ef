@@ -57,7 +57,7 @@ internal sealed class TargetDbContextInfo : BaseEfEntity<TargetDbContextInfo>
     /// </summary>
     /// <param name="namespace">Namespace del DbContext di destinazione.</param>
     /// <param name="validator">Validatore opzionale per applicare regole custom.</param>
-    public static TargetDbContextInfo Create(string @namespace, IValidateAndFix<TargetDbContextInfo>? validator = null)
+    public static TargetDbContextInfo Create(string @namespace, IValidateAndFix<TargetDbContextInfo>? validator)
     {
         var instance = new TargetDbContextInfo(validator)
         {

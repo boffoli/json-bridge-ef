@@ -21,21 +21,6 @@ namespace JsonBridgeEF.Shared.Dag.Interfaces
     }
 
     /// <summary>
-    /// Interfaccia marker per definire il contesto tipizzato di nodi in una gerarchia aggregato/valore.
-    /// </summary>
-    /// <typeparam name="TAggregate">Tipo dell'aggregato.</typeparam>
-    /// <typeparam name="TValue">Tipo del nodo foglia.</typeparam>
-    /// <remarks>
-    /// <para><b>Domain Concept:</b><br/>
-    /// Lega semanticamente entità e proprietà, definendo il contesto della gerarchia nel grafo.</para>
-    /// </remarks>
-    public interface INode<TAggregate, TValue> : INode
-        where TAggregate : class, IAggregateNode<TAggregate, TValue>
-        where TValue : class, IValueNode<TValue, TAggregate>
-    {
-    }
-
-    /// <summary>
     /// Domain Interface: Nodo aggregato in un grafo.
     /// </summary>
     /// <typeparam name="TSelf">Il tipo concreto dell'aggregato.</typeparam>
@@ -52,8 +37,8 @@ namespace JsonBridgeEF.Shared.Dag.Interfaces
     /// - Aggrega nodi aggregati e nodi foglia, in una navigazione strettamente discendente.</para>
     /// </remarks>
     public interface IAggregateNode<TSelf, TValue> : INode
-        where TSelf : class, IAggregateNode<TSelf, TValue>
-        where TValue : class, IValueNode<TValue, TSelf>
+        where TSelf  : class, IAggregateNode<TSelf, TValue>
+        where TValue: class, IValueNode<TValue, TSelf>
     {
         /// <summary>
         /// Collezione in sola lettura dei nodi aggregati figli.
@@ -72,7 +57,7 @@ namespace JsonBridgeEF.Shared.Dag.Interfaces
         /// <remarks>
         /// <para><b>Preconditions:</b><br/>
         /// - Il nodo <paramref name="child"/> non può essere <c>null</c>.<br/>
-        /// - Non può essere lo stesso nodo (auto-riferimento non ammesso).<br/>
+        /// - Non può essere lo stesso nodo (auto‑riferimento non ammesso).<br/>
         /// - L'aggiunta non deve creare cicli nella struttura.</para>
         /// <para><b>Postconditions:</b><br/>
         /// - Il nodo viene aggiunto a <c>SelfChildren</c> se supera le validazioni.</para>
@@ -113,8 +98,8 @@ namespace JsonBridgeEF.Shared.Dag.Interfaces
     /// - Fa parte della struttura aggregata definita dal nodo <typeparamref name="TAggregate"/>.</para>
     /// </remarks>
     public interface IValueNode<TSelf, TAggregate> : INode
-        where TSelf : class, IValueNode<TSelf, TAggregate>
-        where TAggregate : class, IAggregateNode<TAggregate, TSelf>
+        where TSelf     : class, IValueNode<TSelf, TAggregate>
+        where TAggregate: class, IAggregateNode<TAggregate, TSelf>
     {
         /// <summary>
         /// Nodo aggregato proprietario di questo nodo foglia.

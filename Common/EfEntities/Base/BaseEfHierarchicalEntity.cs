@@ -58,7 +58,7 @@ public abstract class BaseEfHierarchicalEntity<TSelf>
     /// </summary>
     /// <param name="name">Nome dell'entità.</param>
     /// <param name="validator">Validatore opzionale per le regole di dominio.</param>
-    protected BaseEfHierarchicalEntity(string name, IValidateAndFix<TSelf>? validator = null)
+    protected BaseEfHierarchicalEntity(string name, IValidateAndFix<TSelf>? validator)
         : base(name, validator)
     {
         _manager = new HierarchicalEntityManager<TSelf>((TSelf)this);

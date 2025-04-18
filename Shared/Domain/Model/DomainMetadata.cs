@@ -48,9 +48,9 @@ namespace JsonBridgeEF.Shared.Domain.Model
         /// Costruttore: Inizializza i metadati con il nome da cui derivare lo slug e la descrizione opzionale.
         /// </summary>
         /// <param name="name">Il nome dell'entità, usato per generare lo slug.</param>
-        /// <param name="description">Una descrizione opzionale dell'entità.</param>
+        /// <param name="description">Una descrizione dell'entità.</param>
         /// <exception cref="ArgumentException">Se <paramref name="name"/> è nullo o vuoto.</exception>
-        public DomainMetadata(string name, string? description = null)
+        public DomainMetadata(string name, string? description)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Il nome non può essere nullo o vuoto.", nameof(name));

@@ -5,12 +5,12 @@ using JsonBridgeEF.Common.Validators;
 namespace JsonBridgeEF.Seeding.SourceJson.Models;
 
 /// <summary>
-/// Domain Entity: Campo JSON appartenente a un <see cref="JsonBlock"/>, identificato da un nome univoco
+/// Domain Entity: Campo JSON appartenente a un <see cref="JsonEntities"/>, identificato da un nome univoco
 /// e da un percorso logico all'interno della struttura JSON. Può essere designato come chiave logica del blocco.
 /// </summary>
 /// <remarks>
 /// <para><b>Domain Concept:</b><br/>
-/// Un <c>JsonField</c> rappresenta una proprietà di un oggetto JSON, mappata come sotto-elemento di un <see cref="JsonBlock"/>.
+/// Un <c>JsonField</c> rappresenta una proprietà di un oggetto JSON, mappata come sotto-elemento di un <see cref="JsonEntities"/>.
 /// Ogni campo ha un nome, un percorso sorgente nel JSON, e può essere utilizzato come identificatore logico (chiave).</para>
 ///
 /// <para><b>Creation Strategy:</b><br/>
@@ -20,16 +20,16 @@ namespace JsonBridgeEF.Seeding.SourceJson.Models;
 /// <para><b>Constraints:</b><br/>
 /// - <c>Name</c> e <c>SourceFieldPath</c> sono obbligatori.<br/>
 /// - <c>SourceFieldPath</c> non può essere vuoto o nullo.<br/>
-/// - Il blocco di appartenenza deve essere valido e coerente con il tipo <see cref="JsonBlock"/>.</para>
+/// - Il blocco di appartenenza deve essere valido e coerente con il tipo <see cref="JsonEntities"/>.</para>
 ///
 /// <para><b>Relationships:</b><br/>
-/// - Appartiene a un <see cref="JsonBlock"/> che implementa <see cref="IWithKeyedEntities{JsonField}"/>.<br/>
+/// - Appartiene a un <see cref="JsonEntities"/> che implementa <see cref="IWithKeyedEntities{JsonField}"/>.<br/>
 /// - Registrato automaticamente nella collezione del blocco al momento della creazione.</para>
 ///
 /// <para><b>Usage Notes:</b><br/>
 /// Utilizzare per modellare proprietà dinamiche dei blocchi JSON, eventualmente marcabili come chiave logica.
 /// Il valore <see cref="IsKey"/> viene gestito dalla collezione nel blocco.</para>
-public sealed class JsonField : BaseEfKeyedOwnedEntity<JsonField, JsonBlock>
+public sealed class JsonField2 : BaseEfKeyedOwnedEntity<JsonField, JsonEntities>
 {
     // 🔹 COSTRUTTORE RISERVATO A EF CORE 🔹
 
@@ -53,10 +53,10 @@ public sealed class JsonField : BaseEfKeyedOwnedEntity<JsonField, JsonBlock>
     /// Domain Constructor: Crea un nuovo campo JSON con nome, blocco e percorso sorgente.
     /// </summary>
     /// <param name="name">Nome univoco del campo all’interno del blocco.</param>
-    /// <param name="block">Blocco JSON a cui il campo appartiene.</param>
+    /// <param name="jsonEntity">Blocco JSON a cui il campo appartiene.</param>
     /// <param name="validator">Validatore opzionale per la logica di dominio.</param>
-    public JsonField(string name, JsonBlock block, IValidateAndFix<JsonField>? validator = null)
-        : base(name, block, validator)
+    public JsonField(string name, JsonEntities jsonEntity, IValidateAndFix<JsonField>? validator)
+        : base(name, jsonEntity, validator)
     {
     }
 
