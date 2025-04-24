@@ -1,30 +1,76 @@
-namespace JsonBridgeEF.Seeding.Source.Exceptions;
-
-/// <summary>
-/// <para><b>Domain Concept:</b><br/>
-/// Eccezione specifica per errori nella definizione di relazioni tra blocchi JSON,
-/// come cicli, autoreferenze o inversioni logiche padre-figlio.
-/// </para>
-///
-/// <para><b>Usage:</b><br/>
-/// Sollevata da <see cref="Support.RelationshipGuard"/> quando una relazione tra blocchi è logicamente invalida.
-/// </para>
-///
-/// <para><b>Example:</b><br/>
-/// <c>throw new JsonEntityRelationshipException("Un blocco non può essere padre di sé stesso.");</c>
-/// </para>
-/// </summary>
-public sealed class JsonEntityRelationshipException : Exception
+namespace JsonBridgeEF.Seeding.Source.Exceptions
 {
     /// <summary>
-    /// Crea una nuova istanza con il messaggio di errore specificato.
+    /// <para><b>Domain Concept:</b><br/>
+    /// Eccezione base per tutte le anomalie relazionali tra blocchi JSON.</para>
     /// </summary>
-    public JsonEntityRelationshipException(string message)
-        : base(message) { }
+    public abstract class JsonRelationshipException : JsonEntityException
+    {
+        protected JsonRelationshipException(string message) : base(message) { }
+        protected JsonRelationshipException(string message, Exception? inner) : base(message, inner ?? new Exception()) { }
+    }
 
     /// <summary>
-    /// Crea una nuova istanza con un messaggio e un’eccezione interna.
+    /// Eccezione per autoreferenza padre-figlio.
     /// </summary>
-    public JsonEntityRelationshipException(string message, Exception innerException)
-        : base(message, innerException) { }
+    internal sealed class JsonSelfParentException : JsonRelationshipException
+    {
+        public JsonSelfParentException(string blockName)
+            : base($"❌ Il blocco '{blockName}' non può essere padre di sé stesso.") { }
+    }
+
+    /// <summary>
+    /// Eccezione per riferimento circolare tra blocchi.
+    /// </summary>
+    internal sealed class JsonCircularReferenceException : JsonRelationshipException
+    {
+        public JsonCircularReferenceException(string source, string target)
+            : base($"❌ Rilevato ciclo diretto tra '{source}' e '{target}'.") { }
+    }
+
+    /// <summary>
+    /// Eccezione per relazione invertita padre-figlio.
+    /// </summary>
+    internal sealed class JsonInvertedParentingException : JsonRelationshipException
+    {
+        public JsonInvertedParentingException(string parent, string child)
+            : base($"❌ Relazione invertita: '{parent}' non può essere figlio di '{child}'.") { }
+    }
+
+    /// <summary>
+    /// Eccezione per relazione ridondante già definita.
+    /// </summary>
+    internal sealed class JsonRedundantRelationshipException : JsonRelationshipException
+    {
+        public JsonRedundantRelationshipException(string parent, string child)
+            : base($"❌ La relazione padre-figlio '{parent} → {child}' è già stata definita.") { }
+    }
+
+    /// <summary>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Factory per istanziare eccezioni relazionali tra blocchi JSON.</para>
+    /// </summary>
+    internal static class JsonRelationshipError
+    {
+        public static JsonRelationshipException SelfParent(string blockName) =>
+            new JsonSelfParentException(blockName);
+
+        public static JsonRelationshipException CircularReference(string source, string target) =>
+            new JsonCircularReferenceException(source, target);
+
+        public static JsonRelationshipException InvertedParenting(string parent, string child) =>
+            new JsonInvertedParentingException(parent, child);
+
+        public static JsonRelationshipException Redundant(string parent, string child) =>
+            new JsonRedundantRelationshipException(parent, child);
+
+        public static JsonRelationshipException WithInner(string message, Exception inner) =>
+            new JsonRelationshipGenericException(message, inner);
+    }
+
+    internal sealed class JsonRelationshipGenericException : JsonRelationshipException
+    {
+        public JsonRelationshipGenericException(string message, Exception inner)
+            : base(message, inner) { }
+    }
 }

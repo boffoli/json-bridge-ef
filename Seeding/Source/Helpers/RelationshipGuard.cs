@@ -37,7 +37,7 @@ internal static class RelationshipGuard
     public static void EnsureNotSelfReference(JsonEntity parent, JsonEntity child)
     {
         if (ReferenceEquals(parent, child))
-            throw new JsonEntityRelationshipException("Un blocco non può essere padre di sé stesso.");
+            throw JsonRelationshipError.SelfParent(child.Name);
     }
 
     /// <summary>
@@ -46,15 +46,14 @@ internal static class RelationshipGuard
     /// </para>
     /// <param name="parent">Blocco padre proposto.</param>
     /// <param name="child">Blocco figlio proposto.</param>
-    /// <exception cref="JsonEntityRelationshipException">
+    /// <exception cref="JsonRelationshipException">
     /// Se il blocco figlio è già padre diretto del blocco proposto come padre.
     /// </exception>
     public static void EnsureNotReverseReference(JsonEntity parent, JsonEntity child)
     {
         if (child.Parents.Contains(parent))
         {
-            throw new JsonEntityRelationshipException(
-                $"Relazione non valida: il blocco '{child.Name}' è già padre del blocco '{parent.Name}' (inversione diretta).");
+            throw JsonRelationshipError.InvertedParenting(parent.Name, child.Name);
         }
     }
 
@@ -71,8 +70,7 @@ internal static class RelationshipGuard
     {
         if (IsRecursiveReference(parent, child))
         {
-            throw new JsonEntityRelationshipException(
-                $"Relazione non valida: aggiungendo il blocco '{child.Name}' come figlio di '{parent.Name}' si creerebbe una dipendenza ciclica.");
+            throw JsonRelationshipError.CircularReference(parent.Name, child.Name);
         }
     }
 

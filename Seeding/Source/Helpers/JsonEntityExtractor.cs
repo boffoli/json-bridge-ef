@@ -1,4 +1,5 @@
 using System.Text.Json;
+using JsonBridgeEF.Seeding.Source.Exceptions;
 using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
 using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
 using JsonBridgeEF.Seeding.Source.Validators;
@@ -35,41 +36,39 @@ internal static class JsonEntityExtractor
     /// <returns>Lista piatta dei blocchi estratti, ciascuno già registrato nello schema.</returns>
     public static IReadOnlyList<JsonEntity> ExtractJsonEntity(JsonSchema schema)
     {
-        using var jsonDoc = JsonDocument.Parse(schema.JsonSchemaContent);
-        var jsonEntity = new List<JsonEntity>();
+        try
+        {
+            using var jsonDoc = JsonDocument.Parse(schema.JsonSchemaContent);
+            var jsonEntity = new List<JsonEntity>();
 
-        // 🔁 Avvia ricorsione dal nodo root
-        ExtractJsonEntityRecursive(jsonDoc.RootElement, schema, parentJsonEntity: null, jsonEntity);
+            // 🔁 Avvia ricorsione dal nodo root
+            ExtractJsonEntityRecursive(jsonDoc.RootElement, schema, parentJsonEntity: null, jsonEntity);
 
-        return jsonEntity;
+            return jsonEntity;
+        }
+        catch (JsonException ex)
+        {
+            throw JsonSchemaError.InvalidJsonContent("Errore durante il parsing del contenuto JSON dello schema.", ex);
+        }
+        catch (ArgumentNullException ex)
+        {
+            throw JsonSchemaError.InvalidJsonContent("Il contenuto dello schema JSON è nullo.", ex);
+        }
     }
 
-    /// <summary>
-    /// Estrae i blocchi JSON da un elemento e li collega ricorsivamente in modo padre-figlio.
-    /// Usa factory method per garantire integrità e consistenza del dominio.
-    /// </summary>
-    /// <param name="element">Elemento JSON di partenza.</param>
-    /// <param name="schema">Schema a cui i blocchi appartengono.</param>
-    /// <param name="parentJsonEntity">Blocco padre (null se radice).</param>
-    /// <param name="candidates">Lista cumulativa dei blocchi estratti.</param>
     private static void ExtractJsonEntityRecursive(JsonElement element, JsonSchema schema, JsonEntity? parentJsonEntity, List<JsonEntity> candidates)
     {
-        // 🔒 Verifica che l'elemento sia un oggetto JSON valido
         if (element.ValueKind != JsonValueKind.Object)
             return;
 
-        // 🔍 Cerca la sezione "properties" che definisce i blocchi figli
         if (!element.TryGetProperty("properties", out JsonElement properties))
             return;
 
         foreach (var property in properties.EnumerateObject())
         {
             string jsonEntityName = property.Name;
-
-            // 📝 Descrizione automatica del blocco
             var entityDescription = $"Blocco JSON '{jsonEntityName}' estratto dallo schema.";
 
-            // 🧱 CREAZIONE BLOCCO (schema + nome + descrizione)
             var currentJsonEntity = new JsonEntity(
                 name: jsonEntityName,
                 schema: schema,
@@ -77,15 +76,12 @@ internal static class JsonEntityExtractor
                 validator: new JsonEntityValidator()
             );
 
-            // 🔁 RELAZIONE PADRE-FIGLIO (se applicabile)
             parentJsonEntity?.AddChild(currentJsonEntity);
 
-            // 🧩 ESTRAZIONE CAMPI SE IL BLOCCO CONTIENE PROPRIETÀ
             if (property.Value.TryGetProperty("properties", out JsonElement subProperties))
             {
                 foreach (var subProperty in subProperties.EnumerateObject())
                 {
-                    // 📝 Descrizione automatica o da attributo "description"
                     var fieldDescription = subProperty.Value.TryGetProperty("description", out var descElement)
                         ? descElement.GetString() ?? $"Campo '{subProperty.Name}'"
                         : $"Campo '{subProperty.Name}' di tipo primitivo";
@@ -100,7 +96,6 @@ internal static class JsonEntityExtractor
                 }
             }
 
-            // ➕ Aggiunta del blocco alla lista dei risultati
             candidates.Add(currentJsonEntity);
 
             // 🔁 RICORSIONE SU OGGETTI O ARRAY
@@ -114,6 +109,14 @@ internal static class JsonEntityExtractor
                 else if (type == "array" && property.Value.TryGetProperty("items", out JsonElement arrayItems))
                 {
                     ExtractJsonEntityRecursive(arrayItems, schema, currentJsonEntity, candidates);
+                }
+                else
+                {
+                    throw JsonEntityError.InvalidTypeProperty(
+                        entityName: currentJsonEntity.Name,
+                        propertyName: property.Name,
+                        type: type
+                    );
                 }
             }
         }

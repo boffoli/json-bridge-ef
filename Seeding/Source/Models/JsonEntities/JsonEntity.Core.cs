@@ -1,5 +1,5 @@
-using System;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Seeding.Source.Exceptions;
 using JsonBridgeEF.Seeding.Source.Interfaces;
 using JsonBridgeEF.Seeding.Source.Model.JsonProperties;
 using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
@@ -7,7 +7,6 @@ using JsonBridgeEF.Shared.Domain.Interfaces;
 using JsonBridgeEF.Shared.Domain.Model;
 using JsonBridgeEF.Shared.EfPersistance.Interfaces;
 using JsonBridgeEF.Shared.EntityModel.Model;
-using JsonBridgeEF.Shared.Navigation.Interfaces;
 
 namespace JsonBridgeEF.Seeding.Source.Model.JsonEntities
 {
@@ -43,7 +42,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonEntities
             IValidateAndFix<JsonEntity>? validator)
             : base(name, validator)
         {
-            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            Schema = schema ?? throw JsonEntityError.InvalidSchemaReference();
             _metadata = new DomainMetadata(name, description);
 
             // Relazione unidirezionale: registra questo oggetto nello schema
@@ -83,8 +82,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonEntities
                 }
             }
 
-            throw new InvalidOperationException(
-                $"Nessuna proprietà trovata con il nome '{propertyName}' o oggetto già identificabile.");
+            throw JsonEntityError.KeyPromotionFailed(propertyName);
         }
 
         /// <inheritdoc />

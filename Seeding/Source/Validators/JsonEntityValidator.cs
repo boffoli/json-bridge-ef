@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Seeding.Source.Exceptions;
 using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
 using JsonBridgeEF.Seeding.Source.Model.JsonProperties;
 using JsonBridgeEF.Seeding.Source.Model.JsonSchemas;
@@ -33,10 +33,10 @@ namespace JsonBridgeEF.Seeding.Source.Validators
             base.EnsureValid(model);
 
             // validazione specifica: lo schema non può essere null
-            ValidateSchema(model.Schema);
+            ValidateSchema(model.Schema, model.Name);
 
             // validazione aggiuntiva: descrizione non troppo lunga
-            ValidateDescription(model.Description);
+            ValidateDescription(model.Description, model.Name);
         }
 
         /// <inheritdoc/>
@@ -50,19 +50,19 @@ namespace JsonBridgeEF.Seeding.Source.Validators
         /// <summary>
         /// Verifica che l'entità abbia uno schema JSON associato.
         /// </summary>
-        private static void ValidateSchema(JsonSchema? schema)
+        private static void ValidateSchema(JsonSchema? schema, string jsonEntityName)
         {
             if (schema == null)
-                throw new ValidationException("The JsonEntity must have a valid owner (JsonSchema).");
+                throw JsonEntityError.MissingSchemaReference(jsonEntityName);
         }
 
         /// <summary>
         /// Verifica che la descrizione non ecceda la lunghezza massima consentita.
         /// </summary>
-        private static void ValidateDescription(string? description)
+        private static void ValidateDescription(string? description, string jsonEntityName)
         {
             if (description != null && description.Length > MaxDescriptionLength)
-                throw new ValidationException($"Description cannot exceed {MaxDescriptionLength} characters.");
+                throw JsonEntityError.DescriptionTooLong(jsonEntityName, MaxDescriptionLength);
         }
 
         /// <summary>

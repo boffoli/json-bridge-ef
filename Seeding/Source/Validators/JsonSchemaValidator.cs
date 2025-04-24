@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Seeding.Source.Exceptions;
 using JsonBridgeEF.Seeding.Source.Helpers;
@@ -22,28 +19,23 @@ namespace JsonBridgeEF.Seeding.Source.Validators
     /// <para><b>Usage Notes:</b>  
     /// Valido per ambienti di seeding o validazione dominio pre-persistenza.</para>
     /// </remarks>
-    internal sealed class JsonSchemaValidator : IValidateAndFix<JsonSchema>
+    /// <remarks>
+    /// Costruttore con injection opzionale del validatore dei blocchi JSON.
+    /// </remarks>
+    /// <param name="jsonEntityValidator">
+    /// Validatore per <see cref="JsonEntity"/>. 
+    /// Se <c>null</c>, viene usato <see cref="JsonEntityValidator"/>.
+    /// </param>
+    internal sealed class JsonSchemaValidator(IValidateAndFix<JsonEntity>? jsonEntityValidator = null) : IValidateAndFix<JsonSchema>
     {
-        private readonly IValidateAndFix<JsonEntity> _jsonEntityValidator;
+        private readonly IValidateAndFix<JsonEntity> _jsonEntityValidator = jsonEntityValidator ?? new JsonEntityValidator();
         private const int MaxDescriptionLength = 1000;
-
-        /// <summary>
-        /// Costruttore con injection opzionale del validatore dei blocchi JSON.
-        /// </summary>
-        /// <param name="jsonEntityValidator">
-        /// Validatore per <see cref="JsonEntity"/>. 
-        /// Se <c>null</c>, viene usato <see cref="JsonEntityValidator"/>.
-        /// </param>
-        public JsonSchemaValidator(IValidateAndFix<JsonEntity>? jsonEntityValidator = null)
-        {
-            _jsonEntityValidator = jsonEntityValidator ?? new JsonEntityValidator();
-        }
 
         /// <inheritdoc />
         public void EnsureValid(JsonSchema schema)
         {
             ValidateName(schema.Name);
-            ValidateDescription(schema.Description);
+            ValidateDescription(schema.Description, schema.Name); // Passando il nome dello schema
             ValidateJsonContent(schema.JsonSchemaContent);
             ValidateJsonEntities(schema);
         }
@@ -63,17 +55,17 @@ namespace JsonBridgeEF.Seeding.Source.Validators
 
         private static void ValidateName(string? name)
         {
+            // Aggiungiamo un controllo preventivo per evitare che venga passato un valore null o vuoto.
             if (string.IsNullOrWhiteSpace(name))
-                throw new ValidationException("The Name of the schema cannot be null or empty.");
+                throw JsonSchemaError.InvalidName("Schema name"); // Passiamo un messaggio significativo se il nome è null o vuoto
         }
 
         // ======================== DESCRIPTION ========================
 
-        private static void ValidateDescription(string? description)
+        private static void ValidateDescription(string? description, string schemaName)
         {
             if (description != null && description.Length > MaxDescriptionLength)
-                throw new ValidationException(
-                    $"The schema description cannot exceed {MaxDescriptionLength} characters.");
+                throw JsonSchemaError.DescriptionTooLong(schemaName, MaxDescriptionLength); // Passando il nome dello schema e la lunghezza massima
         }
 
         private static string FixDescription(string? description)
@@ -95,7 +87,7 @@ namespace JsonBridgeEF.Seeding.Source.Validators
                 _jsonEntityValidator.EnsureValid(jsonEntity);
 
                 if (!seen.Add(jsonEntity.Name))
-                    throw new JsonEntityAlreadyExistsException(jsonEntity.Name);
+                    throw JsonEntityAlreadyExistsException.AlreadyExists(jsonEntity.Name);
 
                 JsonSchemaHelper.EnsureJsonEntityBelongsToSchema(schema, jsonEntity);
             }

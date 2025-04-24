@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Seeding.Source.Exceptions;
 using JsonBridgeEF.Seeding.Source.Interfaces;
 using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
 using JsonBridgeEF.Seeding.Source.Model.JsonProperties;
@@ -40,33 +41,21 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonSchemas
         /// Inizializza una nuova istanza della classe <see cref="JsonSchema"/>.
         /// </summary>
         /// <param name="name">Nome univoco dello schema.</param>
-        /// <param name="jsonSchemaContent">Contenuto JSON originale, non <c>null</c>.</param>
+        /// <param name="jsonSchemaContent">Contenuto JSON originale.</param>
         /// <param name="description">Descrizione testuale opzionale.</param>
         /// <param name="validator">Validatore opzionale per lo schema.</param>
-        /// <exception cref="ArgumentException">
-        /// Se <paramref name="name"/> è <c>null</c>, vuoto o whitespace.</exception>
-        /// <exception cref="ArgumentNullException">
-        /// Se <paramref name="jsonSchemaContent"/> è <c>null</c>.</exception>
         public JsonSchema(
             string name,
             string jsonSchemaContent,
             string? description,
             IValidateAndFix<JsonSchema>? validator)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException(
-                    "Il nome dello schema non può essere nullo, vuoto o whitespace.", 
-                    nameof(name));
-
             Name = name;
-            JsonSchemaContent = jsonSchemaContent 
-                ?? throw new ArgumentNullException(nameof(jsonSchemaContent));
-
+            JsonSchemaContent = jsonSchemaContent;
             _metadata = new DomainMetadata(name, description);
             _validator = validator;
 
-            // Esegui la validazione se fornita
-            _validator?.EnsureValid(this);
+            _validator?.EnsureValid(this); // Validazione delegata
         }
 
         /// <inheritdoc />
@@ -97,11 +86,7 @@ namespace JsonBridgeEF.Seeding.Source.Model.JsonSchemas
         public void AddJsonEntity(JsonEntity jsonEntity)
         {
             if (jsonEntity is null)
-                throw new ArgumentNullException(nameof(jsonEntity));
-
-            if (_jsonEntities.Any(e => e.Name == jsonEntity.Name))
-                throw new InvalidOperationException(
-                    $"Oggetto con nome duplicato: {jsonEntity.Name}.");
+                throw JsonSchemaError.InvalidName();
 
             _jsonEntities.Add(jsonEntity);
             this.Touch();

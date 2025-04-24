@@ -26,8 +26,8 @@ namespace JsonBridgeEF.Shared.Dag.Model
         where TSelf  : AggregateNode<TSelf, TValue>, IAggregateNode<TSelf, TValue>
         where TValue: class, IValueNode<TValue, TSelf>
     {
-        private readonly List<TSelf>  _selfChildren  = new();
-        private readonly List<TValue> _valueChildren = new();
+        private readonly List<TSelf>  _selfChildren  = [];
+        private readonly List<TValue> _valueChildren = [];
 
         private readonly IReadOnlyCollection<TSelf>  _selfChildrenView;
         private readonly IReadOnlyCollection<TValue> _valueChildrenView;

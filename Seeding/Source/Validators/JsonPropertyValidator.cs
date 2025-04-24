@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Seeding.Source.Exceptions;
 using JsonBridgeEF.Seeding.Source.Model.JsonProperties;
 using JsonBridgeEF.Seeding.Source.Model.JsonEntities;
 using JsonBridgeEF.Shared.EntityModel.Validators;
@@ -18,11 +18,13 @@ namespace JsonBridgeEF.Seeding.Source.Validators;
 internal sealed class JsonPropertyValidator
     : EntityPropertyValidator<JsonProperty, JsonEntity>, IValidateAndFix<JsonProperty>
 {
+    private const int MaxDescriptionLength = 500;
+
     /// <inheritdoc />
     public void EnsureValid(JsonProperty jsonProperty)
     {
         base.EnsureValid(jsonProperty);
-        ValidateDescription(jsonProperty.Description);
+        ValidateDescription(jsonProperty.Description, jsonProperty.Name, jsonProperty.Parent?.Name);
     }
 
     /// <inheritdoc />
@@ -35,10 +37,10 @@ internal sealed class JsonPropertyValidator
     /// <summary>
     /// Verifica che la descrizione non ecceda la lunghezza massima consentita.
     /// </summary>
-    private static void ValidateDescription(string? description)
+    private static void ValidateDescription(string? description, string propertyName, string ? entityName)
     {
-        if (description != null && description.Length > 500)
-            throw new ValidationException("The Description cannot exceed 500 characters.");
+        if (description != null && description.Length > MaxDescriptionLength)
+            throw JsonPropertyError.DescriptionTooLong(propertyName, entityName, MaxDescriptionLength);
     }
 
     /// <summary>

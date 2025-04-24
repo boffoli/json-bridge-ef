@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Validators;
+using JsonBridgeEF.Shared.EntityModel.Exceptions;
 using JsonBridgeEF.Shared.EntityModel.Interfaces;
 
 namespace JsonBridgeEF.Shared.EntityModel.Validators
@@ -28,11 +28,8 @@ namespace JsonBridgeEF.Shared.EntityModel.Validators
         /// <inheritdoc/>
         public void EnsureValid(IEntity<TSelf, TEntityProperty> entity)
         {
-            // 1) validazione base di figli e chiave
             base.EnsureValid(entity);
             ValidateKey(entity);
-
-            // 2) validazione gerarchia parentale
             ValidateParents(entity);
             ValidateSelfReference(entity);
         }
@@ -41,35 +38,33 @@ namespace JsonBridgeEF.Shared.EntityModel.Validators
         public void Fix(IEntity<TSelf, TEntityProperty> entity)
         {
             base.Fix(entity);
-            // Nessuna correzione aggiuntiva a questo livello
         }
 
         // ======================== CHIAVE ========================
 
         private static void ValidateKey(IEntity<TSelf, TEntityProperty> entity)
         {
-            if (entity.IsIdentifiable() && entity.GetKeyProperty() == null)
-                throw new ValidationException(
-                    $"L'entità '{entity.Name}' è marcata come identificabile ma non espone una proprietà chiave.");
+            if (entity.IsIdentifiable() && entity.GetKeyProperty() is null)
+                throw EntityError.MissingKey(entity.Name);
         }
 
         // ==================== PARENT / CHILD INTEGRITY ====================
 
         private static void ValidateParents(IEntity<TSelf, TEntityProperty> entity)
         {
-            var parents = entity.Parents ?? throw new ValidationException("La collezione dei genitori non può essere nulla.");
-            if (parents.Distinct().Count() != parents.Count)
-                throw new ValidationException("Sono presenti genitori duplicati nella collezione.");
+            if (entity.Parents is null)
+                throw EntityError.NullParentCollection(entity.Name);
+
+            if (entity.Parents.Distinct().Count() != entity.Parents.Count)
+                throw EntityError.DuplicateParents(entity.Name);
         }
 
         private static void ValidateSelfReference(IEntity<TSelf, TEntityProperty> entity)
         {
-            // l'entità stessa è sempre di tipo TSelf
             var self = (TSelf)entity;
 
             if (entity.Parents.Contains(self) || entity.SelfChildren.Contains(self))
-                throw new ValidationException(
-                    $"Un'entità non può essere suo proprio genitore o figlio: '{entity.Name}'.");
+                throw EntityError.SelfReference(entity.Name);
         }
     }
 }

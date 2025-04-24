@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Shared.Dag.Exceptions;
 using JsonBridgeEF.Shared.Dag.Interfaces;
 
 namespace JsonBridgeEF.Shared.Dag.Model
@@ -36,13 +37,16 @@ namespace JsonBridgeEF.Shared.Dag.Model
         /// <param name="validator">Validatore opzionale per la validazione del nodo.</param>
         protected Node(string name, IValidateAndFix<TSelf>? validator)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw NodeValidationException.InvalidName();
+
             Name = name;
             _validator = validator;
 
             if (_validator is not null)
             {
                 if (GetType() != typeof(TSelf))
-                    throw new InvalidCastException($"Istanza di tipo {GetType()} non corrisponde esattamente a {typeof(TSelf)}.");
+                    throw NodeValidationException.TypeMismatch(GetType(), typeof(TSelf));
 
                 _validator.EnsureValid((TSelf)(object)this);
             }

@@ -1,5 +1,6 @@
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Model;
+using JsonBridgeEF.Shared.EntityModel.Exceptions;
 using JsonBridgeEF.Shared.EntityModel.Interfaces;
 using JsonBridgeEF.Shared.Navigation.Helpers;
 
@@ -29,11 +30,11 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
     /// </summary>
     /// <typeparam name="TSelf">Tipo concreto dell’entità.</typeparam>
     /// <typeparam name="TEntityProperty">Tipo delle proprietà aggregate.</typeparam>
-    internal abstract class Entity<TSelf, TEntityProperty> 
+    internal abstract class Entity<TSelf, TEntityProperty>
         : AggregateNode<TSelf, TEntityProperty>,
           IEntity<TSelf, TEntityProperty>
-        where TSelf           : Entity<TSelf, TEntityProperty>, IEntity<TSelf, TEntityProperty>
-        where TEntityProperty: class, IEntityProperty<TEntityProperty, TSelf>
+        where TSelf : Entity<TSelf, TEntityProperty>, IEntity<TSelf, TEntityProperty>
+        where TEntityProperty : class, IEntityProperty<TEntityProperty, TSelf>
     {
         // === Fields ===
 
@@ -117,8 +118,7 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
             if (child.IsKey)
             {
                 if (_keyProperty is not null)
-                    throw new InvalidOperationException(
-                        $"L'entità '{Name}' ha già una proprietà chiave: '{_keyProperty.Name}'.");
+                    throw EntityError.DuplicateKey(Name, _keyProperty.Name);
                 _keyProperty = child;
             }
         }

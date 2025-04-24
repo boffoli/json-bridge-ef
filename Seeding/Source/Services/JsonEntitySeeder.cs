@@ -29,7 +29,7 @@ internal sealed class JsonEntitySeeder(IUnitOfWork unitOfWork) : BaseDbService(u
     /// </summary>
     /// <param name="schema">Schema JSON di riferimento.</param>
     /// <returns>Lista dei blocchi generati e salvati.</returns>
-    /// <exception cref="InvalidOperationException">Se lo schema ha già blocchi associati.</exception>
+    /// <exception cref="JsonEntityError">Se lo schema ha già blocchi associati.</exception>
     /// <remarks>
     /// <para><b>Preconditions:</b> Lo schema deve essere valido e tracciato dal contesto EF.</para>
     /// <para><b>Postconditions:</b> I blocchi estratti vengono persistiti e assegnati a <see cref="SeededJsonEntities"/>.</para>
@@ -46,7 +46,7 @@ internal sealed class JsonEntitySeeder(IUnitOfWork unitOfWork) : BaseDbService(u
 
         // 🛑 Previene duplicazione
         if (await HasExistingJsonEntitiesAsync(schema.Id, repository))
-            throw new InvalidOperationException($"❌ Lo schema '{schema.Name}' ha già blocchi definiti.");
+            throw JsonEntityAlreadyExistsException.AlreadyExists(schema.Name);
 
         // 🧠 Estrae blocchi dal contenuto JSON
         var extractedJsonEntities = JsonEntityExtractor.ExtractJsonEntity(schema);
@@ -93,7 +93,7 @@ internal sealed class JsonEntitySeeder(IUnitOfWork unitOfWork) : BaseDbService(u
         }
         catch (Exception ex)
         {
-            throw new JsonEntityPromotionException(jsonEntityName, keyFieldName, ex.Message);
+            throw JsonEntityPromotionException.PromotionFailed(jsonEntityName, keyFieldName, ex.Message);
         }
     }
 
@@ -118,7 +118,9 @@ internal sealed class JsonEntitySeeder(IUnitOfWork unitOfWork) : BaseDbService(u
     /// <exception cref="JsonEntityNotFoundException">Se il blocco non è stato trovato tra quelli generati.</exception>
     private JsonEntity FindJsonEntityByNameOrThrow(string jsonEntityName, string schemaName)
     {
-        return SeededJsonEntities.FirstOrDefault(b => b.Name.Equals(jsonEntityName, StringComparison.OrdinalIgnoreCase))
-               ?? throw new JsonEntityNotFoundException(jsonEntityName, schemaName);
+        var result = SeededJsonEntities.FirstOrDefault(
+            b => b.Name.Equals(jsonEntityName, StringComparison.OrdinalIgnoreCase)) 
+                ?? throw JsonEntityNotFoundException.NotFound(jsonEntityName, schemaName);
+        return result;
     }
 }

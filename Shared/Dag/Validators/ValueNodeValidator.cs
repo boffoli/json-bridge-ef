@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Shared.Dag.Exceptions;
 using JsonBridgeEF.Shared.Dag.Interfaces;
 using JsonBridgeEF.Shared.Dag.Model;
 
@@ -25,7 +26,9 @@ internal class ValueNodeValidator<TSelf, TAggregate>
         base.EnsureValid(valueNode);
 
         if (valueNode.Parent == null)
-            throw new ValidationException($"La proprietà 'Parent' non può essere null nel nodo '{valueNode.Name}'.");
+        {
+            throw ValueNodeError.NullParent(valueNode.Name);
+        }
     }
 
     /// <inheritdoc />

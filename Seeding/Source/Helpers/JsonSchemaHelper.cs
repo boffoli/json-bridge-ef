@@ -29,15 +29,15 @@ internal static class JsonSchemaHelper
     /// </para>
     /// <param name="schemaName">Nome proposto per lo schema.</param>
     /// <param name="repository">Repository su cui effettuare il controllo.</param>
-    /// <exception cref="ArgumentException">Se il nome è nullo o vuoto.</exception>
+    /// <exception cref="JsonSchemaError">Se il nome è nullo o vuoto.</exception>
     /// <exception cref="SchemaNameAlreadyExistsException">Se il nome è già presente.</exception>
     public static async Task EnsureSchemaNameIsValidAsync(string schemaName, IRepository<JsonSchema> repository)
     {
         if (string.IsNullOrWhiteSpace(schemaName))
-            throw new ArgumentException("Il nome dello schema non può essere vuoto.", nameof(schemaName));
-
+            throw JsonSchemaError.InvalidName("Tipo dello schema");
+            
         if (await repository.ExistsAsync(s => s.Name == schemaName))
-            throw new SchemaNameAlreadyExistsException(schemaName);
+            throw JsonSchemaError.NameAlreadyExists(schemaName);
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ internal static class JsonSchemaHelper
     {
         var existing = await repository.FirstOrDefaultAsync(s => s.JsonSchemaContent == jsonSchemaContent);
         if (existing is not null && !forceSave)
-            throw new SchemaContentAlreadyExistsException(existing.Name);
+            throw JsonSchemaError.ContentAlreadyExists(existing.Name);
     }
 
     /// <summary>
@@ -60,15 +60,15 @@ internal static class JsonSchemaHelper
     /// Verifica che il file JSON fornito esista sul filesystem.
     /// </para>
     /// <param name="filePath">Percorso assoluto del file.</param>
-    /// <exception cref="ArgumentException">Se il percorso è nullo o vuoto.</exception>
+    /// <exception cref="JsonSchemaError">Se il percorso è nullo o vuoto.</exception>
     /// <exception cref="JsonFileNotFoundException">Se il file non è trovato.</exception>
     public static void EnsureFileExists(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("Il percorso del file è nullo o vuoto.", nameof(filePath));
+            throw JsonSchemaError.InvalidFilePath();
 
         if (!File.Exists(filePath))
-            throw new JsonFileNotFoundException(filePath);
+            throw JsonSchemaError.FileNotFound(filePath);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ internal static class JsonSchemaHelper
     public static void EnsureJsonContentIsValid(string? jsonContent)
     {
         if (string.IsNullOrWhiteSpace(jsonContent))
-            throw new InvalidJsonContentException("Il contenuto JSON è nullo o vuoto.");
+            throw JsonSchemaError.InvalidJsonContent("Il contenuto JSON è nullo o vuoto.");
 
         try
         {
@@ -88,7 +88,7 @@ internal static class JsonSchemaHelper
         }
         catch (JsonException ex)
         {
-            throw new InvalidJsonContentException("Il contenuto JSON non è valido.", ex);
+            throw JsonSchemaError.InvalidJsonContent("Il contenuto JSON non è valido.", ex);
         }
     }
 

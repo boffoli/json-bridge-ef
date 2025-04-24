@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
+using JsonBridgeEF.Shared.Dag.Exceptions;
 using JsonBridgeEF.Shared.Dag.Interfaces;
 using JsonBridgeEF.Shared.Dag.Validators;
 
@@ -19,15 +20,6 @@ namespace JsonBridgeEF.Shared.Dag.Model
     /// <para><b>Usage Notes:</b><br/>
     /// Il validatore <see cref="ValueNodeValidator{TSelf, TAggregate}"/> può essere iniettato per controlli a runtime.</para>
     /// </remarks>
-    /// <remarks>
-    /// Costruttore protetto: inizializza nome, parent e validatore opzionale.
-    /// </remarks>
-    /// <param name="name">Nome del nodo foglia.</param>
-    /// <param name="parent">Aggregato proprietario.</param>
-    /// <param name="validator">Validatore opzionale per il tipo concreto <typeparamref name="TSelf"/>.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Se <paramref name="parent"/> è <c>null</c>.
-    /// </exception>
     internal abstract class ValueNode<TSelf, TAggregate>(
         string name,
         TAggregate parent,
@@ -36,7 +28,7 @@ namespace JsonBridgeEF.Shared.Dag.Model
         where TSelf     : ValueNode<TSelf, TAggregate>, IValueNode<TSelf, TAggregate>
         where TAggregate: class, IAggregateNode<TAggregate, TSelf>
     {
-        private readonly TAggregate _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly TAggregate _parent = parent ?? throw ValueNodeValidationException.NullParent(name);
 
         /// <inheritdoc />
         [Required]
