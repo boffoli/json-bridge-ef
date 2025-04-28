@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Common.Validators;
-using JsonBridgeEF.Shared.EntityModel.Validators;
 using JsonBridgeEF.Seeding.Target.Model.ClassInfos;
 using JsonBridgeEF.Seeding.Target.Model.Properties;
+using JsonBridgeEF.Seeding.Target.Exceptions;
+using JsonBridgeEF.Shared.EntityModel.Validators;
 
 namespace JsonBridgeEF.Seeding.Target.Validators
 {
@@ -26,7 +26,7 @@ namespace JsonBridgeEF.Seeding.Target.Validators
     {
         private const int MaxDescriptionLength = 500;
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void EnsureValid(ClassProperty property)
         {
             // 1) validazione base di nome e parent linkage
@@ -42,7 +42,7 @@ namespace JsonBridgeEF.Seeding.Target.Validators
             ValidateDescription(property.Description);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void Fix(ClassProperty property)
         {
             // applica correzioni base (es. descrizione null -> string.Empty)
@@ -61,12 +61,11 @@ namespace JsonBridgeEF.Seeding.Target.Validators
             string name)
         {
             if (string.IsNullOrWhiteSpace(fqn))
-                throw new ValidationException("Il nome qualificato della proprietà non può essere nullo o vuoto.");
+                throw ClassPropertyError.InvalidClassPropertyName(name);
 
             var expected = $"{parent.ClassQualifiedName}.{name}";
             if (!string.Equals(fqn, expected, StringComparison.Ordinal))
-                throw new ValidationException(
-                    $"Il FullyQualifiedPropertyName '{fqn}' non corrisponde al namespace e nome: atteso '{expected}'.");
+                throw ClassPropertyError.InvalidClassPropertyName(name);
         }
 
         /// <summary>
@@ -75,8 +74,7 @@ namespace JsonBridgeEF.Seeding.Target.Validators
         private static void ValidateDescription(string? description)
         {
             if (description != null && description.Length > MaxDescriptionLength)
-                throw new ValidationException(
-                    $"La descrizione non può superare {MaxDescriptionLength} caratteri.");
+                throw ClassPropertyError.DescriptionTooLong("Proprietà", MaxDescriptionLength);
         }
 
         /// <summary>

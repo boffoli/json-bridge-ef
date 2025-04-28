@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.EntityModel.Validators;
 using JsonBridgeEF.Seeding.Target.Model.ClassInfos;
 using JsonBridgeEF.Seeding.Target.Model.Properties;
 using JsonBridgeEF.Seeding.Target.Model.DbContextInfos;
+using JsonBridgeEF.Seeding.Target.Exceptions;
 
 namespace JsonBridgeEF.Seeding.Target.Validators
 {
@@ -30,7 +30,11 @@ namespace JsonBridgeEF.Seeding.Target.Validators
         private static readonly Regex IdentifierRegex = MyRegex();
         private static readonly Regex NamespaceRegex  = MyRegex1();
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        /// <summary>
+        /// Verifica che la classe sia valida. 
+        /// Include la validazione di namespace, nome qualificato della classe, DbContext e descrizione.
+        /// </summary>
         public void EnsureValid(ClassInfo model)
         {
             // 1) validazione base (figli, chiave, parent/child integrity)
@@ -43,22 +47,35 @@ namespace JsonBridgeEF.Seeding.Target.Validators
             ValidateDescription(model.Description);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        /// <summary>
+        /// Corregge eventuali problemi nel modello. 
+        /// Normalizza la descrizione se è null.
+        /// </summary>
         public void Fix(ClassInfo model)
         {
             base.Fix(model);
-            // Normalizza la descrizione se è null
             model.Description = FixDescription(model.Description);
         }
 
+        /// <summary>
+        /// Verifica che il namespace sia valido.
+        /// </summary>
+        /// <param name="ns">Il namespace da validare.</param>
         private static void ValidateNamespace(string ns)
         {
             if (string.IsNullOrWhiteSpace(ns))
-                throw new ValidationException("Il namespace non può essere nullo o vuoto.");
+                throw ClassInfoError.InvalidClassInfo();
             if (!NamespaceRegex.IsMatch(ns))
-                throw new ValidationException($"Il namespace '{ns}' non è un identificatore C# valido.");
+                throw ClassInfoError.InvalidClassQualifiedName(ns, ns);
         }
 
+        /// <summary>
+        /// Verifica che il nome qualificato della classe sia corretto.
+        /// </summary>
+        /// <param name="qualifiedName">Il nome qualificato da validare.</param>
+        /// <param name="ns">Il namespace della classe.</param>
+        /// <param name="name">Il nome della classe.</param>
         private static void ValidateClassQualifiedName(
             string qualifiedName,
             string ns,
@@ -66,44 +83,53 @@ namespace JsonBridgeEF.Seeding.Target.Validators
         {
             var expected = $"{ns}.{name}";
             if (qualifiedName != expected)
-                throw new ValidationException(
-                    $"Il ClassQualifiedName '{qualifiedName}' non corrisponde a '{expected}'.");
+                throw ClassInfoError.InvalidClassQualifiedName(expected, qualifiedName);
             if (!IdentifierRegex.IsMatch(name))
-                throw new ValidationException(
-                    $"Il nome della classe '{name}' non è un identificatore C# valido.");
+                throw ClassInfoError.InvalidClassName(name);
             _ = AppDomain.CurrentDomain
                 .GetAssemblies()
                 .Select(a => a.GetType(qualifiedName, throwOnError: false, ignoreCase: false))
                 .FirstOrDefault(t => t != null)
-                ?? throw new ValidationException(
-                    $"Impossibile trovare il tipo '{qualifiedName}' nelle assembly caricate.");
+                ?? throw ClassInfoError.ClassNotFound(qualifiedName);
         }
 
+        /// <summary>
+        /// Verifica che il DbContext associato sia valido.
+        /// </summary>
+        /// <param name="ctx">Il DbContext da validare.</param>
         private static void ValidateDbContext(DbContextInfo ctx)
         {
             if (ctx is null)
-                throw new ValidationException("La classe deve essere associata a un DbContextInfo valido.");
+                throw ClassInfoError.InvalidDbContext();
         }
 
         /// <summary>
         /// Verifica che la descrizione non ecceda la lunghezza massima consentita.
         /// </summary>
+        /// <param name="description">La descrizione da validare.</param>
         private static void ValidateDescription(string? description)
         {
             if (description != null && description.Length > MaxDescriptionLength)
-                throw new ValidationException(
-                    $"La descrizione non può superare {MaxDescriptionLength} caratteri.");
+                throw ClassInfoError.DescriptionTooLong(description, MaxDescriptionLength);
         }
 
         /// <summary>
         /// Restituisce una descrizione non nulla, convertendo <c>null</c> in stringa vuota.
         /// </summary>
+        /// <param name="description">La descrizione da normalizzare.</param>
+        /// <returns>La descrizione normalizzata.</returns>
         private static string FixDescription(string? description)
             => description ?? string.Empty;
 
+        /// <summary>
+        /// Regex per validare identificatori C#.
+        /// </summary>
         [GeneratedRegex(@"^[A-Za-z_]\w*$", RegexOptions.Compiled)]
         private static partial Regex MyRegex();
 
+        /// <summary>
+        /// Regex per validare namespace C#.
+        /// </summary>
         [GeneratedRegex(@"^([A-Za-z_]\w*)(\.[A-Za-z_]\w*)*$", RegexOptions.Compiled)]
         private static partial Regex MyRegex1();
     }

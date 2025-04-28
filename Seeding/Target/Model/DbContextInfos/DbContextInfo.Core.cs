@@ -25,7 +25,7 @@ namespace JsonBridgeEF.Seeding.Target.Model.DbContextInfos
     /// </remarks>
     internal partial class DbContextInfo : IDbContextInfo<ClassInfo, ClassProperty>, IDomainMetadata, IEfEntity
     {
-        private readonly List<ClassInfo> _targetEntities = new();
+        private readonly List<ClassInfo> _targetEntities = [];
 
         /// <summary>
         /// Inizializza una nuova istanza di <see cref="DbContextInfo"/>, impostando anche i metadata di dominio.

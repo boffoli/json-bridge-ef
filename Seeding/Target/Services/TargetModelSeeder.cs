@@ -8,6 +8,7 @@ using JsonBridgeEF.Seeding.Target.Model.Properties;
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Seeding.Target.Helpers;
+using JsonBridgeEF.Seeding.Target.Exceptions;
 
 namespace JsonBridgeEF.Seeding.Target.Services
 {
@@ -109,24 +110,47 @@ namespace JsonBridgeEF.Seeding.Target.Services
                 )
                 .ToList();
 
+            // Gestione di caso in cui non troviamo DbContext
             if (candidates.Count == 0)
-                throw new InvalidOperationException($"❌ Nessun DbContext trovato nel namespace '{ns}'.");
+                throw DbContextInfoError.DbContextNotFound(ns); // Eccezione per il DbContext non trovato
 
+            // Gestione di caso in cui ci sono più di un DbContext
             if (candidates.Count > 1)
-                throw new InvalidOperationException(
-                    $"❌ Più di un DbContext trovato in '{ns}': {string.Join(", ", candidates.Select(t => t.FullName))}");
+            {
+                // Controllo che tutti i FullName siano non nulli prima di passarli
+                var fullNames = candidates
+                    .Select(c => c.FullName)
+                    .Where(f => f != null) // Filtra i null
+                    .Cast<string>() // Cast per garantire che l'array risultante sia di tipo string[]
+                    .ToArray(); // Converte in array di stringhe non nulli (string[])
 
+                // Verifica se fullNames è vuoto
+                if (fullNames.Length == 0)
+                {
+                    throw DbContextInfoError.DbContextNotFound(ns); // Non ci sono DbContext con FullName valido
+                }
+
+                throw DbContextInfoError.MultipleDbContextsFound(ns, fullNames); // Eccezione per più di un DbContext
+            }
+
+            // Assicurati che `FullName` non sia null prima di passarlo
+            var className = candidates.Single().FullName;
+            if (string.IsNullOrEmpty(className))
+            {
+                throw DbContextInfoError.DbContextInstantiationFailed("Nome classe vuoto"); // Fallimento instanziazione
+            }
+
+            // Tentativo di istanziare il DbContext
             if (Activator.CreateInstance(candidates.Single()) is not DbContext context)
-                throw new InvalidOperationException(
-                    $"❌ Impossibile istanziare {candidates.Single().FullName}.");
+                throw DbContextInfoError.DbContextInstantiationFailed(className); // Lancia eccezione se instanziazione fallita
 
             return context;
         }
 
         private DbContextInfo CreateDbContextInfo(DbContext context)
         {
-            var name           = context.GetType().Name;
-            var @namespace     = context.GetType().Namespace!;
+            var name = context.GetType().Name;
+            var @namespace = context.GetType().Namespace!;
             var connectionString = context.Database.GetConnectionString();
 
             _logger.LogInformation("📂 Creazione contesto EF: {Context}", name);
@@ -145,7 +169,7 @@ namespace JsonBridgeEF.Seeding.Target.Services
             foreach (var entityType in context.Model.GetEntityTypes())
             {
                 var clrType = entityType.ClrType;
-                if (clrType?.Namespace == null) 
+                if (clrType?.Namespace == null)
                     continue;
 
                 _logger.LogInformation("🏷️ Rilevata classe: {Class}", clrType.FullName);

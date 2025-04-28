@@ -1,7 +1,7 @@
-using System.ComponentModel.DataAnnotations;
+using JsonBridgeEF.Seeding.Target.Exceptions;
 using System.Text.RegularExpressions;
-using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Seeding.Target.Model.DbContextInfos;
+using JsonBridgeEF.Common.Validators;
 
 namespace JsonBridgeEF.Seeding.Target.Validators
 {
@@ -44,34 +44,30 @@ namespace JsonBridgeEF.Seeding.Target.Validators
         private static void ValidateName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ValidationException("Il Name del DbContext non può essere nullo o vuoto.");
+                throw DbContextInfoError.InvalidDbContextName(name);
             if (!IdentifierRegex.IsMatch(name))
-                throw new ValidationException(
-                    $"Il Name '{name}' non è un identificatore C# valido.");
+                throw DbContextInfoError.InvalidDbContextName(name);
         }
 
         private static void ValidateNamespace(string ns)
         {
             if (string.IsNullOrWhiteSpace(ns))
-                throw new ValidationException("Il Namespace del DbContext non può essere nullo o vuoto.");
+                throw DbContextInfoError.InvalidDbContextNamespace(ns);
             if (!NamespaceRegex.IsMatch(ns))
-                throw new ValidationException(
-                    $"Il Namespace '{ns}' non è un identificatore C# valido.");
+                throw DbContextInfoError.InvalidDbContextNamespace(ns);
         }
 
         private static void ValidateClassQualifiedName(string qualifiedName, string ns, string name)
         {
             var expected = $"{ns}.{name}";
             if (!string.Equals(qualifiedName, expected, StringComparison.Ordinal))
-                throw new ValidationException(
-                    $"Il ClassQualifiedName '{qualifiedName}' non corrisponde a '{expected}'.");
+                throw DbContextInfoError.InvalidDbContextClassQualifiedName(expected, qualifiedName);
         }
 
         private static void ValidateDescription(string? description)
         {
             if (description != null && description.Length > MaxDescriptionLength)
-                throw new ValidationException(
-                    $"La descrizione del DbContext non può superare {MaxDescriptionLength} caratteri.");
+                throw DbContextInfoError.DescriptionTooLong(MaxDescriptionLength);
         }
 
         private static string FixDescription(string? description)
