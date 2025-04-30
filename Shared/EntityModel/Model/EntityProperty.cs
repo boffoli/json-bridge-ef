@@ -9,14 +9,31 @@ namespace JsonBridgeEF.Shared.EntityModel.Model
     /// Implementazione astratta di <see cref="IEntityProperty{TSelf, TEntity}"/>.
     /// </summary>
     /// <remarks>
-    /// Costruttore base per la proprietà.
+    /// Fornisce il costruttore base per una proprietà di entità, 
+    /// programmando verso l’interfaccia per il parent.
     /// </remarks>
+    /// <typeparam name="TSelf">
+    /// Il tipo concreto della proprietà che estende questa classe.
+    /// </typeparam>
+    /// <typeparam name="TEntity">
+    /// Il tipo dell’entità proprietaria, che implementa <see cref="IEntity{TEntity, TSelf}"/>.
+    /// </typeparam>
     /// <param name="name">Nome della proprietà (obbligatorio e immutabile).</param>
-    /// <param name="parent">Entità proprietaria (obbligatoria e immutabile).</param>
+    /// <param name="parent">
+    /// Entità proprietaria, dipendente dall’astrazione <see cref="IEntity{TEntity,TSelf}"/>.
+    /// </param>
     /// <param name="isKey">Indica se la proprietà è una chiave logica.</param>
     /// <param name="validator">Validatore opzionale per questa proprietà.</param>
-    internal abstract class EntityProperty<TSelf, TEntity>(string name, TEntity parent, bool isKey, IValidateAndFix<TSelf>? validator)
-        : ValueNode<TSelf, TEntity>(name, parent, validator), IEntityProperty<TSelf, TEntity>
+    internal abstract class EntityProperty<TSelf, TEntity>(
+        string name,
+        IEntity<TEntity, TSelf> parent,
+        bool isKey,
+        IValidateAndFix<TSelf>? validator
+    ) : ValueNode<TSelf, TEntity>(
+            name,
+            (TEntity)parent!,
+            validator
+        ), IEntityProperty<TSelf, TEntity>
         where TSelf : EntityProperty<TSelf, TEntity>, IEntityProperty<TSelf, TEntity>
         where TEntity : class, IEntity<TEntity, TSelf>
     {

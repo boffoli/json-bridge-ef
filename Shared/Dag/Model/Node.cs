@@ -35,10 +35,10 @@ namespace JsonBridgeEF.Shared.Dag.Model
         /// </summary>
         /// <param name="name">Nome del nodo (obbligatorio ma validato esternamente).</param>
         /// <param name="validator">Validatore opzionale per la validazione del nodo.</param>
-        protected Node(string name, IValidateAndFix<TSelf>? validator)
+        protected Node(string name, IValidateAndFix<TSelf>? validator = null)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw NodeValidationException.InvalidName();
+                throw NodeError.InvalidName(GetType().Name);
 
             Name = name;
             _validator = validator;
@@ -46,7 +46,8 @@ namespace JsonBridgeEF.Shared.Dag.Model
             if (_validator is not null)
             {
                 if (GetType() != typeof(TSelf))
-                    throw NodeValidationException.TypeMismatch(GetType(), typeof(TSelf));
+                    throw new InvalidOperationException(
+                        $"Type mismatch: expected {typeof(TSelf)}, got {GetType()}.");
 
                 _validator.EnsureValid((TSelf)(object)this);
             }

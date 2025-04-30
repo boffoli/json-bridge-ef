@@ -2,13 +2,13 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using JsonBridgeEF.Common.UnitOfWorks;
-using JsonBridgeEF.Seeding.Target.Model.DbContextInfos;
-using JsonBridgeEF.Seeding.Target.Model.ClassInfos;
-using JsonBridgeEF.Seeding.Target.Model.Properties;
 using JsonBridgeEF.Common;
 using JsonBridgeEF.Common.Validators;
-using JsonBridgeEF.Seeding.Target.Helpers;
-using JsonBridgeEF.Seeding.Target.Exceptions;
+using JsonBridgeEF.Seeding.Target.ClassInfos.Model;
+using JsonBridgeEF.Seeding.Target.DbContextInfos.Model;
+using JsonBridgeEF.Seeding.Target.ClassInfos.Helpers;
+using JsonBridgeEF.Seeding.Target.ClassProperties.Model;
+using JsonBridgeEF.Seeding.Target.DbContextInfos.Exceptions;
 
 namespace JsonBridgeEF.Seeding.Target.Services
 {

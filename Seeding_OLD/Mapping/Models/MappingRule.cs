@@ -13,7 +13,7 @@ namespace JsonBridgeEF.Seeding.Mapping.Models
     /// with an optional transformation specified in JsFormula.
     /// This rule is associated with a MappingProject that defines the common JSON schema.
     /// </summary>
-    internal class MappingRule : BaseModel<MappingRule>
+    internal class MappingRule2 : BaseModel<MappingRule>
     {
         /// <summary>
         /// Parameterless constructor required by Entity Framework.

@@ -104,22 +104,5 @@ namespace JsonBridgeEF.Shared.EntityModel.Exceptions
 
         public static EntityPropertyException NullParent(string nodeName, Exception inner) =>
             EntityPropertyNullParentException.NullParent(nodeName, inner);
-
-        // ==== Composizione: metodi da ValueNodeError ====
-
-        public static ValueNodeException InvalidValueFromValueNode(string nodeName) =>
-            ValueNodeError.InvalidValue(nodeName);
-
-        public static ValueNodeException DuplicateKeyFromValueNode(string nodeName, string key) =>
-            ValueNodeError.DuplicateKey(nodeName, key);
-
-        public static ValueNodeException NullParentFromValueNode(string nodeName) =>
-            ValueNodeError.NullParent(nodeName);
-
-        public static NodeException InvalidName(string nodeType) =>
-            ValueNodeError.InvalidName(nodeType);
-
-        public static NodeException MissingId(string nodeType) =>
-            ValueNodeError.MissingId(nodeType);
     }
 }

@@ -1,7 +1,7 @@
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Validators;
-using JsonBridgeEF.Shared.EntityModel.Exceptions;
 using JsonBridgeEF.Shared.EntityModel.Interfaces;
+using JsonBridgeEF.Shared.EntityModel.Exceptions;
 
 namespace JsonBridgeEF.Shared.EntityModel.Validators
 {

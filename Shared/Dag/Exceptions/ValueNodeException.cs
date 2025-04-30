@@ -8,10 +8,10 @@ namespace JsonBridgeEF.Shared.Dag.Exceptions
     /// </summary>
     public abstract class ValueNodeException : NodeException
     {
-        // Costruttore che accetta solo il messaggio di errore
+        /// <summary>Crea una nuova eccezione di tipo <see cref="ValueNodeException"/>.</summary>
         protected ValueNodeException(string message) : base(message) { }
 
-        // Costruttore che accetta il messaggio di errore e una eventuale eccezione interna
+        /// <summary>Crea una nuova eccezione di tipo <see cref="ValueNodeException"/>, con eccezione interna.</summary>
         protected ValueNodeException(string message, Exception inner) : base(message, inner) { }
     }
 
@@ -74,36 +74,32 @@ namespace JsonBridgeEF.Shared.Dag.Exceptions
 
     /// <summary>
     /// <para><b>Domain Concept:</b><br/>
-    /// Factory per eccezioni semantiche specifiche dei nodi valore (foglia), che usa il factory di NodeError in composizione.</para>
+    /// Factory per eccezioni semantiche specifiche dei nodi valore (foglia), che usa il factory di <see cref="NodeError"/> in composizione.</para>
     /// </summary>
     internal static class ValueNodeError
     {
-        // ==== Specifici per ValueNode ====
-
+        /// <summary>Valore nullo o invalido.</summary>
         public static ValueNodeException InvalidValue(string nodeName) =>
             ValueNodeInvalidValueException.InvalidValue(nodeName);
 
+        /// <summary>Valore nullo o invalido con eccezione interna.</summary>
         public static ValueNodeException InvalidValue(string nodeName, Exception inner) =>
             ValueNodeInvalidValueException.InvalidValue(nodeName, inner);
 
+        /// <summary>Chiave duplicata.</summary>
         public static ValueNodeException DuplicateKey(string nodeName, string key) =>
             ValueNodeDuplicateKeyException.DuplicateKey(nodeName, key);
 
+        /// <summary>Chiave duplicata con eccezione interna.</summary>
         public static ValueNodeException DuplicateKey(string nodeName, string key, Exception inner) =>
             ValueNodeDuplicateKeyException.DuplicateKey(nodeName, key, inner);
 
+        /// <summary>Parent nullo.</summary>
         public static ValueNodeException NullParent(string nodeName) =>
             ValueNodeNullParentException.NullParent(nodeName);
 
+        /// <summary>Parent nullo con eccezione interna.</summary>
         public static ValueNodeException NullParent(string nodeName, Exception inner) =>
             ValueNodeNullParentException.NullParent(nodeName, inner);
-
-        // ==== Composizione: metodi da NodeError ====
-
-        public static NodeException InvalidName(string nodeType) =>
-            NodeError.InvalidName(nodeType);
-
-        public static NodeException MissingId(string nodeType) =>
-            NodeError.MissingId(nodeType);
     }
 }

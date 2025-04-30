@@ -59,7 +59,7 @@ namespace JsonBridgeEF.Shared.Dag.Helpers
         private static void ThrowIfSelfReference<T>(T source, T target) where T : class
         {
             if (ReferenceEquals(source, target) || source.Equals(target))
-                throw AggregateNodeValidationException.SelfReference(source?.ToString() ?? "(null)");
+                throw AggregateNodeError.SelfReference(source?.ToString() ?? "(null)");
         }
 
         private static void ThrowIfInvalidParentBinding<TSelf, TValue>(TSelf source, TSelf target)
@@ -67,10 +67,10 @@ namespace JsonBridgeEF.Shared.Dag.Helpers
             where TValue : class, IValueNode<TValue, TSelf>
         {
             if (source is not IParentNavigableNode<TSelf> navSource)
-                throw AggregateNodeValidationException.ParentNavigationNotSupported(source?.ToString() ?? "(null)");
+                throw AggregateNodeError.ParentNavigationNotSupported(source?.ToString() ?? "(null)");
 
             if (navSource.Parents.Contains(target) && !target.SelfChildren.Contains(source))
-                throw AggregateNodeValidationException.InvalidParentBinding(source.Name, target.Name);
+                throw AggregateNodeError.InvalidParentBinding(source.Name, target.Name);
         }
 
         private static void ThrowIfInvalidChildBinding<TSelf, TValue>(TSelf source, TSelf target)
@@ -81,7 +81,7 @@ namespace JsonBridgeEF.Shared.Dag.Helpers
                 return;
 
             if (target is not IParentNavigableNode<TSelf> navTarget || !navTarget.Parents.Contains(source))
-                throw AggregateNodeValidationException.InvalidChildBinding(source.Name, target.Name);
+                throw AggregateNodeError.InvalidChildBinding(source.Name, target.Name);
         }
 
         private static void ThrowIfNotExpectedParent<TSelf, TValue>(TSelf expectedParent, TValue child)
@@ -89,7 +89,7 @@ namespace JsonBridgeEF.Shared.Dag.Helpers
             where TValue : class, IValueNode<TValue, TSelf>
         {
             if (!ReferenceEquals(child.Parent, expectedParent))
-                throw AggregateNodeValidationException.NotExpectedParent(child.Name, expectedParent.Name);
+                throw AggregateNodeError.NotExpectedParent(child.Name, expectedParent.Name);
         }
 
         private static void ThrowIfDuplicateLeaf<TSelf, TValue>(TSelf parent, TValue child)
@@ -97,7 +97,7 @@ namespace JsonBridgeEF.Shared.Dag.Helpers
             where TValue : class, IValueNode<TValue, TSelf>
         {
             if (parent.ValueChildren.Contains(child))
-                throw AggregateNodeValidationException.DuplicateLeaf(child.Name);
+                throw AggregateNodeError.DuplicateLeaf(child.Name);
         }
 
         private static void ThrowIfCycleDetected<TSelf, TValue>(TSelf start, TSelf candidate)
@@ -105,7 +105,7 @@ namespace JsonBridgeEF.Shared.Dag.Helpers
             where TValue : class, IValueNode<TValue, TSelf>
         {
             if (DetectCycle<TSelf, TValue>(start, candidate))
-                throw AggregateNodeValidationException.CycleDetected(start.Name, candidate.Name);
+                throw AggregateNodeError.CycleDetected(start.Name, candidate.Name);
         }
 
         private static bool DetectCycle<TSelf, TValue>(TSelf current, TSelf target)

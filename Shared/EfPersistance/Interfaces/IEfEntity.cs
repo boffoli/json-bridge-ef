@@ -13,7 +13,7 @@ namespace JsonBridgeEF.Shared.EfPersistance.Interfaces
     ///   può impostarla tramite meccanismi interni o reflection.
     /// </para>
     /// </remarks>
-    internal interface IEfEntity
+    public interface IEfEntity
     {
         /// <summary>
         /// Chiave primaria tecnica, univoca all'interno della tabella del database.

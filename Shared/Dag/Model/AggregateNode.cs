@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using JsonBridgeEF.Common.Validators;
 using JsonBridgeEF.Shared.Dag.Helpers;
 using JsonBridgeEF.Shared.Dag.Interfaces;
-using JsonBridgeEF.Shared.Dag.Validators;
 using JsonBridgeEF.Shared.Infrastructure.HookedExecutionFlow;
 
 namespace JsonBridgeEF.Shared.Dag.Model
@@ -12,19 +11,32 @@ namespace JsonBridgeEF.Shared.Dag.Model
     /// Domain Class: Nodo aggregato che contiene altri nodi nel grafo.
     /// </summary>
     /// <remarks>
+    /// <para><b>Domain Concept:</b><br/>
+    /// Rappresenta un nodo in un grafo che può aggregare sia altri nodi dello stesso tipo
+    /// (self-children) sia nodi di tipo valore (value-children).</para>
+    ///
     /// <para><b>Creation Strategy:</b><br/>
     /// Inizializzato tramite costruttore protetto con nome e validatore opzionale.</para>
+    ///
     /// <para><b>Constraints:</b><br/>
-    /// Nessun ciclo, nessun duplicato, coerenza semantica con i figli.</para>
+    /// - Le collezioni di figli non possono contenere duplicati né riferimenti null.<br/>
+    /// - Non possono crearsi cicli di parent-child.</para>
+    ///
     /// <para><b>Relationships:</b><br/>
-    /// Contiene figli sia di tipo aggregato che foglia; la validazione di aggiunta è delegata a <see cref="AggregateNodeValidator{TSelf, TValue}"/>.</para>
+    /// - Eredita da <see cref="Node{TSelf}"/> per la gestione di nome, uguaglianza e hash code.<br/>
+    /// - Implementa <see cref="IAggregateNode{TSelf, TValue}"/> per la navigazione e manipolazione dei figli.</para>
+    ///
     /// <para><b>Usage Notes:</b><br/>
-    /// Sovrascrivere gli hook semantici nelle sottoclassi per personalizzare il flusso.</para>
+    /// - L’aggiunta di figli avviene tramite il flusso orchestrato di 
+    ///   <see cref="HookedExecutionFlow"/>, con hook pre- e post-azione.<br/>
+    /// - È possibile specializzare i metodi protetti 
+    ///   (<c>OnBeforeAddChildFlow</c>, <c>OnBeforeChildAdded</c>, 
+    ///   <c>OnAfterChildAdded</c>, <c>OnAfterAddChildFlow</c>) per aggiungere logica custom.</para>
     /// </remarks>
     internal abstract class AggregateNode<TSelf, TValue> 
         : Node<TSelf>, IAggregateNode<TSelf, TValue>
-        where TSelf  : AggregateNode<TSelf, TValue>, IAggregateNode<TSelf, TValue>
-        where TValue: class, IValueNode<TValue, TSelf>
+        where TSelf   : AggregateNode<TSelf, TValue>, IAggregateNode<TSelf, TValue>
+        where TValue : class, IValueNode<TValue, TSelf>
     {
         private readonly List<TSelf>  _selfChildren  = [];
         private readonly List<TValue> _valueChildren = [];
@@ -37,17 +49,15 @@ namespace JsonBridgeEF.Shared.Dag.Model
         /// </summary>
         /// <param name="name">Il nome del nodo aggregato.</param>
         /// <param name="validator">Validatore opzionale per il tipo concreto <typeparamref name="TSelf"/>.</param>
-        protected AggregateNode(
-            string name,
-            IValidateAndFix<TSelf>? validator
-        ) : base(name, validator)
+        protected AggregateNode(string name, IValidateAndFix<TSelf>? validator = null)
+            : base(name, validator)
         {
             _selfChildrenView  = new ReadOnlyCollection<TSelf>(_selfChildren);
             _valueChildrenView = new ReadOnlyCollection<TValue>(_valueChildren);
         }
 
         /// <inheritdoc />
-        public IReadOnlyCollection<TSelf> SelfChildren  => _selfChildrenView;
+        public IReadOnlyCollection<TSelf> SelfChildren => _selfChildrenView;
 
         /// <inheritdoc />
         public IReadOnlyCollection<TValue> ValueChildren => _valueChildrenView;
@@ -73,13 +83,13 @@ namespace JsonBridgeEF.Shared.Dag.Model
         }
 
         /// <inheritdoc />
-        public void AddChild(TValue child)
+        public void AddChildValue(TValue child)
         {
             HookedExecutionFlow
                 .For<TValue>()
                 .WithOnStartFlowHook(OnBeforeAddChildFlow)
                 .WithInitialValidation(c => AggregateNodeRelationGuard
-                    .EnsureCanAddChild((TSelf)this, c))
+                    .EnsureCanAddChild<TSelf, TValue>((TSelf)this, c))
                 .WithOnPreActionHook(OnBeforeChildAdded)
                 .WithAction(c =>
                 {
@@ -92,22 +102,30 @@ namespace JsonBridgeEF.Shared.Dag.Model
                 .Execute(child);
         }
 
-        // Hook virtuali per estendere il flusso semantico
+        // ================ Protected hooks for customization ================
 
+        /// <summary>Hook invocato prima di iniziare il flusso di aggiunta di un figlio self.</summary>
         protected virtual void OnBeforeAddChildFlow(TSelf child) { }
 
+        /// <summary>Hook invocato prima di iniziare il flusso di aggiunta di un figlio value.</summary>
         protected virtual void OnBeforeAddChildFlow(TValue child) { }
 
+        /// <summary>Hook invocato prima dell’azione di aggiunta di un figlio self.</summary>
         protected virtual void OnBeforeChildAdded(TSelf child) { }
 
+        /// <summary>Hook invocato prima dell’azione di aggiunta di un figlio value.</summary>
         protected virtual void OnBeforeChildAdded(TValue child) { }
 
+        /// <summary>Hook invocato subito dopo l’azione di aggiunta di un figlio self.</summary>
         protected virtual void OnAfterChildAdded(TSelf child) { }
 
+        /// <summary>Hook invocato subito dopo l’azione di aggiunta di un figlio value.</summary>
         protected virtual void OnAfterChildAdded(TValue child) { }
 
+        /// <summary>Hook invocato al termine del flusso di aggiunta di un figlio self.</summary>
         protected virtual void OnAfterAddChildFlow(TSelf child) { }
 
+        /// <summary>Hook invocato al termine del flusso di aggiunta di un figlio value.</summary>
         protected virtual void OnAfterAddChildFlow(TValue child) { }
     }
 }

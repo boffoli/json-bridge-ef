@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using JsonBridgeEF.Shared.Dag.Interfaces;
 using JsonBridgeEF.Shared.Navigation.Interfaces;
 

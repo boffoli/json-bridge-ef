@@ -11,7 +11,7 @@ namespace JsonBridgeEF.Seeding.Mapping.Models
     /// Represents a mapping project that links a source JSON schema to a target database context.
     /// This is the top-level entity that groups mapping rules.
     /// </summary>
-    internal class MappingProject : BaseModel<MappingProject>
+    internal class MappingProject2 : BaseModel<MappingProject>
     {
         /// <summary>
         /// Constructor required by Entity Framework Core.
